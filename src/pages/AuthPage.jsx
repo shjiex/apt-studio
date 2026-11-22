@@ -48,7 +48,7 @@ function AuthPage({ mode }) {
 
         {!isFirebaseReady && (
           <p className="auth__notice">
-            Accounts are not set up yet. Paste your Firebase values into src/firebaseConfig.js.
+            Accounts aren’t set up yet. Paste your Firebase values into src/firebaseConfig.js and you’ll be able to sign in.
           </p>
         )}
 
