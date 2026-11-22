@@ -1,0 +1,5 @@
+node_modules
+dist
+.DS_Store
+# Firebase keys stay out of version control (see the course page on firebaseConfig)
+src/firebaseConfig.js
