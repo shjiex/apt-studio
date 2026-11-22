@@ -1,0 +1,11 @@
+# Python packages for the 3D pipeline (not needed to run the web app)
+ultralytics
+rembg
+onnxruntime
+opencv-python-headless
+scikit-image
+scipy
+pillow
+numpy
+bpy
+pycolmap
