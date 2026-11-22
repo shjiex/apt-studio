@@ -231,6 +231,12 @@ My direction for this round: "Use stronger glass but ensure AA accessibility." T
 
 My direction: outlines should cover the whole predicted object even when a table stands on a rug or a blanket lies on a couch; buttons should sink in; the segmented control should flow like Liquid Glass; "Fits" should shout less; the score should be just the number, the size of its neighbours; the check card should lead with one priority and nest the rest, with an icon on every line.
 
+### Glass on panels, the toast and the phone tab bar (22 Nov, 3:45 pm), AI-generated
+
+- `src/styles/app.css`: the "glass panels" block and the "toast and tab bar" block.
+
+My direction: "keep going with scheduled tasks to polish the rest of everything with the liquid glass as well". Making grey labels ink inside glass panels was the assistant's way of keeping AA.
+
 ## Chat transcript
 
 TODO: paste the share link or exported transcript of the Claude conversation here.

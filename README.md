@@ -347,6 +347,18 @@ project continues.
   above it. Its card shows one thing to do first with its tip and what it is worth; the other
   things to improve and the checks that pass are folded away, each line with an icon (`FengShuiCard.jsx`).
 
+### Glass on panels, the toast and the phone tab bar (22 Nov, 3:45 pm)
+
+- The panels that open over the room (lighting, floor and walls, the room score card) are glass.
+  Grey text fails AA on glass, so inside a panel `--ink-muted` is set to ink and every label
+  follows. Blocks inside a panel are a milkier 55% white. The app blurs behind a dialog; dialogs
+  themselves stay solid white.
+- The toast is dark glass (82% ink, white text). On a phone the tab bar is light glass with ink
+  labels.
+- All of it is in the three "glass" blocks at the end of `src/styles/app.css`, and falls back to
+  solid colour when the system asks for less transparency or more contrast.
+- `shoot38.py` measures the lighting panel as well: lowest reading 4.99 to 1.
+
 ## Components
 
 | Component | What it does |
