@@ -2684,3 +2684,35 @@ a.btn {
     backdrop-filter: none;
   }
 }
+
+/* ---------- glass: the toast and the phone's tab bar ----------
+   The toast is dark glass: 82% ink over the blurred app, with white text, which
+   measures at least 11 to 1 whatever is behind it. The tab bar floats over the
+   page on a phone, so it is the same light glass as the other floating controls,
+   and its labels are ink (grey would fail on glass). */
+.toast {
+  background: var(--glass-chosen);
+  -webkit-backdrop-filter: blur(28px) saturate(1.4);
+  backdrop-filter: blur(28px) saturate(1.4);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.22),
+    0 8px 24px rgba(15, 15, 14, 0.25);
+}
+
+@media (max-width: 900px) {
+  .tab-bar {
+    background: var(--glass-fill);
+    -webkit-backdrop-filter: var(--glass-filter);
+    backdrop-filter: var(--glass-filter);
+    box-shadow: var(--glass-edge);
+  }
+
+  .tab-bar button {
+    color: var(--ink);
+  }
+
+  .tab-bar button.is-current {
+    background: var(--glass-chosen);
+    color: var(--white);
+  }
+}
