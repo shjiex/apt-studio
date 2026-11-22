@@ -17,6 +17,7 @@ output per image:  <out>/<id>/cutout.png, swatch.png, target.json
 """
 import argparse, json, os, sys, glob, urllib.request
 import numpy as np
+import cv2
 from PIL import Image, ImageFilter
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -161,7 +162,88 @@ def cut_out(img, obj, pad=0.06):
     core = np.asarray(inst.filter(ImageFilter.MinFilter(grow * 2 + 1)), dtype=np.float32) / 255
     alpha = np.maximum(alpha, core * 0.98) if agree > 0.6 else alpha
     rgba = np.dstack([np.asarray(crop), (alpha * 255).astype(np.uint8)])
+    # what the matting model sees as the thing in front, as a mask over the whole image (for whole_outline)
+    obj['matte'] = np.zeros((H, W), dtype=bool)
+    obj['matte'][cy1:cy2, cx1:cx2] = a_matte > 0.5
+    obj['matte_agreement'] = float(agree)
     return Image.fromarray(rgba, 'RGBA'), [cx1, cy1, cx2, cy2], float(agree)
+
+
+def whole_outline(target, objs, W, H, kind):
+    """The outline of the WHOLE object, hidden parts included, as corner points from 0 to 1.
+
+    The detector's mask only covers what the camera can see. A rug under a table comes back as
+    a rug with a table-shaped bite out of it; a sofa with a blanket over one arm comes back
+    without that arm. People still mean the whole rug and the whole sofa, so the missing parts
+    are filled back in, in three steps:
+
+      1. Hull. Stretch a rubber band round the visible mask. Nothing of the object lies outside it.
+      2. Fill. Inside the rubber band, add (a) every other detected thing, because the object
+         carries on behind or under it (the table on the rug, the blanket and cushions on the
+         sofa), and (b) what the matting model calls foreground, which catches a blanket or a
+         cat the detector did not name. Then close small gaps and fill holes.
+      3. Shape. A rug is a rectangle on the floor, so in a photo it has four straight sides: use
+         the four-cornered shape round everything found. Anything else keeps its own edge.
+
+    Returns (outline, what_was_added). Bare objects come back unchanged, because steps 1 and 2
+    only ever add where something else was detected inside the rubber band."""
+    mask = target['mask'].astype(np.uint8)
+    x1, y1, x2, y2 = target['box']
+    own_area = max(1.0, (x2 - x1) * (y2 - y1))
+    points = cv2.findNonZero(mask)
+    if points is None:
+        return [], []
+    hull = np.zeros((H, W), np.uint8)
+    cv2.fillConvexPoly(hull, cv2.convexHull(points), 1)
+
+    whole = mask.copy()
+    added = []
+    # Thin, open things (a floor lamp, a plant, a chair on legs) fill little of their rubber band,
+    # and what shows through it is the wall behind, not something lying on them. Only fill in
+    # for solid things: at least 60% of the rubber band is the object itself. A rug always counts.
+    solid = kind == 'rug' or mask.sum() >= 0.6 * hull.sum()
+    for other in objs if solid else []:
+        if other is target:
+            continue
+        ox1, oy1, ox2, oy2 = other['box']
+        if (ox2 - ox1) * (oy2 - oy1) > own_area * 1.5:
+            continue                                   # something bigger (the floor, the room) is not lying on it
+        part = other['mask'].astype(np.uint8) & hull
+        if part.sum() >= 0.002 * own_area:              # ignore slivers
+            whole |= part
+            added.append(other['label'])
+    if solid and target.get('matte') is not None and target.get('matte_agreement', 0) > 0.6:
+        extra = target['matte'].astype(np.uint8) & hull & (1 - whole)
+        if extra.sum() >= 0.01 * own_area:
+            whole |= target['matte'].astype(np.uint8) & hull
+            added.append('foreground the detector did not name')
+
+    k = max(5, int(0.05 * max(x2 - x1, y2 - y1)) | 1)   # gaps up to about 5% of the object close up
+    whole = cv2.morphologyEx(whole, cv2.MORPH_CLOSE, cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (k, k)))
+    contours, _ = cv2.findContours(whole, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)   # outer edges only: holes fill in
+    biggest = max(cv2.contourArea(c) for c in contours)
+    pieces = [c for c in contours if cv2.contourArea(c) >= 0.03 * biggest]
+
+    if kind == 'rug' or len(pieces) > 1:
+        # a rug, or an object something has cut into separate pieces: the shape round all the pieces
+        ring = cv2.convexHull(np.vstack(pieces))
+        if kind == 'rug':
+            eps = 0.01
+            corners = ring
+            while len(corners) > 4 and eps < 0.2:        # loosen until four corners are left
+                corners = cv2.approxPolyDP(ring, eps * cv2.arcLength(ring, True), True)
+                eps += 0.01
+            if len(corners) != 4:
+                corners = cv2.boxPoints(cv2.minAreaRect(ring)).reshape(-1, 1, 2)
+        else:
+            corners = cv2.approxPolyDP(ring, 0.004 * cv2.arcLength(ring, True), True)
+        if len(pieces) > 1 and 'joined pieces' not in added:
+            added.append('joined pieces')
+    else:
+        corners = cv2.approxPolyDP(pieces[0], 0.004 * cv2.arcLength(pieces[0], True), True)
+    corners = np.asarray(corners, dtype=np.float32).reshape(-1, 2)
+    outline = [[round(float(min(max(x, 0), W)) / W, 4), round(float(min(max(y, 0), H)) / H, 4)] for x, y in corners]
+    return outline, sorted(set(added))
 
 
 def to_hex(c):
@@ -255,12 +337,21 @@ def process(path_or_img, out_dir, pin_id, meta=None):
 
     s, o = scored[0]
     cutout, crop_box, agree = cut_out(img, o)
+    # The object's shape as corner points (0 to 1 across the image), for the app's hover highlight.
+    # `outline` is the whole object, hidden parts filled in (see whole_outline); `seen_outline`
+    # is only what the camera can see, kept for comparison.
+    shape = cv2.morphologyEx(o['mask'].astype(np.uint8), cv2.MORPH_CLOSE, np.ones((5, 5), np.uint8))
+    contours, _ = cv2.findContours(shape, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    biggest = max(contours, key=cv2.contourArea)
+    corners = cv2.approxPolyDP(biggest, 0.005 * cv2.arcLength(biggest, True), True)[:, 0, :]
+    seen_outline = [[round(float(x) / W, 4), round(float(y) / H, 4)] for x, y in corners]
+    outline, filled_in = whole_outline(o, objs, W, H, FURNITURE[o['label']][0])
     cutout.save(os.path.join(d, 'cutout.png'))
     mats = read_materials(cutout)
     if mats.get('swatch') is not None:
         mats['swatch'].save(os.path.join(d, 'swatch.png'))
     tgt = describe(s, o)
-    tgt.update(cutout='cutout.png', crop_box=crop_box, matte_agreement=round(agree, 3),
+    tgt.update(outline=outline, seen_outline=seen_outline, filled_in=filled_in, cutout='cutout.png', crop_box=crop_box, matte_agreement=round(agree, 3),
                colors=mats['colors'], swatch='swatch.png' if mats.get('swatch') is not None else None,
                ready_for_3d=bool(o['cut_sides'] == 0 and o['occlusion'] < 0.15))
     result['target'] = tgt

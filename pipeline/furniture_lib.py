@@ -293,7 +293,91 @@ def sofa():
             leg((sx * (W / 2 - 0.1), sy * (D / 2 - 0.1), 0.19), (sx * (W / 2 - 0.07), sy * (D / 2 - 0.07), 0), 0.025, 0.015, wz)
     return dict(az=-32, el=18)
 
-OBJECTS = dict(desk=desk, chair=chair, shelf=shelf, lamp=lamp, bed=bed, plant=plant, rug=rug, sofa=sofa)
+# ---------- more pieces (added 22 Nov for a larger catalog). Fronts face -Y, like the desk's drawer. ----------
+def _four_legs(W, D, top, mat, inset=0.05, r_top=0.022, r_bot=0.013):
+    for sx in (-1, 1):
+        for sy in (-1, 1):
+            leg((sx * (W / 2 - inset), sy * (D / 2 - inset), top), (sx * (W / 2 - inset + 0.02), sy * (D / 2 - inset + 0.02), 0), r_top, r_bot, mat)
+
+def nightstand():
+    wx = wood('walnut_x', *WALNUT, axis='X'); wz = wood('walnut_z', *WALNUT, axis='Z')
+    brass = plain('brass', (0.83, 0.62, 0.30), 0.28, 1.0)
+    W, D, H = 0.45, 0.40, 0.55
+    box((W, D, 0.34), (0, 0, H - 0.17), wx, 0.006, 4)
+    for z in (H - 0.09, H - 0.25):
+        box((W - 0.04, 0.012, 0.14), (0, -D / 2 - 0.004, z), wx, 0.003)
+        cyl(0.011, 0.02, (0, -D / 2 - 0.02, z), brass, rot=(math.pi / 2, 0, 0))
+    _four_legs(W, D, H - 0.34, wz)
+    return dict(az=-32, el=20)
+
+def dresser():
+    wx = wood('oak_x', *OAK, axis='X'); wz = wood('oak_z', *OAK, axis='Z')
+    brass = plain('brass', (0.83, 0.62, 0.30), 0.28, 1.0)
+    W, D, H, foot = 1.2, 0.45, 0.8, 0.12
+    body = H - foot
+    box((W, D, body), (0, 0, foot + body / 2), wx, 0.006, 4)
+    for row in range(3):
+        z = foot + (row + 0.5) * body / 3
+        for sx in (-1, 1):
+            box((W / 2 - 0.04, 0.012, body / 3 - 0.03), (sx * W / 4, -D / 2 - 0.004, z), wx, 0.003)
+            cyl(0.012, 0.02, (sx * W / 4, -D / 2 - 0.02, z), brass, rot=(math.pi / 2, 0, 0))
+    _four_legs(W, D, foot, wz)
+    return dict(az=-32, el=18)
+
+def coffee_table():
+    wx = wood('walnut_x', *WALNUT, axis='X'); wz = wood('walnut_z', *WALNUT, axis='Z')
+    W, D, H = 1.0, 0.55, 0.40
+    box((W, D, 0.03), (0, 0, H - 0.015), wx, 0.006, 4)
+    box((W - 0.16, D - 0.12, 0.018), (0, 0, 0.14), wx, 0.004)
+    _four_legs(W, D, H - 0.03, wz, inset=0.06)
+    return dict(az=-32, el=24)
+
+def armchair():
+    fab = fabric('armchair', (0.74, 0.50, 0.26), weave=200.0, wrinkle=0.2)
+    wz = wood('oak_z', *OAK, axis='Z')
+    W, D = 0.8, 0.8
+    box((W, D, 0.18), (0, 0, 0.27), fab, 0.05, 8)
+    box((W - 0.28, D - 0.2, 0.14), (0, -0.06, 0.43), fab, 0.06, 8)
+    box((W - 0.28, 0.18, 0.40), (0, D / 2 - 0.18, 0.66), fab, 0.07, 8, rot=(math.radians(-12), 0, 0))
+    for i in (-1, 1):
+        box((0.16, D + 0.02, 0.50), (i * (W / 2 - 0.07), 0, 0.42), fab, 0.06, 8)
+    box((W - 0.04, 0.15, 0.58), (0, D / 2 - 0.06, 0.48), fab, 0.06, 8)
+    _four_legs(W, D, 0.19, wz, inset=0.1, r_top=0.025, r_bot=0.015)
+    return dict(az=-34, el=18)
+
+def dining_table():
+    wx = wood('oak_x', *OAK, axis='X'); wz = wood('oak_z', *OAK, axis='Z')
+    W, D, H = 1.4, 0.8, 0.75
+    box((W, D, 0.035), (0, 0, H - 0.0175), wx, 0.006, 4)
+    for sy in (-1, 1):
+        box((W - 0.2, 0.02, 0.07), (0, sy * (D / 2 - 0.07), H - 0.035 - 0.035), wx, 0.003)
+    for sx in (-1, 1):
+        box((0.02, D - 0.2, 0.07), (sx * (W / 2 - 0.09), 0, H - 0.035 - 0.035), wx, 0.003)
+    _four_legs(W, D, H - 0.035, wz, inset=0.08, r_top=0.03, r_bot=0.018)
+    return dict(az=-32, el=22)
+
+def bookcase():
+    wx = wood('walnut_x', *WALNUT, axis='X')
+    W, D, H, t = 1.0, 0.32, 0.9, 0.022
+    for sx in (-1, 1):
+        box((t, D, H), (sx * (W / 2 - t / 2), 0, H / 2), wx, 0.003)
+    for z in (0.06, H / 2, H - t / 2):
+        box((W - 2 * t, D, t), (0, 0, z), wx, 0.003)
+    box((W - 2 * t, 0.008, H - 0.06), (0, D / 2 - 0.004, H / 2 + 0.03), wx, 0.002)
+    # a few books on each shelf, in the colours of the design system
+    colours = [(1.0, 0.31, 0.17), (1.0, 0.88, 0.23), (0.15, 0.28, 0.96), (0.12, 0.66, 0.35), (0.56, 0.42, 1.0), (0.95, 0.94, 0.9)]
+    random.seed(4)
+    for base in (0.06 + t / 2, H / 2 + t / 2):
+        x = -W / 2 + t + 0.03
+        for i in range(9):
+            w = random.uniform(0.025, 0.05); h = random.uniform(0.2, 0.3)
+            box((w, D - 0.1, h), (x + w / 2, -0.02, base + h / 2), plain(f'book{i}', colours[i % 6], 0.7), 0.002)
+            x += w + 0.004
+    return dict(az=-30, el=16)
+
+OBJECTS = dict(desk=desk, chair=chair, shelf=shelf, lamp=lamp, bed=bed, plant=plant, rug=rug, sofa=sofa,
+               nightstand=nightstand, dresser=dresser, coffee_table=coffee_table, armchair=armchair,
+               dining_table=dining_table, bookcase=bookcase)
 
 # ---------- scene ----------
 def render(name, res=640, samples=96):

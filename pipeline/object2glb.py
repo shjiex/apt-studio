@@ -302,7 +302,7 @@ def make(pin_dir, out_dir, do_preview=False):
     glb = os.path.join(out_dir, r['id'] + '.glb')
     export_glb(glb)
     entry = dict(id=r['id'], name=t['label'], type=t['type'], size=size, model=os.path.basename(glb), backend=backend,
-                 ready_for_3d=t['ready_for_3d'], source=dict(image=r.get('source'), link=r.get('link'), box=t['box']),
+                 ready_for_3d=t['ready_for_3d'], source=dict(image=r.get('source'), link=r.get('link'), box=t['box'], outline=t.get('outline')),
                  colors=[c['hex'] for c in t.get('colors', [])], bytes=os.path.getsize(glb))
     png = os.path.join(out_dir, r['id'] + '.png')
     if do_preview:

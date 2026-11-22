@@ -1,4 +1,4 @@
-"""bake_catalog.py - turn the eight catalog pieces into real 3D model files (.glb).
+"""bake_catalog.py - turn the catalog pieces into real 3D model files (.glb).
 
 The pieces are drawn in Blender with wood, fabric and weave patterns that only Blender understands.
 "Baking" paints those patterns into ordinary image textures (colour + surface bumps) so a web page can show them.
@@ -9,7 +9,7 @@ import bpy, sys, os, math
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import furniture_lib as furn
 
-ROUGH = dict(desk=0.5, chair=0.85, shelf=0.55, lamp=0.6, bed=0.9, plant=0.7, rug=0.97, sofa=0.92)
+ROUGH = dict(desk=0.5, chair=0.85, shelf=0.55, lamp=0.6, bed=0.9, plant=0.7, rug=0.97, sofa=0.92, armchair=0.92)
 
 
 def bake(name, res, out_dir):
@@ -69,7 +69,7 @@ def bake(name, res, out_dir):
     if has_emit:
         te = nt.nodes.new('ShaderNodeTexImage'); te.image = bpy.data.images.load(paths['emit'])
         nt.links.new(te.outputs['Color'], b.inputs['Emission Color']); b.inputs['Emission Strength'].default_value = 1.0
-    b.inputs['Roughness'].default_value = ROUGH[name]
+    b.inputs['Roughness'].default_value = ROUGH.get(name, 0.6)
     ob.data.materials.clear(); ob.data.materials.append(mat)
     for p in ob.data.polygons: p.material_index = 0
     glb = os.path.join(out_dir, name + '.glb')

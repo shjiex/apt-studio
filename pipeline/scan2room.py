@@ -135,13 +135,35 @@ def align_walls(p, c):
     return p2, c2, float(deg)
 
 
-def wall_positions(p):
-    """Where the points stop on each side. Uses the densest far edge rather than the single furthest point."""
-    out = {}
+def wall_positions(p, band=0.02):
+    """Where each of the four walls is.
+
+    A wall shows up as a PILE of points at one distance: seen from above, a line of points.
+    Furniture and stray points do not pile up like that. So for each side, look outward-in
+    for the first thin slice (2% of the room's size) holding a clear pile, and call that the wall.
+    A blank wall gives no points and no pile: then fall back to where the points stop.
+    Returns the positions, and for each wall whether a pile was found.
+    """
+    out, seen = {}, {}
     for axis, name in ((0, 'x'), (1, 'y')):
         v = p[:, axis]
-        out[name] = (float(np.percentile(v, 0.5)), float(np.percentile(v, 99.5)))
-    return out
+        lo, hi = np.percentile(v, 0.5), np.percentile(v, 99.5)          # where the points stop
+        step = (hi - lo) * band
+        edges = np.arange(lo - 3 * step, hi + 4 * step, step)
+        counts, _ = np.histogram(v, bins=edges)
+        typical = np.median(counts[counts > 0])
+        middle = len(counts) // 2
+        found = []
+        for side, order, fallback in (('lo', range(0, middle), lo), ('hi', range(len(counts) - 1, middle, -1), hi)):
+            order = list(order); peak = max(counts[i] for i in order)
+            where = None
+            if peak >= 4 * typical:                                     # a clear pile: a wall
+                first = next(i for i in order if counts[i] >= 0.5 * peak)
+                where = (edges[first] + edges[first + 1]) / 2
+            found.append(float(where if where is not None else fallback))
+            seen[f'{name}_{side}'] = where is not None
+        out[name] = tuple(found)
+    return out, seen
 
 
 def run(src, out, width_m=None, camera_height=None, seed=0):
@@ -153,7 +175,7 @@ def run(src, out, width_m=None, camera_height=None, seed=0):
     n, d, floor_pts = fit_floor(pts, centres, downs, rng)
     p, c = to_room_frame(pts, centres, n, d)
     p, c, turn = align_walls(p, c)
-    walls = wall_positions(p)
+    walls, seen = wall_positions(p)
     size_x = walls['x'][1] - walls['x'][0]; size_y = walls['y'][1] - walls['y'][0]
     long_side, short_side = max(size_x, size_y), min(size_x, size_y)
     cam_h = float(np.median(c[:, 2]))
@@ -168,6 +190,7 @@ def run(src, out, width_m=None, camera_height=None, seed=0):
         highest_point_seen=round(top * scale, 2),
         height=None, height_note='The ceiling is only known if the video shows it. highest_point_seen is a lower bound.',
         camera_height=round(cam_h * scale, 2), scale_source=source,
+        walls_seen_as_a_line=sum(seen.values()), walls_guessed_from_outermost_points=4 - sum(seen.values()),
         floor_points=floor_pts, wall_turn_degrees=turn, **info)
     json.dump(result, open(os.path.join(out, 'room.json'), 'w'), indent=1)
     np.save(os.path.join(out, 'points.npy'), np.hstack([p * scale, cols]))
