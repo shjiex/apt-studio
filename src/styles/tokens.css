@@ -1,0 +1,46 @@
+/* Design tokens from the Apt Studio design system v3 (Figma). */
+@font-face {
+  font-family: 'Host Grotesk';
+  src: url('/fonts/HostGrotesk-Variable.woff2') format('woff2');
+  font-weight: 300 800;
+  font-display: swap;
+}
+
+:root {
+  /* neutrals */
+  --white: #ffffff;
+  --ground: #f8f8f6;
+  --grey: #efeeeb;
+  --grey-strong: #e3e2de;
+  --ink: #0f0f0e;
+  --ink-muted: #6b6a66;
+
+  /* colour set: only on furniture, status and brand moments */
+  --pop-tomato: #ff4f2b;
+  --pop-orange: #ff9a3d;
+  --pop-yellow: #ffe03a;
+  --pop-green: #1fa85a;
+  --pop-mint: #7debc2;
+  --pop-violet: #8f6bff;
+  --pop-pink: #ff7ad1;
+  --pop-brown: #a9623f;
+  --danger: #d92c0f;
+
+  /* shape and space */
+  --radius-xs: 8px;
+  --radius-sm: 16px;
+  --radius-md: 24px;
+  --radius-lg: 32px;
+  --radius-pill: 1000px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --control-sm: 40px;
+  --control-md: 48px;
+
+  --font-sans: 'Host Grotesk', system-ui, -apple-system, sans-serif;
+  --shadow-overlay: 0 16px 48px rgba(15, 15, 14, 0.16);
+}
