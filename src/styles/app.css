@@ -73,7 +73,49 @@ p {
   white-space: nowrap;
 }
 
-.room-chip {
+/* ---------- rooms: the home's name and one tab per room, under the top bar ---------- */
+
+.room-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.home-chip {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  height: var(--control-sm);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+  color: var(--white);
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.home-chip input {
+  width: 9em;
+  border: 0;
+  padding: 0;
+  background: none;
+  outline: none;
+  color: inherit;
+  font: inherit;
+}
+
+.room-tabs {
+  display: flex;
+  gap: 6px;
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.room-tab {
+  flex: none;
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
@@ -81,13 +123,108 @@ p {
   padding: 0 var(--space-4);
   border-radius: var(--radius-pill);
   background: var(--grey);
+  color: var(--ink-muted);
   font-size: 14px;
   font-weight: 500;
   white-space: nowrap;
 }
 
-.room-chip:hover {
+.room-tab:hover {
   background: var(--grey-strong);
+}
+
+/* the open room: white with a hairline, like a raised tab */
+.room-tab.is-current {
+  background: var(--white);
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1.5px var(--ink);
+}
+
+.room-tab__size {
+  color: var(--ink-muted);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+}
+
+.room-tab--add {
+  width: var(--control-sm);
+  padding: 0;
+  justify-content: center;
+}
+
+/* "Start over" at the far end of the room bar, and its yes / no question */
+.room-bar__end,
+.room-bar__ask {
+  margin-left: auto;
+  flex: none;
+}
+
+.room-bar__ask {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--ink-muted);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.room-bar__link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-muted);
+  font: inherit;
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.room-bar__link:hover {
+  color: var(--ink);
+}
+
+.room-bar__link--danger {
+  color: var(--danger);
+}
+
+/* the kind-of-room choices in the room dialog */
+.room-kinds {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.room-kind {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: var(--space-3) var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--grey);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.room-kind.is-current {
+  background: var(--ink);
+  color: var(--white);
+}
+
+.dialog__links {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.dialog__links .dialog__link {
+  margin-bottom: 0;
+}
+
+.dialog__link--danger {
+  color: var(--danger);
 }
 
 /* preview | divider | moodboard. The divider sets --moodboard-width. */
@@ -206,6 +343,50 @@ p {
   display: block;
 }
 
+/* the Realistic switch and its pass count, top left of the stage in the inside view */
+/* on a narrow stage the controls wrap onto a second row instead of running off the side */
+.stage__real {
+  position: absolute;
+  top: var(--space-4);
+  left: var(--space-4);
+  right: var(--space-4);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  pointer-events: none; /* the empty part of the row lets a drag through to the room */
+}
+
+.stage__real > * {
+  pointer-events: auto;
+}
+
+/* the brightness slider of the realistic picture, in a white pill like its neighbours */
+.stage__bright {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 12px;
+  border-radius: var(--radius-pill);
+  background: var(--white);
+  font-size: 13px;
+}
+
+.stage__bright input {
+  width: 96px;
+  accent-color: var(--ink);
+}
+
+.stage__passes {
+  white-space: nowrap;
+  padding: 6px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--white);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
 .stage__overlay {
   position: absolute;
   left: var(--space-4);
@@ -321,13 +502,223 @@ p {
   background: var(--pop-tomato);
 }
 
+/* ---------- feng shui score ---------- */
+
+/* The score button sits in the top bar; its card drops down under it. */
+.feng {
+  position: relative;
+}
+
+.feng__score strong {
+  font-weight: 600;
+}
+
+.feng__card {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  z-index: 20;
+  width: 320px;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: var(--white);
+  box-shadow: 0 0 0 1px var(--line);
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: left;
+}
+
+.feng__checks {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.feng__checks li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.feng__checks .is-passing svg {
+  color: var(--pop-green);
+}
+
+.feng__checks .is-failing {
+  color: var(--ink-muted);
+}
+
+.feng__card h3 {
+  margin: var(--space-3) 0 6px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.feng__tips {
+  display: grid;
+  gap: 6px;
+}
+
+.feng__tips p {
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: var(--radius-xs);
+  background: var(--ground);
+}
+
+.feng__note {
+  margin: var(--space-3) 0 0;
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
 /* ---------- furniture strip ---------- */
+
+.strip-area {
+  display: grid;
+  gap: var(--space-2);
+}
+
+/* the search field and the group chips share one row above the tiles */
+.strip-tools {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.strip-search {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 200px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: var(--radius-pill);
+  background: var(--grey);
+  color: var(--ink-muted);
+}
+
+.strip-search:focus-within {
+  box-shadow: inset 0 0 0 2px var(--ink);
+  color: var(--ink);
+}
+
+.strip-search input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  background: none;
+  outline: none;
+  font: inherit;
+  font-size: 13px;
+  color: var(--ink);
+}
+
+.strip__empty {
+  margin: 0;
+  padding: var(--space-4) var(--space-2);
+  color: var(--ink-muted);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+/* group chips above the tiles */
+.strip-groups {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  min-width: 0;
+}
+
+.strip-group {
+  flex: none;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: var(--radius-pill);
+  background: var(--grey);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.strip-group.is-current {
+  background: var(--ink);
+  color: var(--white);
+}
+
+/* a small "Shop" mark on tiles that have a product link */
+.tile__shop {
+  position: absolute;
+  left: 6px;
+  bottom: 6px;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--white);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* link field inside the selection bar */
+.selection-bar__link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.selection-bar__link input {
+  width: 220px;
+  height: 32px;
+  padding: 0 12px;
+  border-radius: var(--radius-pill);
+  background: var(--grey);
+  border: 0;
+  font: inherit;
+  font-size: 13px;
+}
+
+/* shop list dialog */
+.shop-list {
+  list-style: none;
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+
+.shop-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.shop-row img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  border-radius: var(--radius-xs);
+  background: var(--grey);
+}
+
+.shop-row__text {
+  flex: 1;
+  display: grid;
+  font-size: 13px;
+}
+
+.shop-row__text span {
+  color: var(--ink-muted);
+}
 
 .strip {
   display: flex;
   gap: var(--space-2);
   overflow-x: auto;
   padding-bottom: var(--space-1);
+  min-height: 148px; /* a row of tiles, so an empty search does not move the stage */
 }
 
 .tile {
@@ -761,22 +1152,24 @@ a.btn {
     padding: var(--space-3) var(--space-3) 96px;
   }
 
+  /* three rows on a phone: name, then the tools, then the 2D / 3D switch */
   .top-bar {
-    grid-template-columns: 1fr auto;
+    grid-template-columns: minmax(0, 1fr);
     row-gap: var(--space-2);
   }
 
-  .top-bar .view-switch {
+  .top-bar__right {
     grid-row: 2;
-    grid-column: 1 / -1;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .top-bar .view-switch {
+    grid-row: 3;
     justify-self: center;
   }
 
-  .room-chip {
-    padding: 0 var(--space-3);
-  }
-
-  .room-chip__name {
+  .room-tab__size {
     display: none;
   }
 
@@ -837,4 +1230,1416 @@ a.btn {
   .toast {
     bottom: 96px;
   }
+}
+
+
+/* ---------- "already in your room" dialog ---------- */
+
+.dialog--wide {
+  width: min(880px, calc(100vw - 48px));
+}
+
+.found {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.found__photo {
+  position: relative;
+  align-self: start;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+
+.found__photo img {
+  display: block;
+  width: 100%;
+}
+
+/* a frame around each piece found in the photo */
+.found__frame {
+  position: absolute;
+  border: 2px solid var(--white);
+  border-radius: 6px;
+  opacity: 0.45;
+}
+
+.found__frame.is-kept {
+  opacity: 1;
+  box-shadow: 0 0 0 1px rgba(15, 15, 14, 0.35);
+}
+
+.found__number {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--white);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.found__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  align-content: start;
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+.found__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--grey);
+  cursor: pointer;
+}
+
+.found__row .found__number {
+  flex: none;
+}
+
+.found__text {
+  flex: 1;
+  display: grid;
+  font-size: 13px;
+}
+
+.found__text span {
+  color: var(--ink-muted);
+}
+
+.found__row input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--ink);
+}
+
+@media (max-width: 900px) {
+  .found {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- download menu ---------- */
+
+.download-menu {
+  width: 260px;
+  padding: var(--space-2);
+  display: grid;
+  gap: 2px;
+}
+
+.download-menu__choice {
+  display: grid;
+  gap: 2px;
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.download-menu__choice:hover,
+.download-menu__choice:focus-visible {
+  background: var(--grey);
+}
+
+.download-menu__choice strong {
+  font-weight: 600;
+}
+
+.download-menu__choice span {
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+/* ---------- room from a floor plan ---------- */
+
+/* a text link inside a dialog */
+.dialog__link {
+  justify-self: start;
+  margin-bottom: var(--space-4);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.plan__picture {
+  box-shadow: 0 0 0 1px var(--line);
+}
+
+/* the room outlines sit exactly on top of the plan picture */
+.plan__picture svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.plan__room {
+  fill: rgba(15, 15, 14, 0.06);
+  stroke: none;
+  cursor: pointer;
+}
+
+.plan__room:hover {
+  fill: rgba(15, 15, 14, 0.14);
+}
+
+.plan__room.is-picked {
+  fill: rgba(255, 224, 58, 0.5);
+  stroke: var(--ink);
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+}
+
+.plan__number {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 1px var(--line);
+  pointer-events: none;
+}
+
+.plan__side {
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+}
+
+.plan__result {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+/* ---------- found pieces drawn as shapes; chips; site icons ---------- */
+
+.found__photo svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* a piece found in the photo: dashed until it is kept */
+.found__shape {
+  fill: rgba(255, 255, 255, 0.12);
+  stroke: var(--white);
+  stroke-width: 2px;
+  stroke-dasharray: 5 5;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  cursor: pointer;
+}
+
+.found__shape.is-kept {
+  fill: rgba(255, 255, 255, 0.36);
+  stroke-dasharray: none;
+}
+
+.found__number--on-photo {
+  position: absolute;
+  transform: translate(4px, 4px);
+  pointer-events: none;
+}
+
+.found__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* a small grey chip for one word */
+.tag {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--white);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.shop-row__site {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.site-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background: var(--grey-strong, #e3e2de);
+  color: var(--ink);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: lowercase;
+}
+
+.shop-row .site-icon {
+  width: 16px;
+  height: 16px;
+  background: none;
+}
+
+/* ---------- the panel for a selected piece ---------- */
+
+.piece-panel {
+  overflow-y: auto;
+  max-height: calc(100vh - 104px);
+  gap: var(--space-5, 24px);
+}
+
+.piece-panel__head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.piece-panel__head img {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+  background: var(--grey);
+}
+
+.piece-panel__name {
+  flex: 1;
+  display: grid;
+  gap: 6px;
+}
+
+.piece-panel__name h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 500;
+}
+
+.piece-panel__tags {
+  display: flex;
+  gap: 6px;
+}
+
+.tag--grey {
+  background: var(--grey);
+}
+
+.piece-panel__actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.piece-panel__group {
+  display: grid;
+  gap: var(--space-2);
+  justify-items: start;
+}
+
+.piece-panel__group h3 {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+/* three small boxes in a row: a label and its number */
+.piece-panel__facts {
+  width: 100%;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.piece-panel__facts div {
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--grey);
+}
+
+.piece-panel__facts dt {
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+
+.piece-panel__facts dd {
+  margin: 2px 0 0;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.piece-panel__shop {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-size: 14px;
+}
+
+/* On a computer the panel shows the selected piece, so the bar over the stage is only for phones. */
+@media (min-width: 901px) {
+  .stage__overlay {
+    display: none;
+  }
+}
+
+/* ---------- the room score, a circle on the stage ---------- */
+
+.stage__score {
+  position: absolute;
+  right: var(--space-4);
+  bottom: var(--space-4);
+}
+
+/* the zoom buttons sit above the score */
+.stage__zoom {
+  bottom: calc(var(--space-4) + 64px + var(--space-2));
+}
+
+.feng__circle {
+  width: 64px;
+  height: 64px;
+  padding: 4px;
+  border: 0;
+  border-radius: 50%;
+  /* the ring: ink for the score, grey for what is left */
+  background: conic-gradient(var(--ink) var(--score), var(--grey-strong, #e3e2de) 0);
+  cursor: pointer;
+}
+
+.feng__inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--white);
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0;
+  color: var(--ink);
+  line-height: 1;
+}
+
+.feng__inner strong {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* the list opens upward from the circle */
+.stage__score .feng__card {
+  top: auto;
+  bottom: calc(100% + var(--space-2));
+}
+
+.feng__title {
+  margin: 0 0 var(--space-2) !important;
+  font-size: 15px !important;
+}
+
+/* the list of checks never grows taller than the stage: it scrolls instead */
+.stage__score .feng__card {
+  max-height: min(60vh, 420px);
+  overflow-y: auto;
+}
+
+/* ---------- moodboard cards: just the image, more on hover ---------- */
+
+/* the fade and the outline of the target object, stretched over the image */
+.pin__focus {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 140ms;
+  z-index: 1;
+}
+
+.pin__veil {
+  fill: rgba(255, 255, 255, 0.62);
+}
+
+.pin__outline {
+  fill: none;
+  stroke: var(--white);
+  stroke-width: 2px;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  filter: drop-shadow(0 1px 2px rgba(15, 15, 14, 0.45));
+}
+
+.pin-card:hover .pin__focus,
+.pin-card:focus-within .pin__focus {
+  opacity: 1;
+}
+
+/* with the fade on, the old darkening is not needed */
+.pin-card:hover .pin__image::after {
+  background: none;
+}
+
+/* the row under the image keeps its space, so the grid does not jump; it shows on hover */
+.pin__under {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  min-height: 34px;
+  margin-top: 4px;
+  opacity: 0;
+  transition: opacity 140ms;
+}
+
+.pin-card:hover .pin__under,
+.pin-card:focus-within .pin__under {
+  opacity: 1;
+}
+
+.pin__under .pin__title {
+  margin-top: 0;
+  flex: 1;
+  -webkit-line-clamp: 1;
+}
+
+/* the add button is now just the model's thumbnail */
+.pin__under .pin__add {
+  width: auto;
+  flex: none;
+  margin-top: 0;
+  padding: 3px;
+}
+
+/* a touch screen has no hover: show the row all the time */
+@media (hover: none) {
+  .pin__under {
+    opacity: 1;
+  }
+}
+
+/* ---------- lighting panel ---------- */
+
+.light {
+  width: 300px;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.light__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+}
+
+.light__head input {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--ink);
+}
+
+.light__row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 6px 8px;
+  color: var(--ink-muted);
+}
+
+.light__row strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.light__row input[type='range'] {
+  grid-column: 1 / -1;
+  width: 100%;
+  accent-color: var(--ink);
+}
+
+/* ---------- moodboard search, filters and explore ---------- */
+
+.board-tools {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.board-tools__search {
+  flex: 1;
+  width: auto;
+  height: var(--control-sm);
+}
+
+.board-tools__explore {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: var(--control-sm);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-pill);
+  background: var(--grey);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.board-tools__explore:hover {
+  background: var(--grey-strong);
+}
+
+.board-tools__count {
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+}
+
+.board-empty {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 14px;
+}
+
+/* ---------- marking a rectangle on a floor or wall photo ---------- */
+
+.dialog--wide {
+  width: min(560px, 100%);
+  font-size: 16px; /* it opens from inside the small-text panel */
+  line-height: 1.45;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+}
+
+.dialog__fields--two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* the photo, with the marked shape and its four corner handles on top */
+.straighten {
+  position: relative;
+  align-self: center;
+  margin: 10px;
+  line-height: 0;
+  touch-action: none;
+  user-select: none;
+}
+
+.straighten img {
+  display: block;
+  max-width: 100%;
+  max-height: 46vh;
+  border-radius: 8px;
+}
+
+.straighten svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.straighten polygon {
+  fill: rgba(255, 224, 58, 0.18);
+  stroke: var(--pop-yellow);
+  stroke-width: 2.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.straighten__corner {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  margin: -12px 0 0 -12px;
+  padding: 0;
+  border: 3px solid var(--ink);
+  border-radius: 50%;
+  background: var(--pop-yellow);
+  cursor: grab;
+  touch-action: none;
+}
+
+.straighten__corner:active {
+  cursor: grabbing;
+}
+
+/* ---------- floor and walls menu ---------- */
+
+.surface__photo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.surface__photo img {
+  width: 48px;
+  height: 48px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+/* the real file input is hidden; its label is the button */
+.surface__file {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.surface__pick {
+  display: inline-flex;
+  align-items: center;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: var(--radius-pill);
+  background: var(--ink);
+  color: var(--white);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.surface__file:focus-visible + .surface__pick,
+.surface__photo:focus-within .surface__pick {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+.surface__choice {
+  padding: 0 10px;
+  font-weight: 500;
+}
+
+.surface__paints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.surface__paint {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(15, 15, 14, 0.14);
+  cursor: pointer;
+}
+
+.surface__paint.is-current {
+  box-shadow: 0 0 0 2px var(--white), 0 0 0 4px var(--ink);
+}
+
+/* the name and code of the paint in use, on its own row under the swatches */
+.surface__paint-name {
+  flex-basis: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0;
+  font-size: 13px;
+}
+
+.surface__paint-name span {
+  color: var(--ink-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* a short message when a window or door has nowhere to go */
+.surface__note {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--grey);
+  font-size: 13px;
+}
+
+/* the browser's colour picker, shaped like the other swatches */
+.surface__paint--any {
+  appearance: none;
+  background: conic-gradient(#ff4f2b, #ffe03a, #1fa85a, #8f6bff, #ff7ad1, #ff4f2b);
+  overflow: hidden;
+}
+
+.surface__paint--any::-webkit-color-swatch-wrapper,
+.surface__paint--any::-webkit-color-swatch {
+  opacity: 0;
+}
+
+/* a Kelvin number's everyday name beside its colour dot */
+.light__named {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* sunrise, sunset and sun height as three small facts in a row */
+.light__facts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin: 0;
+}
+
+.light__facts div {
+  padding: 8px 10px;
+  border-radius: var(--radius-xs);
+  background: var(--ground);
+}
+
+.light__facts dt {
+  color: var(--ink-muted);
+  font-size: 11px;
+}
+
+.light__facts dd {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* the city list and the twelve month buttons in the daylight part */
+.light__select {
+  height: 28px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--grey);
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.light__months {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 2px;
+}
+
+.light__months .light__choice {
+  min-width: 0;
+  padding: 0;
+}
+
+/* the colour this Kelvin number gives */
+.light__swatch {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--line);
+}
+
+/* nine spots over the room for the ceiling light */
+.light__spots {
+  display: grid;
+  grid-template-columns: repeat(3, 18px);
+  gap: 4px;
+}
+
+.light__spot {
+  width: 18px;
+  height: 18px;
+  border: 0;
+  border-radius: 5px;
+  background: var(--grey-strong, #e3e2de);
+  cursor: pointer;
+}
+
+.light__spot.is-current {
+  background: var(--ink);
+}
+
+/* lighting panel, round 2: scroll when long, choices, fixed lights */
+.light {
+  width: 320px;
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
+}
+
+.light__choices {
+  display: flex;
+  gap: 4px;
+}
+
+.light__choice {
+  min-width: 28px;
+  height: 28px;
+  padding: 0 6px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--grey);
+  color: var(--ink);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.light__choice--word {
+  text-transform: capitalize;
+  font-weight: 500;
+}
+
+.light__choice.is-current {
+  background: var(--ink);
+  color: var(--white);
+}
+
+.light__fixed {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--ground, #f8f8f6);
+}
+
+.light__tools {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.light__remove {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-muted);
+  font: inherit;
+  font-size: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.light__add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.piece-panel__bulb {
+  justify-items: stretch;
+}
+
+/* ---------- prices in the shop list and the piece panel ---------- */
+
+.shop-row__price {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.shop-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--grey);
+}
+
+.shop-total strong {
+  font-size: 20px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* the price field is narrow; the form may wrap in the narrow piece panel */
+.selection-bar__link .piece-panel__price {
+  width: 84px;
+  flex: none;
+}
+
+.piece-panel .selection-bar__link {
+  flex-wrap: wrap;
+}
+
+/* ---------- motion ----------
+   Small, quick movements that show where things come from: panels and dialogs
+   grow out of the button that opened them, the toast rises from the bottom, a
+   pressed button gives a little. Everything is under a quarter of a second, and
+   all of it is switched off for people who ask their system for less motion. */
+
+:root {
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1); /* fast start, soft landing */
+  --quick: 120ms;
+  --calm: 220ms;
+}
+
+/* things that change colour or size when hovered, pressed or chosen */
+.btn,
+.room-tab,
+.home-chip,
+.strip-group,
+.light__choice,
+.room-kind,
+.view-switch__option,
+.surface__paint,
+.board-tools__explore,
+.tile,
+.light__spot {
+  transition:
+    background-color var(--quick),
+    color var(--quick),
+    box-shadow var(--quick),
+    transform var(--quick) var(--ease-out);
+}
+
+.btn:active,
+.room-tab:active,
+.strip-group:active,
+.light__choice:active,
+.room-kind:active,
+.surface__paint:active {
+  transform: scale(0.96);
+}
+
+.tile:hover {
+  transform: translateY(-2px);
+}
+
+.tile:active {
+  transform: translateY(0) scale(0.97);
+}
+
+/* a panel that opens under a top-bar button grows out of that corner */
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.97);
+  }
+}
+
+.feng__card {
+  transform-origin: top right;
+  animation: pop-in var(--calm) var(--ease-out);
+}
+
+/* the room score card opens upward from the ring at the bottom of the stage */
+.stage__score .feng__card {
+  transform-origin: bottom right;
+}
+
+/* a dialog: the dark sheet fades in, the dialog rises a little into place */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes rise-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+}
+
+.scrim {
+  animation: fade-in var(--calm);
+}
+
+.dialog {
+  animation: rise-in var(--calm) var(--ease-out);
+}
+
+/* the panel on the right slides in when it swaps between the moodboard and a piece */
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+}
+
+.piece-panel,
+.moodboard {
+  animation: slide-in var(--calm) var(--ease-out);
+}
+
+/* a new room tab, a new fixed light or window card, a moodboard pin after a search */
+.room-tab,
+.light__fixed,
+.pin-card,
+.stage__real,
+.stage__passes,
+.tag {
+  animation: fade-in var(--calm);
+}
+
+/* the toast comes up from the bottom edge */
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    translate: 0 16px;
+  }
+}
+
+.toast {
+  animation: toast-in var(--calm) var(--ease-out);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    transition-duration: 1ms !important;
+  }
+}
+
+/* ---------- glass ----------
+   The controls that float over the room, and the two switches in the bars, are
+   glass: you see a blurred, lightened version of what is behind them.
+
+   How the text stays readable (WCAG AA asks for 4.5 to 1 for text):
+   The backdrop is blurred, then squeezed towards light (contrast 0.55, then
+   brightness 1.45), then covered with 30% white. Start from pure black, the
+   worst case: 0 becomes 0.225, then 0.326, then 0.3 + 0.7 x 0.326 = 0.53. Ink
+   text on that grey measures 5.3 to 1. Any other backdrop ends up lighter, so
+   ink text on glass always passes. Grey text would not, so nothing on glass is
+   grey: every label on glass is ink. The chosen option is 82% ink with white
+   text, which measures at least 11 to 1.
+
+   If the browser cannot blur what is behind an element, or the person has asked
+   their system for less transparency or more contrast, glass falls back to solid
+   white. */
+
+:root {
+  --glass-fill: rgba(255, 255, 255, 0.3);
+  --glass-filter: blur(28px) saturate(1.4) contrast(0.55) brightness(1.45);
+  /* a bright rim, a highlight along the top edge, a soft shade along the bottom, and a drop shadow */
+  --glass-edge:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.8), inset 0 2px 2px rgba(255, 255, 255, 0.95),
+    inset 0 -3px 6px rgba(15, 15, 14, 0.16), 0 8px 24px rgba(15, 15, 14, 0.2);
+  --glass-hover: rgba(255, 255, 255, 0.45);
+  --glass-chosen: rgba(15, 15, 14, 0.82);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  :root {
+    --glass-fill: var(--white);
+    --glass-hover: var(--grey);
+    --glass-chosen: var(--ink);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  :root {
+    --glass-fill: var(--white);
+    --glass-filter: none;
+    --glass-hover: var(--grey);
+    --glass-chosen: var(--ink);
+  }
+}
+
+.stage__history,
+.stage__zoom,
+.stage__bright,
+.stage__passes,
+.stage__real .btn--white,
+.stage__overlay .selection-bar,
+.feng__circle,
+.view-switch,
+.room-tabs {
+  background: var(--glass-fill);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  box-shadow: var(--glass-edge);
+  color: var(--ink);
+}
+
+/* buttons inside a glass group are clear, and lighten under the pointer */
+.stage__history .btn--white,
+.stage__zoom .btn--white {
+  background: transparent;
+}
+
+.stage__history .btn--white:hover:not(:disabled),
+.stage__zoom .btn--white:hover:not(:disabled),
+.stage__real .btn--white:hover,
+.room-tab:hover,
+.view-switch__option:hover:not(.is-current) {
+  background: var(--glass-hover);
+}
+
+/* labels on glass are ink, never grey (see the note above) */
+.view-switch__option,
+.room-tab,
+.stage__overlay .selection-bar__size {
+  color: var(--ink);
+}
+
+.view-switch__option.is-current {
+  background: var(--glass-chosen);
+  color: var(--white);
+}
+
+/* the room tabs sit together in one glass pill; the open room is a white pill inside it */
+.room-tabs {
+  padding: var(--space-1);
+  gap: var(--space-1);
+  border-radius: var(--radius-pill);
+}
+
+.room-tab {
+  background: transparent;
+}
+
+.room-tab.is-current {
+  background: var(--white);
+  box-shadow: none;
+}
+
+/* The room score: a glass disc. Its ring is drawn on top by ::before, cut down to
+   a 4 px band with a mask, so the glass shows through the middle. */
+.feng__circle {
+  position: relative;
+}
+
+.feng__circle::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: conic-gradient(var(--ink) var(--score), rgba(15, 15, 14, 0.14) 0);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 4px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 4px));
+  pointer-events: none;
+}
+
+.feng__inner {
+  background: transparent;
+}
+
+/* ---------- pressed: a control sinks in while it is held down ----------
+   It moves down a pixel, shrinks a little, and gets a shadow on its inside top
+   edge, as if pushed below the surface. 90 ms down, a little slower back up. */
+.btn,
+.room-tab,
+.home-chip,
+.view-switch__option,
+.light__choice,
+.chip,
+.tile,
+.feng__circle {
+  transition:
+    transform 180ms var(--ease-out),
+    box-shadow 180ms var(--ease-out),
+    background-color var(--quick),
+    color var(--quick);
+}
+
+.btn:active:not(:disabled),
+.room-tab:active,
+.home-chip:active,
+.light__choice:active,
+.chip:active,
+.tile:active,
+.feng__circle:active {
+  transform: translateY(1px) scale(0.97);
+  box-shadow: inset 0 2px 5px rgba(15, 15, 14, 0.28);
+  transition-duration: 90ms;
+}
+
+/* on a dark button the inner shadow would not show, so it is stronger there */
+.btn--primary:active:not(:disabled),
+.home-chip:active {
+  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.6);
+}
+
+.view-switch__option:active {
+  transform: scale(0.96);
+}
+
+/* ---------- the view switch: a thumb that flows from one option to the next ---------- */
+.view-switch {
+  position: relative;
+}
+
+/* The dark pill behind the chosen option. It travels with a little overshoot (the
+   1.3 in the curve) and ViewSwitch.jsx stretches it on the way. */
+.view-switch__thumb {
+  position: absolute;
+  top: var(--space-1);
+  bottom: var(--space-1);
+  border-radius: var(--radius-pill);
+  background: var(--glass-chosen);
+  box-shadow:
+    inset 0 1px 1px rgba(255, 255, 255, 0.22),
+    0 2px 6px rgba(15, 15, 14, 0.25);
+  transition:
+    left 420ms cubic-bezier(0.3, 1.3, 0.4, 1),
+    width 420ms cubic-bezier(0.3, 1.3, 0.4, 1);
+  pointer-events: none;
+}
+
+.view-switch__option {
+  position: relative; /* above the thumb */
+  z-index: 1;
+}
+
+.view-switch__option.is-current {
+  background: transparent; /* the thumb is the background now */
+  color: var(--white);
+}
+
+/* ---------- fit tags, said quietly ---------- */
+.fit-tag--fits {
+  background: var(--fits-bg);
+  color: var(--fits-ink);
+}
+
+.fit-tag--tight {
+  background: var(--tight-bg);
+  color: var(--tight-ink);
+}
+
+.fit-tag--blocked {
+  background: var(--blocked-bg);
+  color: var(--blocked-ink);
+}
+
+/* ---------- the room score: a button the size of its neighbours, and a card in steps ---------- */
+.feng__circle {
+  width: var(--control-md);
+  height: var(--control-md);
+  padding: 0;
+}
+
+.feng__inner strong {
+  font-size: 16px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* the zoom buttons sit above the score: 16 from the edge, the score's 48, then 8 */
+.stage__zoom {
+  bottom: calc(var(--space-4) + var(--control-md) + var(--space-2));
+}
+
+.feng__card {
+  display: grid;
+  gap: var(--space-3);
+  font-size: 14px;
+}
+
+.feng__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+}
+
+.feng__head strong {
+  font-size: 28px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.feng__head span {
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+/* the one thing to do first */
+.feng__first {
+  display: grid;
+  gap: 6px;
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--ground);
+}
+
+.feng__eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+
+.feng__first p,
+.feng__item p {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+.feng__item p {
+  padding: 0 0 var(--space-2) 24px; /* lined up under the title, past the icon */
+}
+
+/* one line: an icon, the words, and something at the far end */
+.feng__line {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 32px;
+}
+
+.feng__line > :last-child:not(:first-child):not(strong) {
+  margin-left: auto;
+}
+
+.feng__gain {
+  margin-left: auto;
+  padding: 2px 8px;
+  border-radius: var(--radius-xs);
+  background: var(--fits-bg);
+  color: var(--fits-ink);
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.feng__line--good svg:last-child {
+  color: var(--fits-ink);
+}
+
+/* a fold: its summary is a row you press; the plus turns into a cross when open */
+.feng__fold > summary,
+.feng__item > summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.feng__fold > summary::-webkit-details-marker,
+.feng__item > summary::-webkit-details-marker {
+  display: none;
+}
+
+.feng__fold > summary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 32px;
+  font-weight: 500;
+}
+
+.feng__fold > summary svg {
+  transition: rotate var(--calm) var(--ease-out);
+}
+
+.feng__fold[open] > summary svg {
+  rotate: 45deg;
+}
+
+.feng__fold[open] > :not(summary),
+.feng__item[open] > p {
+  animation: rise-in var(--calm) var(--ease-out);
 }

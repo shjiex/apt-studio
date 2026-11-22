@@ -26,6 +26,67 @@
   --pop-brown: #a9623f;
   --danger: #d92c0f;
 
+  /* ---------- colour ramps ----------
+     Each colour in five more strengths, so a colour can speak quietly:
+     tint (12% of the colour on white), soft (30%), then the colour itself,
+     shade (30% towards ink), deep (dark enough for text on its own tint: at
+     least 4.5 to 1, checked when these were made), and tone (half grey: the
+     same hue, less saturated). */
+  --pop-tomato-tint: #ffeae6;
+  --pop-tomato-soft: #ffcabf;
+  --pop-tomato-shade: #b73c22;
+  --pop-tomato-deep: #93321e;
+  --pop-tomato-tone: #c46c58;
+  --pop-orange-tint: #fff3e8;
+  --pop-orange-soft: #ffe1c5;
+  --pop-orange-shade: #b7702f;
+  --pop-orange-deep: #935b28;
+  --pop-orange-tone: #c49261;
+  --pop-yellow-tint: #fffbe7;
+  --pop-yellow-soft: #fff6c4;
+  --pop-yellow-shade: #b7a12d;
+  --pop-yellow-deep: #7b6d22;
+  --pop-yellow-tone: #c4b460;
+  --pop-green-tint: #e4f5eb;
+  --pop-green-soft: #bce5ce;
+  --pop-green-shade: #1a7a43;
+  --pop-green-deep: #186338;
+  --pop-green-tone: #549870;
+  --pop-mint-tint: #effdf8;
+  --pop-mint-soft: #d8f9ed;
+  --pop-mint-shade: #5ca98c;
+  --pop-mint-deep: #40725f;
+  --pop-mint-tone: #84baa4;
+  --pop-violet-tint: #f2edff;
+  --pop-violet-soft: #ddd3ff;
+  --pop-violet-shade: #694fb7;
+  --pop-violet-deep: #554293;
+  --pop-violet-tone: #8c7ac2;
+  --pop-pink-tint: #ffeff9;
+  --pop-pink-soft: #ffd7f1;
+  --pop-pink-shade: #b75a96;
+  --pop-pink-deep: #934a79;
+  --pop-pink-tone: #c482ab;
+  --pop-brown-tint: #f5ece8;
+  --pop-brown-soft: #e5d0c5;
+  --pop-brown-shade: #7b4930;
+  --pop-brown-deep: #643d29;
+  --pop-brown-tone: #9a7662;
+
+  /* temperature: the same greys leaning warm (towards yellow) and cool (towards blue) */
+  --grey-warm: #f1ede6;
+  --grey-cool: #eaedf0;
+  --ink-warm: #14110d;
+  --ink-cool: #0c0f14;
+
+  /* how a piece fits, said quietly: a tint behind, the deep colour for the word and its icon */
+  --fits-bg: var(--pop-green-tint);
+  --fits-ink: var(--pop-green-deep);
+  --tight-bg: var(--pop-yellow-soft);
+  --tight-ink: var(--pop-yellow-deep);
+  --blocked-bg: var(--pop-tomato-tint);
+  --blocked-ink: var(--pop-tomato-deep);
+
   /* shape and space */
   --radius-xs: 8px;
   --radius-sm: 16px;
