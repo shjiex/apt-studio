@@ -2643,3 +2643,44 @@ a.btn {
 .feng__item[open] > p {
   animation: rise-in var(--calm) var(--ease-out);
 }
+
+/* ---------- glass panels ----------
+   The panels that open over the room (lighting, floor and walls, the room score)
+   are the same glass as the small controls. Grey text is not allowed on glass (see
+   the glass note above), so inside a glass panel the "muted" colour is switched to
+   ink: every rule in here that asks for var(--ink-muted) gets ink. The blocks
+   inside a panel are a lighter, milkier layer, so the panel reads as two depths. */
+.feng__card {
+  background: var(--glass-fill);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  box-shadow: var(--glass-edge);
+  --ink-muted: var(--ink);
+}
+
+.feng__card .light__fixed,
+.feng__card .feng__first,
+.feng__card .light__fact,
+.feng__card .surface__note {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+/* a dialog stays solid white, but the app behind it blurs, as if seen through frosted glass */
+.scrim {
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  backdrop-filter: blur(14px) saturate(1.2);
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .feng__card .light__fixed,
+  .feng__card .feng__first,
+  .feng__card .light__fact,
+  .feng__card .surface__note {
+    background: var(--ground);
+  }
+
+  .scrim {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
