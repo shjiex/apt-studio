@@ -21,7 +21,21 @@ const PATHS = {
   pin: 'M9 4h6l-1 6 3 3H7l3-3zM12 13v7',
   user: 'M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM4.5 20a7.5 7.5 0 0 1 15 0',
   link: 'M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1 1M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1',
+  open: 'M8 16L16 8M9 8h7v7',
+  bulb: 'M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5c.7.7 1 1.5 1 2.5h6c0-1 .3-1.8 1-2.5A6 6 0 0 0 12 3z',
+  compass: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18zM15.5 8.5l-2 5-5 2 2-5z',
   logout: 'M15 12H4m0 0l4-4m-4 4l4 4M11 5h8v14h-8',
+  eye: 'M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
+  layers: 'M12 4l9 5-9 5-9-5zM3 14l9 5 9-5',
+  search: 'M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14zM16.5 16.5L20 20',
+  // the home and one icon per kind of room (see lib/rooms.js)
+  home: 'M4 11l8-7 8 7M6 10v10h12V10M10 20v-6h4v6',
+  bed: 'M3 6v13M3 15h18v4M7 15v-4h10a4 4 0 0 1 4 4',
+  sofa: 'M6 11V8a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v3M3 13a2 2 0 0 1 4 0v2h10v-2a2 2 0 0 1 4 0v5H3zM6 18v2M18 18v2',
+  kitchen: 'M7 3v18M4 3v5a3 3 0 0 0 6 0V3M17 21v-8M17 13c-2-2-2-8 0-10v10',
+  dining: 'M4 10h16M12 10v9M8 19h8M2 6v13M22 6v13',
+  desk: 'M3 8h18M5 8v11M19 8v11M13 8v6h6',
+  bath: 'M4 12h16v2a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5zM6 12V6a2 2 0 0 1 4 0M8 19l-1 2M16 19l1 2',
 };
 
 function Icon({ name, size = 18 }) {

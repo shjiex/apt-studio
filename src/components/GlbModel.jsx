@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import * as THREE from 'three';
 import { loadModel } from '../lib/models.js';
+import { asset } from '../lib/paths.js';
 
 const MUTED = new THREE.Color('#D8D7D2');
 
@@ -13,7 +14,7 @@ function GlbModel({ url, size, muted, onReady, onFail }) {
   useEffect(() => {
     let isCurrent = true;
 
-    loadModel(url)
+    loadModel(asset(url))
       .then((scene) => {
         if (!isCurrent) return;
 

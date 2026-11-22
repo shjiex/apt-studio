@@ -1,4 +1,5 @@
 import { CATEGORY_COLORS } from '../data/catalog.js';
+import { asset } from '../lib/paths.js';
 
 // One piece of furniture in the strip. Pressing it adds one to the room.
 // A small badge shows how many of it are in the room.
@@ -11,8 +12,9 @@ function ElementTile({ item, count, onAdd }) {
       onClick={() => onAdd(item.type)}
     >
       <span className="tile__face" style={{ background: CATEGORY_COLORS[item.category] }}>
-        <img src={item.image} alt="" />
+        <img src={asset(item.image)} alt="" />
         {count > 0 && <span className="tile__check">{count}</span>}
+        {item.link && <span className="tile__shop">Shop</span>}
       </span>
       <span className="tile__label">{item.name}</span>
     </button>
