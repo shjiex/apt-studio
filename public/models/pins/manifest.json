@@ -1,0 +1,186 @@
+[
+ {
+  "id": "mood-1",
+  "name": "couch",
+  "type": "sofa",
+  "size": {
+   "w": 2.267,
+   "d": 0.84,
+   "h": 0.8
+  },
+  "model": "mood-1.glb",
+  "backend": "generated",
+  "ready_for_3d": false,
+  "source": {
+   "image": "mood-1.jpg",
+   "link": null,
+   "box": [
+    0.3643,
+    0.4979,
+    0.6554,
+    0.7854
+   ]
+  },
+  "colors": [
+   "#02233f",
+   "#043875",
+   "#064f8f",
+   "#2870a6"
+  ],
+  "bytes": 1003508,
+  "thumb": "mood-1.png"
+ },
+ {
+  "id": "mood-2",
+  "name": "bureau",
+  "type": "shelf",
+  "size": {
+   "w": 2.2,
+   "d": 0.5,
+   "h": 0.666
+  },
+  "model": "mood-2.glb",
+  "backend": "photo-box (quad)",
+  "ready_for_3d": true,
+  "source": {
+   "image": "mood-2.jpg",
+   "link": null,
+   "box": [
+    0.3248,
+    0.6671,
+    0.5926,
+    0.8225
+   ]
+  },
+  "colors": [
+   "#341505",
+   "#51220a"
+  ],
+  "bytes": 142548,
+  "thumb": "mood-2.png"
+ },
+ {
+  "id": "mood-3",
+  "name": "couch",
+  "type": "sofa",
+  "size": {
+   "w": 2.0,
+   "d": 0.9,
+   "h": 0.8
+  },
+  "model": "mood-3.glb",
+  "backend": "template",
+  "ready_for_3d": false,
+  "source": {
+   "image": "mood-3.jpg",
+   "link": null,
+   "box": [
+    0.0,
+    0.4913,
+    0.3326,
+    0.9975
+   ]
+  },
+  "colors": [
+   "#9ca8a3",
+   "#b6c1c2",
+   "#7e8c85",
+   "#c3d2dc"
+  ],
+  "bytes": 255980,
+  "thumb": "mood-3.png"
+ },
+ {
+  "id": "mood-4",
+  "name": "couch",
+  "type": "sofa",
+  "size": {
+   "w": 2.0,
+   "d": 0.9,
+   "h": 0.8
+  },
+  "model": "mood-4.glb",
+  "backend": "template",
+  "ready_for_3d": false,
+  "source": {
+   "image": "mood-4.jpg",
+   "link": null,
+   "box": [
+    0.0495,
+    0.6247,
+    0.8056,
+    0.9685
+   ]
+  },
+  "colors": [
+   "#01051b",
+   "#02162c",
+   "#01020d",
+   "#0d2d46"
+  ],
+  "bytes": 253372,
+  "thumb": "mood-4.png"
+ },
+ {
+  "id": "mood-5",
+  "name": "couch",
+  "type": "sofa",
+  "size": {
+   "w": 2.0,
+   "d": 0.9,
+   "h": 0.8
+  },
+  "model": "mood-5.glb",
+  "backend": "template",
+  "ready_for_3d": false,
+  "source": {
+   "image": "mood-5.jpg",
+   "link": null,
+   "box": [
+    0.0128,
+    0.2323,
+    0.9782,
+    0.7185
+   ]
+  },
+  "colors": [
+   "#0e0b0d",
+   "#28232a",
+   "#658090",
+   "#48545f"
+  ],
+  "bytes": 256092,
+  "thumb": "mood-5.png"
+ },
+ {
+  "id": "mood-6",
+  "name": "cabinet",
+  "type": "shelf",
+  "size": {
+   "w": 1.008,
+   "d": 0.45,
+   "h": 0.9
+  },
+  "model": "mood-6.glb",
+  "backend": "photo-box (quad)",
+  "ready_for_3d": true,
+  "source": {
+   "image": "mood-6.jpg",
+   "link": null,
+   "box": [
+    0.4125,
+    0.509,
+    0.5268,
+    0.6826
+   ]
+  },
+  "colors": [
+   "#b7a38c",
+   "#d7cec2",
+   "#c4b4a1",
+   "#a1876c"
+  ],
+  "bytes": 47624,
+  "thumb": "mood-6.png"
+ }
+]
