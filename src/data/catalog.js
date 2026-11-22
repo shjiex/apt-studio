@@ -20,6 +20,12 @@ export const CATALOG = [
   { type: 'plant', name: 'Plant', category: 'plants', size: { w: 0.4, d: 0.4, h: 1.0 }, image: '/furniture/plant.png', model: '/models/catalog/plant.glb' },
   { type: 'rug', name: 'Rug', category: 'decor', size: { w: 2.0, d: 1.3, h: 0.02 }, image: '/furniture/rug.png', model: '/models/catalog/rug.glb' },
   { type: 'sofa', name: 'Sofa', category: 'seating', size: { w: 1.8, d: 0.85, h: 0.8 }, image: '/furniture/sofa.png', model: '/models/catalog/sofa.glb' },
+  { type: 'armchair', name: 'Armchair', category: 'seating', size: { w: 0.82, d: 0.83, h: 0.86 }, image: '/furniture/armchair.png', model: '/models/catalog/armchair.glb' },
+  { type: 'nightstand', name: 'Nightstand', category: 'storage', size: { w: 0.45, d: 0.43, h: 0.55 }, image: '/furniture/nightstand.png', model: '/models/catalog/nightstand.glb' },
+  { type: 'dresser', name: 'Dresser', category: 'storage', size: { w: 1.2, d: 0.48, h: 0.8 }, image: '/furniture/dresser.png', model: '/models/catalog/dresser.glb' },
+  { type: 'bookcase', name: 'Low bookcase', category: 'storage', size: { w: 1.0, d: 0.32, h: 0.9 }, image: '/furniture/bookcase.png', model: '/models/catalog/bookcase.glb' },
+  { type: 'coffee_table', name: 'Coffee table', category: 'desks', size: { w: 1.0, d: 0.55, h: 0.4 }, image: '/furniture/coffee_table.png', model: '/models/catalog/coffee_table.glb' },
+  { type: 'dining_table', name: 'Dining table', category: 'desks', size: { w: 1.4, d: 0.8, h: 0.75 }, image: '/furniture/dining_table.png', model: '/models/catalog/dining_table.glb' },
 ];
 
 // Which tile colour each kind of furniture uses.
@@ -52,6 +58,7 @@ export function setPinItems(manifest) {
       model: `/models/pins/${entry.model}`,
       pinId: entry.id,
       box: entry.source.box, // where the object is in the image: [left, top, right, bottom] from 0 to 1
+      outline: entry.source.outline, // the object's shape in the image, as corner points from 0 to 1
       link: entry.source.link, // the page the Pin came from, for a later shop list
       backend: entry.backend,
     });
