@@ -3,6 +3,10 @@
 
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
+// Demo build only: the demo's frame may not let scripts fetch the pictures packed inside a
+// model. Without createImageBitmap the loader uses plain <img> elements, which are allowed.
+if (import.meta.env.VITE_DEMO) window.createImageBitmap = undefined;
+
 const loader = new GLTFLoader();
 const loaded = new Map(); // url -> Promise of the model
 
