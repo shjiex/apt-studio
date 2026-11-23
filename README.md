@@ -411,6 +411,27 @@ project continues.
   browser before and after. Lowest reading 5.34 to 1 (glass groups over black). The toast reads
   11.39 to 1 over white and 19.57 to 1 over black, the same as before.
 
+### The Realistic picture gets ready before you switch it on (22 Nov, 8:45 pm)
+
+- **What took the time.** Timed in a headless browser with software graphics: after the click,
+  reading the room took 0.16 s and preparing the tracer's program on the graphics card took about
+  3.5 s, the biggest single wait. The rest was the normal picture's own frames, which are slow
+  only in software graphics.
+- **What changed.** `PathTraced.jsx` is now mounted the whole time you are in the inside view.
+  One second after you step inside, it reads the room once and has the graphics card prepare the
+  program in the background. Switching Realistic on then reads the room afresh (a fraction of a
+  second, so models and pictures that finished loading are included) and starts tracing at once.
+  The drawing loop moved into a small `TracedPicture` part that is there only while Realistic is on.
+- **When it does not apply.** Preparing in the background needs the `KHR_parallel_shader_compile`
+  feature, which Chrome has. Without it the app waits for the click as before, since preparing
+  would freeze the page while you look around. `?prepare` in the address forces it for testing.
+- **Checked.** With `?prepare` the first traced frame came 4.3 s after the click in software
+  graphics (12.0 s before), and all of that was normal frames before the switch. The inside view
+  before the click is pixel for pixel the same. After 16 passes the picture matches the old way
+  (mean 168.9 against 169.6, half the areas lighter and half darker). Switching off, changing the
+  room, switching on, and leaving and coming back with Realistic on all work. Not yet seen on a
+  real graphics card.
+
 ## Components
 
 | Component | What it does |

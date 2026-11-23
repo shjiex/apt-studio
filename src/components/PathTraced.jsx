@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useLayoutEffect, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass.js';
@@ -30,34 +30,41 @@ const MOST_PIXELS = 1200000;
 // For testing on a slow machine: ?trace=0.2 in the address traces a picture a fifth the size.
 const TEST_SCALE = Number(new URLSearchParams(window.location.search).get('trace')) || 0;
 
+// For testing where the browser cannot prepare a program in the background (software
+// graphics in a test browser): ?prepare in the address gets the tracer ready anyway.
+const TEST_PREPARE = new URLSearchParams(window.location.search).has('prepare');
+
 // How bright the sky is, in the picture's units, for a sun strength from 0 to 1.
 function skyBrightness(daylight, strength) {
   return daylight ? (1.2 + 1.6 * strength) * DAYLIGHT : 0.03;
 }
 
 // It needs a closed room, which is why it is offered only in the inside view.
+//
+// Room3D keeps this part mounted the whole time you are in the inside view, and
+// `isOn` says whether Realistic is switched on. While it is off, the tracer gets
+// ready in the background (see getReady below), so switching it on can start at
+// once. The drawing itself is done by TracedPicture, further down, only while it is on.
+//
 // `signature` is a text that changes whenever the room's contents change.
 // `onPasses` is told how many passes have been averaged so far.
 // `brightness` is the person's own adjustment on top of the exposure: 1 leaves it as it is.
 // `onShown` is told true once the first traced frame is on screen (and false when this
 // is switched off), so Room3D knows how long to keep the normal picture going.
-function PathTraced({ room, signature, daylight, strength, brightness, onPasses, onShown }) {
+function PathTraced({ isOn, room, signature, daylight, strength, brightness, onPasses, onShown }) {
   const { gl, scene, camera } = useThree();
   const tracer = useRef(null);
   const sky = useRef(null); // the simple blue sky the traced room is lit by
-  const isBuilt = useRef(false);
-  const isFirstBuild = useRef(true);
-  const hasShown = useRef(false); // has a traced frame been drawn yet
-  const frameTime = useRef(0.03); // seconds one frame takes, smoothed
-  const tileCount = useRef(2); // each pass is drawn in tileCount x tileCount pieces
-  const bufferSize = useRef(new THREE.Vector2());
+  const isBuilt = useRef(false); // does the tracer have the room as it is now?
+  const builtSignature = useRef(null); // the room's signature when the tracer last read it (null: never)
+  const wasOn = useRef(isOn); // was Realistic on the last time the room or the switch changed?
+  const readyCheck = useRef(null); // the timer that watches the program being prepared
   const meshCount = useRef(0);
-  const lastView = useRef(new THREE.Matrix4());
-  const lastFov = useRef(0);
-  const lastPasses = useRef(-1);
 
   // Make the tracer once. It draws into the same canvas as the normal view.
-  useEffect(() => {
+  // A layout effect, like the one further down that hands it the room, and listed
+  // first, so the tracer is made before that one runs.
+  useLayoutEffect(() => {
     const made = new WebGLPathTracer(gl);
     made.bounces = 5; // how many times light may bounce before it is dropped
     made.filterGlossyFactor = 0.5; // calms the bright speckles shiny surfaces cause
@@ -107,9 +114,8 @@ function PathTraced({ room, signature, daylight, strength, brightness, onPasses,
     };
 
     tracer.current = made;
-    performance.mark('apt-realistic-switched-on');
     return () => {
-      onShown(false); // the normal picture takes over again
+      clearInterval(readyCheck.current);
       sky.current.dispose();
       made.dispose();
       smooth.material.dispose();
@@ -129,7 +135,6 @@ function PathTraced({ room, signature, daylight, strength, brightness, onPasses,
   function build() {
     const made = tracer.current;
     if (!made) return;
-    isFirstBuild.current = false;
     // performance.mark leaves a named time stamp that the browser's Performance
     // panel shows, so the start-up can be timed: switched on, room read, first frame.
     performance.mark('apt-realistic-reading-room');
@@ -249,18 +254,102 @@ function PathTraced({ room, signature, daylight, strength, brightness, onPasses,
     suns.forEach(([light, intensity]) => (light.intensity = intensity));
     meshCount.current = count;
     isBuilt.current = true;
+    builtSignature.current = signature;
     performance.mark('apt-realistic-room-read');
   }
 
-  // Anything in the room changed: wait a moment (a drag changes it many times a
-  // second), then start the picture again. The very first time nothing is moving,
-  // so there is nothing to wait for.
-  useEffect(() => {
-    isBuilt.current = false;
-    const timer = setTimeout(build, isFirstBuild.current ? 0 : 500); // 500: longer than a new piece takes to settle into place
-    return () => clearTimeout(timer);
+  // Have the graphics card prepare the tracer's program now, so it is ready before
+  // Realistic is switched on. The program is large, and preparing it is most of the
+  // wait after the click. Asking the tracer for one sample, without drawing it on the
+  // screen, is what starts the preparing. While the program is being prepared the
+  // tracer traces nothing, so this costs nothing else.
+  function getReady() {
+    const made = tracer.current;
+    if (!made) return;
+    build();
+    made.renderToCanvas = false; // trace into the tracer's own picture, not the screen
+    made.renderSample();
+    made.renderToCanvas = true;
+    // Leave a time stamp once the program is ready, for the browser's Performance panel.
+    clearInterval(readyCheck.current);
+    readyCheck.current = setInterval(() => {
+      if (made.isCompiling) return;
+      clearInterval(readyCheck.current);
+      performance.mark('apt-realistic-ready');
+    }, 200);
+  }
+
+  // Runs when the room changes and when Realistic is switched on or off. It is a
+  // layout effect so it runs before the next frame is drawn: a frame drawn in
+  // between would still show the tracer's old copy of the room.
+  useLayoutEffect(() => {
+    const switchedOn = isOn && !wasOn.current;
+    wasOn.current = isOn;
+
+    if (isOn) {
+      // Nothing changed since the tracer last read the room: nothing to do.
+      if (!switchedOn && builtSignature.current === signature) return undefined;
+      isBuilt.current = false;
+      // Hand the tracer the room. Right after switching on it reads the room afresh,
+      // even if it read it while getting ready, because pictures and models may have
+      // finished loading since; that takes a fraction of a second. When the room
+      // changes while it is on, wait a moment first (a drag changes it many times a
+      // second). Right after switching on, or the very first time, nothing is moving.
+      const isFirst = builtSignature.current === null;
+      const timer = setTimeout(build, switchedOn || isFirst ? 0 : 500); // 500: longer than a new piece takes to settle into place
+      return () => clearTimeout(timer);
+    }
+
+    // Realistic is off. The first time, get the tracer ready in the background, one
+    // second after you step inside so the step itself stays smooth. Later changes
+    // wait until it is switched on, so moving furniture costs nothing extra while
+    // Realistic is off. This needs a browser that can prepare a program in the
+    // background (most can). Without that, preparing it would freeze the page for a
+    // few seconds while you look around, which is worse than waiting after the click.
+    const canPrepareQuietly = gl.extensions.has('KHR_parallel_shader_compile') || TEST_PREPARE;
+    if (builtSignature.current === null && canPrepareQuietly) {
+      const timer = setTimeout(getReady, 1000);
+      return () => clearTimeout(timer);
+    }
+    return undefined;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [signature]);
+  }, [signature, isOn]);
+
+  if (!isOn) return null;
+  return (
+    <TracedPicture
+      tracer={tracer}
+      isBuilt={isBuilt}
+      meshCount={meshCount}
+      build={build}
+      exposure={exposure}
+      onPasses={onPasses}
+      onShown={onShown}
+    />
+  );
+}
+
+// The drawing part of the realistic picture. It is there only while Realistic is
+// on, because while it is there it takes over drawing the whole stage.
+// The tracer and what it knows about the room come from PathTraced above.
+function TracedPicture({ tracer, isBuilt, meshCount, build, exposure, onPasses, onShown }) {
+  const { gl, scene, camera } = useThree();
+  const hasShown = useRef(false); // has a traced frame been drawn yet
+  const frameTime = useRef(0.03); // seconds one frame takes, smoothed
+  const tileCount = useRef(2); // each pass is drawn in tileCount x tileCount pieces
+  const bufferSize = useRef(new THREE.Vector2());
+  const lastView = useRef(new THREE.Matrix4());
+  const lastFov = useRef(0);
+  const lastPasses = useRef(-1);
+
+  // Switched on: leave a time stamp. Switched off: the normal picture takes over again.
+  // A layout effect runs as soon as this part is on the page, before the next frame
+  // is drawn, so the time stamp is not held up by a slow first frame.
+  useLayoutEffect(() => {
+    performance.mark('apt-realistic-switched-on');
+    return () => onShown(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // This runs every frame. A number above 0 tells React Three Fiber that the
   // drawing is done by hand; 2 puts it after Room3D's own extra pass (which is 1),

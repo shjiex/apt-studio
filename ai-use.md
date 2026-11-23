@@ -256,6 +256,12 @@ My direction: "set up Firebase and Pinterest integration, I'll declunk the UI. A
 
 My direction: "the liquid glass should avoid shadows beyond its borders, or minimize it, because it's too much now", and "continue where I left off". Closing the other panels when one opens was the assistant's fix for panels overlapping during the demo.
 
+### The Realistic picture gets ready before you switch it on (22 Nov, 8:45 pm), AI-generated
+
+- `src/components/PathTraced.jsx` (split into `PathTraced`, which gets the tracer ready, and `TracedPicture`, which draws while Realistic is on; `getReady`; `?prepare` for testing) and the mount in `src/components/Room3D.jsx`.
+
+My direction: "adjust the realistic version so it doesn't take as long to load" (from earlier) and "Keep working on it nonstop autonomously". Preparing the program while you look around, and reading the room again on the click so late-loading models are included, were the assistant's choices after timing each step.
+
 ## Chat transcript
 
 TODO: paste the share link or exported transcript of the Claude conversation here.

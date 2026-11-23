@@ -905,9 +905,11 @@ function Scene({ room, pieces, selectedId, view, showGrid, zoom, lighting, surfa
   return (
     <>
       <CameraRig view={view} room={room} zoom={zoom} orbit={orbit} look={look} stand={stand} />
-      {/* The realistic picture takes over the drawing while it is on (inside view only). */}
-      {isTracing && PathTraced && (
+      {/* The realistic picture takes over the drawing while it is on (inside view only).
+          It is there the whole time you are inside, so it can get ready before you switch it on. */}
+      {view === 'inside' && PathTraced && (
         <PathTraced
+          isOn={isTracing}
           room={room}
           signature={signature}
           daylight={sun.up}
