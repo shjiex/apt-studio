@@ -98,9 +98,15 @@ function MoodboardPanel({ moodboard, pickedIds, pinModels, user, onTogglePick, o
   // The card's height is only known once it is drawn. If it would run off the bottom of
   // the window, move it up. useLayoutEffect runs before the browser paints, so the card
   // is never seen in the wrong place.
+  // On a phone the tab bar lies over the bottom of the window, so there the card
+  // stops 8 px above the tab bar. On a wide screen the tab bar is not shown and
+  // has no height.
   useLayoutEffect(() => {
     if (!open || !cardRef.current) return;
-    const lowestTop = Math.max(12, window.innerHeight - 12 - cardRef.current.offsetHeight);
+    const tabBar = document.querySelector('.tab-bar');
+    const isTabBarShown = tabBar !== null && tabBar.offsetHeight > 0;
+    const floor = isTabBarShown ? tabBar.getBoundingClientRect().top - 8 : window.innerHeight - 12;
+    const lowestTop = Math.max(12, floor - cardRef.current.offsetHeight);
     if (open.top > lowestTop) setOpen({ ...open, top: lowestTop });
   }, [open]);
 
