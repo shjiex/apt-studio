@@ -299,6 +299,12 @@ My direction: "Keep working on it nonstop autonomously". The assistant found the
 
 My direction: "Keep working on it nonstop autonomously". Running axe, and which findings to fix, were the assistant's choices.
 
+### Glass that looks like the Figma glass (22 Nov, 10:10 pm), AI-generated
+
+- `src/styles/app.css`: `--glass-filter` and `--glass-edge` in the glass block.
+
+My direction: "it doesn't look like the liquid glass loads right, it should look like" the Stage control in Figma (node 216:4668). The filter values were the assistant's, picked by matching the Figma render's grey and measuring AA over black and white.
+
 ## Chat transcript
 
 TODO: paste the share link or exported transcript of the Claude conversation here.

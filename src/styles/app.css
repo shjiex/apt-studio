@@ -2325,13 +2325,19 @@ a.btn {
 
 :root {
   --glass-fill: rgba(255, 255, 255, 0.3);
-  --glass-filter: blur(28px) saturate(1.4) contrast(0.55) brightness(1.45);
-  /* a bright rim, a highlight along the top edge and a soft shade along the bottom, all
-     inside the glass. Outside it there is only a faint 1 px hairline, so glass still
-     shows its edge on a white page without a shadow spreading past its border. */
+  /* Matches the glass in Figma (Stage control, node 216:4668): a 14 px blur under 30%
+     white, so on the light stage the glass reads as a soft grey pill, a little darker
+     than what is behind it. contrast(0.45) pulls everything behind the glass toward
+     a middle grey: light areas come down a little, dark areas come up enough for ink
+     text to pass AA even over black. saturate(1.8) gives back the colour that
+     contrast takes out, so a room seen through the glass keeps its colours. */
+  --glass-filter: blur(14px) contrast(0.45) brightness(1.05) saturate(1.8);
+  /* a bright rim, a highlight along the top edge and a soft shade along the bottom,
+     inside the glass, and a soft shadow under it, as in Figma but lighter (0.14 in
+     place of 0.2), since the shadow is meant to stay quiet. */
   --glass-edge:
     inset 0 0 0 1px rgba(255, 255, 255, 0.8), inset 0 2px 2px rgba(255, 255, 255, 0.95),
-    inset 0 -3px 6px rgba(15, 15, 14, 0.16), 0 0 0 1px rgba(15, 15, 14, 0.08);
+    inset 0 -3px 6px rgba(15, 15, 13, 0.16), 0 8px 24px rgba(15, 15, 13, 0.14);
   --glass-hover: rgba(255, 255, 255, 0.45);
   --glass-chosen: rgba(15, 15, 14, 0.82);
 }

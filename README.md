@@ -514,6 +514,20 @@ project continues.
   The room dialog puts `role="dialog"` on a form, which axe rates minor. No contrast problems
   were reported.
 
+### Glass that looks like the Figma glass (22 Nov, 10:10 pm)
+
+- **What was wrong.** On the light stage the app's glass came out pure white, because its filter
+  lifted everything behind it (`brightness(1.45)`) until light areas blew out. In Figma (the
+  Stage control, node 216:4668) the same glass is a soft grey pill a little darker than the stage,
+  with a white rim and a soft shadow under it.
+- **What changed.** `--glass-filter` is now `blur(14px) contrast(0.45) brightness(1.05)
+  saturate(1.8)`: the 14 px blur Figma uses, a pull toward middle grey that keeps ink text above
+  AA over black, and saturation so the room's colours still show through. `--glass-edge` has
+  Figma's soft shadow back, lighter (0.14 in place of 0.2). Every glass surface uses these two
+  variables, so the controls, the view switch, the room tabs and the panels all changed together.
+- **Measured.** Over black, ink text on glass reads 4.86 to 1 at the lowest (AA needs 4.5). Over
+  white it reads 12.94 to 1, and the glass there is grey 212, against 215 in the Figma render.
+
 ## Components
 
 | Component | What it does |
