@@ -397,6 +397,12 @@ My direction: "Keep working on it until 7:50 am. Mostly the Pinterest access, 3D
 
 My direction: "Keep working on it until 7:50 am. Mostly the Pinterest access, 3D environment, Firebase and login". The assistant looked at the test link on my Mac at two window sizes and at the tools-at-the-side layout in its own test browser, and fixed what overlapped. The choices that are its own: 72 px as the height kept free for the buttons, 368 px for the tools section, and 460 px as the stage width where the middle buttons move up.
 
+### Turning the room in 3D cannot move a door, and nothing floats (23 Nov, 4:25 am), AI-generated
+
+- Changed: `Room3D.jsx`.
+
+My direction: "the door is glitchy" and "Keep working on it until 7:50 am. Mostly the Pinterest access, 3D environment, Firebase and login". The assistant turned the room on my Mac, moved the door by accident, put it back with undo, and then changed the code so it cannot happen. The choice that is its own: windows and doors are dragged on the plan only. If I want them draggable in 3D again, the two lines are in `grip()` in `Room3D.jsx`.
+
 ## Chat transcript
 
 TODO: paste the share link or exported transcript of the Claude conversation here.

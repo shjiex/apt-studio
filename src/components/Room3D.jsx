@@ -148,7 +148,7 @@ function CameraRig({ view, room, zoom, orbit, look, stand }) {
     );
     // From an angle, fit a ball that wraps the whole room.
     const radius = 0.5 * Math.hypot(room.width, room.length, room.height);
-    const angledDistance = (radius / Math.sin(Math.min(verticalFov, horizontalFov) / 2)) * 0.9;
+    const angledDistance = (radius / Math.sin(Math.min(verticalFov, horizontalFov) / 2)) * 0.96;
     const wanted = THREE.MathUtils.lerp(topDistance, angledDistance, t) / zoomNow.current;
     // Ease towards it, so the picture glides when the room changes size.
     distanceNow.current = distanceNow.current === null ? wanted : THREE.MathUtils.damp(distanceNow.current, wanted, 10, delta);
@@ -354,7 +354,11 @@ function Wall({ name, room, mode, inside, plan, daylight, wall, wallPhoto, onGra
         <mesh
           userData={{ helper: true }}
           position={[0, 0.3, -WALL / 2]}
+          // Windows and doors are dragged on the plan only. In 3D a drag that happens to
+          // start on one turns the room like any other drag, so turning the view can
+          // never move a door by accident.
           onPointerDown={(event) => {
+            if (!plan) return;
             event.stopPropagation();
             onGrab(list, opening.id);
           }}
@@ -363,21 +367,26 @@ function Wall({ name, room, mode, inside, plan, daylight, wall, wallPhoto, onGra
             event.stopPropagation();
             onEdit(list);
           }}
-          onPointerOver={() => (document.body.style.cursor = 'grab')}
+          onPointerOver={() => (document.body.style.cursor = plan ? 'grab' : '')}
           onPointerOut={() => (document.body.style.cursor = '')}
         >
           <boxGeometry args={[opening.half * 2, 0.6, WALL + 0.2]} />
           <meshBasicMaterial transparent opacity={0} depthWrite={false} />
         </mesh>
-        {/* the handle lies flat, just above the top of the wall, so the plan's camera sees it from above */}
-        <mesh userData={{ helper: true }} rotation={[-Math.PI / 2, 0, 0]} position={[0, room.height + 0.05, -WALL / 2]}>
-          <circleGeometry args={[0.085, 28]} />
-          <meshBasicMaterial color="#FFFFFF" toneMapped={false} />
-        </mesh>
-        <mesh userData={{ helper: true }} rotation={[-Math.PI / 2, 0, 0]} position={[0, room.height + 0.06, -WALL / 2]}>
-          <circleGeometry args={[0.055, 28]} />
-          <meshBasicMaterial color="#111111" toneMapped={false} />
-        </mesh>
+        {/* The handle is shown on the plan only, where it can be dragged. It lies flat,
+            just above the top of the wall, so the plan's camera sees it from above. */}
+        {plan && (
+          <>
+            <mesh userData={{ helper: true }} rotation={[-Math.PI / 2, 0, 0]} position={[0, room.height + 0.05, -WALL / 2]}>
+              <circleGeometry args={[0.085, 28]} />
+              <meshBasicMaterial color="#FFFFFF" toneMapped={false} />
+            </mesh>
+            <mesh userData={{ helper: true }} rotation={[-Math.PI / 2, 0, 0]} position={[0, room.height + 0.06, -WALL / 2]}>
+              <circleGeometry args={[0.055, 28]} />
+              <meshBasicMaterial color="#111111" toneMapped={false} />
+            </mesh>
+          </>
+        )}
       </group>
     );
   }
@@ -431,11 +440,15 @@ function Wall({ name, room, mode, inside, plan, daylight, wall, wallPhoto, onGra
         return (
           <group key={opening.id} position={[opening.u, 0, 0]}>
             {!inside && grip('windows', opening)}
-            {/* the sill, which also shows in the plan */}
-            <mesh position={[0, opening.bottom - 0.02, 0.05]}>
-              <boxGeometry args={[width + 0.1, 0.04, 0.1]} />
-              <meshStandardMaterial color={TRIM_COLOR} />
-            </mesh>
+            {/* The sill, which also shows in the plan. In 3D a wall on the camera's side is
+                only a low rim, and a sill left at window height would hang in mid-air over
+                it, so there it is left out (the pale mark on the rim shows the window). */}
+            {(plan || mode === 'real') && (
+              <mesh position={[0, opening.bottom - 0.02, 0.05]}>
+                <boxGeometry args={[width + 0.1, 0.04, 0.1]} />
+                <meshStandardMaterial color={TRIM_COLOR} />
+              </mesh>
+            )}
             {/* sky light on the floor in front of the window: a faint soft patch. The sun's own patch comes from the sun light. */}
             <mesh userData={{ helper: true }} visible={daylight} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.008, 0.95]} renderOrder={1}>
               <planeGeometry args={[width * 1.9, 2.4]} />

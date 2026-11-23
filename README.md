@@ -820,6 +820,20 @@ project continues.
   items without the lines under them. The Liquid glass frame in v5 has a new paragraph with the
   values the build uses since 3 am. Nothing in v3, v4 or the frames I drew myself was touched.
 
+### Turning the room in 3D cannot move a door, and nothing floats (23 Nov, 4:25 am)
+
+- **Found on my Mac.** While turning the bedroom in 3D in the test link, a drag that started
+  on the foot of the door moved the door to another wall. Seen from the window side, the
+  window sill and the round drag handles hung in mid-air above the lowered wall.
+- **Fixed in `Room3D.jsx`.** Windows and doors are dragged on the plan only. In 3D a drag that
+  starts on one turns the room like any other drag, and a double click still opens Floor and
+  walls. The round handles are drawn on the plan only. The sill is left out on a lowered wall,
+  where the pale mark on the rim already shows the window.
+- **A little more air in 3D.** The room is fitted slightly smaller (0.96 in place of 0.9 of the
+  wrapping ball), so the top corner of a wall no longer touches the edge of the stage.
+- **Checked.** Dragging the door along its wall on the plan still works in the test browser.
+  From the window side in 3D nothing floats.
+
 ## Components
 
 | Component | What it does |
