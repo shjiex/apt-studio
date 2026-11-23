@@ -22,7 +22,7 @@ const STARTER_PIECES = [{ id: 'bed-1', type: 'bed', x: -1.0, z: -0.45, rotation:
 
 // The home starts with one room. Every room keeps its own size, pieces, lighting, floor and walls.
 const STARTER_HOME = {
-  name: 'Apt 4B',
+  name: 'My home',
   activeRoomId: 'room-1',
   rooms: [
     { id: 'room-1', name: 'Bedroom', kind: 'bedroom', size: DEFAULT_ROOM, pieces: STARTER_PIECES, lighting: DEFAULT_LIGHTING, surfaces: DEFAULT_SURFACES },

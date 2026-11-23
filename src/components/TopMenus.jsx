@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Button from './Button.jsx';
+import Icon from './Icon.jsx';
 import Segmented from './Segmented.jsx';
 
 // The two round glass buttons at the right of the top bar, each with a small card
@@ -13,7 +14,10 @@ export function PreferencesMenu({ isOpen, onToggle, units, onUnits, layout, onLa
       {isOpen && (
         <div className="feng__card menu-card">
           <div className="light__row">
-            <strong>Measurements</strong>
+            <strong>
+              <Icon name="ruler" size={16} />
+              Measurements
+            </strong>
             <Segmented
               label="Measurements"
               options={[
@@ -25,7 +29,10 @@ export function PreferencesMenu({ isOpen, onToggle, units, onUnits, layout, onLa
             />
           </div>
           <div className="light__row">
-            <strong>Tools</strong>
+            <strong>
+              <Icon name="sidebar" size={16} />
+              Tools
+            </strong>
             <Segmented
               label="Where the tools sit"
               options={[
@@ -36,11 +43,6 @@ export function PreferencesMenu({ isOpen, onToggle, units, onUnits, layout, onLa
               onChange={onLayout}
             />
           </div>
-          <p className="feng__note">
-            {layout === 'side'
-              ? 'Furniture, lighting, and floor and walls share a section to the left of the room.'
-              : 'Furniture sits under the room, and lighting and floor and walls open from the buttons on it.'}
-          </p>
         </div>
       )}
     </div>
@@ -57,12 +59,12 @@ export function SettingsMenu({ isOpen, onToggle, onYourFurniture, onShowTips, on
       {isOpen && (
         <div className="feng__card menu-card download-menu">
           <button type="button" className="download-menu__choice" onClick={onYourFurniture}>
+            <Icon name="image" size={18} />
             <strong>Your furniture</strong>
-            <span>Add the pieces you already own from a photo of your room.</span>
           </button>
           <button type="button" className="download-menu__choice" onClick={onShowTips}>
-            <strong>Show the tips again</strong>
-            <span>A short tour of what each control does.</span>
+            <Icon name="help" size={18} />
+            <strong>Show the tips</strong>
           </button>
           {isAsking ? (
             <div className="download-menu__choice">
@@ -85,8 +87,8 @@ export function SettingsMenu({ isOpen, onToggle, onYourFurniture, onShowTips, on
             </div>
           ) : (
             <button type="button" className="download-menu__choice" onClick={() => setIsAsking(true)}>
+              <Icon name="trash" size={18} />
               <strong>Start over</strong>
-              <span>Clear every room and begin with an empty home.</span>
             </button>
           )}
         </div>

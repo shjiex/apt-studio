@@ -3762,3 +3762,304 @@ a.btn {
     max-width: none;
   }
 }
+
+/* ---------- the login card: the logo, and a cross that takes you back ---------- */
+.auth__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.auth__card {
+  padding: var(--space-6);
+  gap: var(--space-5);
+  border-radius: var(--radius-lg);
+}
+
+/* ================= round of 23 Nov, 3 am ================= */
+
+/* ---------- liquid glass, second pass ---------- */
+/* What changed, and why. The first glass squeezed everything behind it toward a
+   middle grey (contrast 0.45), so it read as a grey film, and it had a bright ring
+   all the way round. Apple describes Liquid Glass as a material that lets what is
+   behind show through and catches light along its edge, and the web write-ups
+   that get closest use a low blur, more saturation, a light fill and one bright
+   edge where the light lands. So:
+     the blur is lower and the squeeze toward grey is much weaker, so the room
+       shows through with its own colours;
+     the fill is a soft top-to-bottom sheen in place of one flat tone;
+     the rim is bright on the top left, faint on the bottom right, like light
+       coming from above, with no full ring.
+   A browser cannot bend what is behind the glass (CSS has no refraction), so this
+   is the look without the lens effect. Ink text still passes AA over black: the
+   numbers are in tests/headless/shoot43.py. */
+:root {
+  --glass-fill: linear-gradient(180deg, rgba(255, 255, 255, 0.54) 0%, rgba(255, 255, 255, 0.34) 100%);
+  --glass-filter: blur(9px) saturate(1.9) brightness(1.15) contrast(0.7);
+  --glass-edge:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.75), inset -1px -1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 0 14px rgba(255, 255, 255, 0.14), 0 1px 2px rgba(15, 15, 13, 0.06), 0 8px 18px -10px rgba(15, 15, 13, 0.18);
+  --glass-hover: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.5) 100%);
+  --glass-fill-page: linear-gradient(180deg, rgba(255, 255, 255, 0.85) 0%, rgba(255, 255, 255, 0.55) 100%);
+}
+
+/* ---------- one way to answer the pointer ---------- */
+/* Hover lightens or darkens the fill and nothing grows. A press settles the
+   control in a little (97%) and eases back, in place of a hard inner shadow. */
+.btn,
+.icon-action,
+.strip-group,
+.view-switch__option,
+.room-tab,
+.home-chip,
+.feng__circle,
+.stage__action,
+.tile,
+.welcome__choice,
+.download-menu__choice,
+.surface__paint,
+.room-kind {
+  transition:
+    transform 180ms var(--ease-out),
+    background-color var(--quick),
+    background var(--quick),
+    color var(--quick),
+    opacity var(--quick);
+}
+
+.btn--glass:hover:not(:disabled),
+.home-chip:hover,
+.feng__circle:hover,
+.stage__action:hover,
+.welcome__choice:hover:not(.is-off) {
+  transform: none;
+}
+
+.btn:active:not(:disabled),
+.icon-action:active,
+.strip-group:active,
+.view-switch__option:active,
+.room-tab:active,
+.home-chip:active,
+.feng__circle:active,
+.stage__action:active,
+.welcome__choice:active:not(.is-off),
+.download-menu__choice:active,
+.surface__paint:active,
+.room-kind:active {
+  transform: scale(0.97);
+  opacity: 0.92;
+}
+
+.tile:active {
+  transform: scale(0.98);
+}
+
+/* ---------- a small round button that is only an icon ---------- */
+/* Used where an action used to be underlined words: remove a window, put a size back. */
+.icon-action {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  color: var(--ink);
+}
+
+.icon-action:hover {
+  background: var(--grey-strong);
+}
+
+.icon-action--danger {
+  color: var(--danger);
+}
+
+/* ---------- words on the three buttons under the room ---------- */
+.stage__tools .btn {
+  padding: 0 var(--space-4);
+  font-size: 14px;
+}
+
+/* when the room is narrow the words go and the buttons are round again */
+@container (max-width: 760px) {
+  .stage__word {
+    display: none;
+  }
+
+  .stage__tools .btn {
+    width: var(--control-md);
+    padding: 0;
+  }
+}
+
+/* ---------- roomier menus and panels ---------- */
+.menu-card {
+  width: 320px;
+  padding: var(--space-5);
+  gap: var(--space-5);
+}
+
+/* in a menu the name sits above its choices, with air between the two */
+.menu-card .light__row {
+  grid-template-columns: 1fr;
+  gap: var(--space-3);
+}
+
+.light__row strong {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.menu-card.download-menu {
+  padding: var(--space-3);
+  gap: var(--space-1);
+}
+
+.menu-card .download-menu__choice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  font-size: 15px;
+}
+
+.piece-panel {
+  gap: var(--space-6);
+  padding: var(--space-5);
+}
+
+.piece-panel__group {
+  gap: var(--space-3);
+}
+
+.piece-panel__actions {
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.measures {
+  gap: var(--space-3);
+}
+
+.measure {
+  gap: 6px;
+  padding: var(--space-3) var(--space-4);
+}
+
+.surface__paints {
+  gap: var(--space-2);
+}
+
+.light__fixed {
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+
+.tools {
+  padding: var(--space-5);
+  gap: var(--space-5);
+}
+
+.feng__card {
+  padding: var(--space-5);
+  gap: var(--space-4);
+}
+
+.dialog {
+  padding: var(--space-6);
+  gap: var(--space-5);
+}
+
+.dialog__links {
+  align-items: center;
+}
+
+.tip {
+  gap: var(--space-2);
+}
+
+/* ---------- the whole tile leans, a little ---------- */
+/* The coloured square leans with the furniture on it, about half as far as
+   before (4 degrees at most). --tilt is set per tile in ElementTile.jsx. */
+.tile__face {
+  transition: transform 320ms var(--flow);
+}
+
+.tile:hover .tile__face {
+  transform: rotate(calc(var(--tilt, 4deg) * 0.55));
+}
+
+.tile:hover .tile__face img {
+  transform: none;
+}
+
+/* ---------- the furniture groups as a glass track ---------- */
+/* On the white card there is nothing behind the glass to show through, so the
+   track is a faint ink tint with the same lit edge as the glass on the room. */
+.strip-groups--glass {
+  background: linear-gradient(180deg, rgba(15, 15, 14, 0.05) 0%, rgba(15, 15, 14, 0.09) 100%);
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.9),
+    inset -1px -1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -6px 10px -8px rgba(15, 15, 13, 0.18),
+    0 1px 2px rgba(15, 15, 13, 0.05);
+}
+
+.strip-groups__thumb {
+  background: linear-gradient(180deg, rgba(40, 40, 38, 0.88) 0%, rgba(15, 15, 14, 0.9) 100%);
+  box-shadow:
+    inset 1px 1px 0 rgba(255, 255, 255, 0.28),
+    0 2px 6px -2px rgba(15, 15, 13, 0.35);
+}
+
+/* ---------- roomier rows of choices ---------- */
+/* The choice rows (Metric or Imperial, which wall, the finish) were 24 px tall with
+   6 px at the sides. They are 32 px tall now, rounder, with more air round each word. */
+.light__choices {
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--radius-pill);
+}
+
+.light__choices .light__choice {
+  height: 32px;
+  padding: 0 14px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.segmented__thumb {
+  top: 3px;
+  bottom: 3px;
+  border-radius: var(--radius-pill);
+}
+
+.light__choice:active {
+  transform: scale(0.97);
+}
+
+/* in a menu the choices share the full width */
+.menu-card .light__choices {
+  display: flex;
+}
+
+.menu-card .light__choices .light__choice {
+  flex: 1;
+  height: 36px;
+}
+
+/* three long names have to fit beside the close button in the tools section */
+.tools .tools__head .light__choices .light__choice,
+.light__fixed .light__choices .light__choice {
+  padding: 0 10px;
+}
+
+/* ---------- the name under a moodboard picture follows the pointer ---------- */
+.pin__name {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}

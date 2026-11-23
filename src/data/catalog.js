@@ -106,13 +106,65 @@ export const TYPE_CATEGORY = {
 const pinItems = [];
 
 // Turn that list into catalog entries and remember them.
+// A plain name for a colour such as '#02233f' ('Navy'). Used to tell apart pieces
+// that would otherwise share one name: four couches become a navy, a grey, a black
+// and a charcoal couch.
+function colourName(hex) {
+  const number = parseInt(hex.slice(1), 16);
+  const r = ((number >> 16) & 255) / 255;
+  const g = ((number >> 8) & 255) / 255;
+  const b = (number & 255) / 255;
+  const most = Math.max(r, g, b);
+  const least = Math.min(r, g, b);
+  const light = (most + least) / 2; // 0 is black, 1 is white
+  const strength = most - least; // 0 is a grey, more is a stronger colour
+  if (light < 0.08) return 'Black';
+  if (strength < 0.12) {
+    if (light < 0.3) return 'Charcoal';
+    return light < 0.75 ? 'Grey' : 'White';
+  }
+  // the hue as an angle round the colour wheel, 0 to 360
+  let hue = 0;
+  if (most === r) hue = ((g - b) / strength) % 6;
+  else if (most === g) hue = (b - r) / strength + 2;
+  else hue = (r - g) / strength + 4;
+  hue = (hue * 60 + 360) % 360;
+  if (hue < 20 || hue >= 340) return light < 0.3 ? 'Maroon' : 'Red';
+  if (hue < 45) return light < 0.4 ? 'Brown' : 'Orange';
+  if (hue < 70) return light < 0.4 ? 'Olive' : 'Yellow';
+  if (hue < 165) return 'Green';
+  if (hue < 195) return 'Teal';
+  if (hue < 260) return light < 0.25 ? 'Navy' : 'Blue';
+  if (hue < 300) return 'Purple';
+  return 'Pink';
+}
+
 export function setPinItems(manifest) {
   pinItems.length = 0;
+  // Names that more than one piece has ("couch"). Those pieces get a colour in front,
+  // so no name is shown twice in the furniture list.
+  const timesUsed = {};
   manifest.forEach((entry) => {
+    timesUsed[entry.name] = (timesUsed[entry.name] || 0) + 1;
+  });
+  const taken = new Set();
+  const nameFor = (entry) => {
+    if (timesUsed[entry.name] < 2) return entry.name;
+    // try the piece's colours in order, and take the first name nobody has yet
+    const tries = (entry.colors || []).map((hex) => `${colourName(hex)} ${entry.name}`);
+    const free = tries.find((name) => !taken.has(name.toLowerCase()));
+    if (free) return free;
+    let count = 2;
+    while (taken.has(`${entry.name} ${count}`)) count += 1;
+    return `${entry.name} ${count}`;
+  };
+  manifest.forEach((entry) => {
+    const name = nameFor(entry);
+    taken.add(name.toLowerCase());
     pinItems.push({
       type: `pin-${entry.id}`,
       baseType: entry.type,
-      name: entry.name.charAt(0).toUpperCase() + entry.name.slice(1),
+      name: name.charAt(0).toUpperCase() + name.slice(1).toLowerCase(),
       category: TYPE_CATEGORY[entry.type],
       size: entry.size,
       image: `/models/pins/${entry.thumb}`,

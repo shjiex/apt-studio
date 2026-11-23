@@ -695,6 +695,46 @@ project continues.
 - **Checked.** The middle of the mark and the middle of the bar are both at 720 px on a
   1440 px wide window.
 
+### Fixes from my 2 am list (23 Nov, 3:15 am)
+
+- **Home name.** New homes are called My home. A saved home still called Apt 4B, the old
+  starting name, is renamed the same way (`completeHome` in `lib/storage.js`).
+- **Pinterest.** The shared test link said it could not reach Pinterest. The cause is the page
+  that hosts the test link: it blocks every request to another site. The same board loaded from
+  an ordinary page in my browser, so the feed and the app's code are fine. The test link now says
+  what is true, and connecting a board works when the app runs from my computer.
+- **Account.** The login card has the logo and a cross that goes back to the room, and Escape
+  does the same. Before, the only way back was the word Apt Studio at the top.
+- **Less text.** Removed the helper lines under Preferences, Settings, the room dialog, the
+  panels and the welcome. The score is called Feng Shui score, without "out of 100" and without
+  the line that named the kind of guideline.
+- **Icons for small actions.** Remove a window, a door or a fixed light, put a size back, skip
+  the tour and remove a room were underlined words. They are round icon buttons now
+  (`.icon-action`).
+- **Words on the stage buttons.** Grid, Lighting, and Floor and walls show their names. When
+  the room is narrower than 760 px the words go and the buttons are round again.
+- **Roomier.** More padding and wider gaps in the menus, the piece panel, the tools section,
+  the dialogs and the score card. Choice rows are 32 px tall with 14 px beside each word.
+- **Glass, second pass.** The first glass squeezed what is behind it toward grey and had a
+  bright ring all round. Apple describes Liquid Glass as a material that lets what is behind
+  show through and catches light on its edge. The fill is now a soft sheen, the blur is lower,
+  much less grey is mixed in, and the rim is bright on the top left and faint on the bottom
+  right. A browser cannot bend what is behind glass, so there is no lens effect.
+- **One hover and press.** Hover changes the fill and nothing grows. A press settles the
+  control to 97% and eases back.
+- **Furniture.** The whole tile leans on hover, by 4 degrees at most. The group row is a glass
+  track with hand-drawn icons from my Figma file (`DrawnIcon.jsx`). Four pieces were all named
+  Couch; they are told apart by colour now (`setPinItems` in `data/catalog.js`).
+- **Moodboard.** The name under a picture follows the piece under the pointer.
+- **Realistic.** The picture came on screen after 4 passes, still full of bright specks. It
+  now waits for 24 passes with the normal picture on screen, and a new step removes single
+  bright specks before the smoothing (`SPECK_SHADER` in `PathTraced.jsx`).
+- **Door.** An open door swings away from the room, behind the wall, so it takes no space
+  from the room. What is behind the doorway in the Inside view is one dim tone in place of a
+  lit hall. The door frame no longer shares a plane with the wall, which is what flickers.
+- **Checked in headless Chromium only.** The specks and the door flicker need a look on a
+  real graphics card.
+
 ## Components
 
 | Component | What it does |

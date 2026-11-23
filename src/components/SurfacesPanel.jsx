@@ -4,6 +4,7 @@ import Segmented from './Segmented.jsx';
 import { WALL_NAMES, keepClear, newDoor, newWindow } from '../lib/room.js';
 import { WALL_PAINTS, loadPhoto } from '../lib/surface.js';
 import Slider from './Slider.jsx';
+import Icon from './Icon.jsx';
 
 // The part both the floor and the walls share: pick a photo, mark a rectangle on
 // it (PhotoStraighten), then say how much it shows.
@@ -160,7 +161,7 @@ function SurfacesPanel({ surfaces, onChange, room, onRoomChange }) {
             surface={floor}
             id="floor-photo"
             secondName="Deep"
-            hint="Photograph a clear patch of floor in even light. An angle is fine: you mark a rectangle on it next."
+            hint="A clear patch of floor in even light works best."
             onChange={(next) => onChange({ ...surfaces, floor: next })}
           />
         )}
@@ -214,7 +215,7 @@ function SurfacesPanel({ surfaces, onChange, room, onRoomChange }) {
             surface={wall}
             id="wall-photo"
             secondName="Up"
-            hint="Photograph a clear patch of wall in even light. Wallpaper, brick and tiles work best."
+            hint="A clear patch of wall in even light works best."
             onChange={(next) => onChange({ ...surfaces, wall: next })}
           />
         )}
@@ -226,8 +227,8 @@ function SurfacesPanel({ surfaces, onChange, room, onRoomChange }) {
         <div className="light__fixed" key={win.id}>
           <div className="light__row">
             <strong>Window {index + 1}</strong>
-            <button type="button" className="light__remove" onClick={() => removeWindow(win.id)}>
-              Remove
+            <button type="button" className="icon-action icon-action--danger" aria-label={`Remove window ${index + 1}`} title="Remove" onClick={() => removeWindow(win.id)}>
+              <Icon name="trash" size={16} />
             </button>
           </div>
           <div className="light__row">
@@ -277,8 +278,8 @@ function SurfacesPanel({ surfaces, onChange, room, onRoomChange }) {
         <div className="light__fixed" key={door.id}>
           <div className="light__row">
             <strong>Door {index + 1}</strong>
-            <button type="button" className="light__remove" onClick={() => removeDoor(door.id)}>
-              Remove
+            <button type="button" className="icon-action icon-action--danger" aria-label={`Remove door ${index + 1}`} title="Remove" onClick={() => removeDoor(door.id)}>
+              <Icon name="trash" size={16} />
             </button>
           </div>
           <div className="light__row">
@@ -337,10 +338,12 @@ function SurfacesPanel({ surfaces, onChange, room, onRoomChange }) {
       ))}
       <div className="light__add">
         <button type="button" className="btn btn--secondary btn--sm" onClick={addWindow}>
-          + Add a window
+          <Icon name="window" size={16} />
+          Window
         </button>
         <button type="button" className="btn btn--secondary btn--sm" onClick={addDoor}>
-          + Add a door
+          <Icon name="door" size={16} />
+          Door
         </button>
       </div>
       {note && (
@@ -348,10 +351,6 @@ function SurfacesPanel({ surfaces, onChange, room, onRoomChange }) {
           {note}
         </p>
       )}
-      <p className="feng__note">
-        You can also drag a window or door along its wall on the plan, using its dot, or double click one in the room to find it here. The
-        back wall is the one at the top of the plan. For a balcony door, add a window and set its bottom edge to 0.
-      </p>
     </div>
   );
 }

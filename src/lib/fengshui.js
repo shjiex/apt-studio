@@ -391,11 +391,11 @@ function checkRoom(pieces, room) {
 
   return [
     {
-      title: 'Door can open freely',
+      title: 'Doorway kept clear',
       passes: !doorBlocked,
       points: 15,
       from: 'Feng shui',
-      tip: "Clear the floor where the door swings so it can open fully.",
+      tip: "Keep the floor in front of the door clear so you can walk straight in.",
     },
     ...(mainPieces.length > 0
       ? [

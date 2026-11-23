@@ -37,11 +37,7 @@ function ShopList({ pieces }) {
   const total = priced.reduce((sum, piece) => sum + piece.price, 0);
   return (
     <div className="shop">
-      <p className="dialog__body">
-        {linked.length === 0
-          ? 'Your shop list is empty for now. Select a piece in your room and add a link or a price to start it.'
-          : `${linked.length} of your ${yours.length} pieces have a link or a price.`}
-      </p>
+      {linked.length === 0 && <p className="dialog__body">Add a link or a price to a piece to start your list.</p>}
 
       <ul className="shop-list">
         {linked.map((piece) => {
@@ -83,7 +79,7 @@ function ShopList({ pieces }) {
 
       {unlinked.length > 0 && (
         <p className="dialog__body">
-          These pieces don’t have a link or a price yet. {unlinked.map((piece) => getItem(piece.type).name).join(', ')}.
+          No link or price yet for {unlinked.map((piece) => getItem(piece.type).name).join(', ')}.
         </p>
       )}
     </div>

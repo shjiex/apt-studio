@@ -155,8 +155,8 @@ function PiecePanel({ piece, room, fit, units, lighting, onLightingChange, onRot
           <Measure icon="height" label="Height" value={toSmall(size.h, units)} unit={unit} onCommit={(typed) => setSize('h', typed)} />
         </div>
         {piece.size && (
-          <button type="button" className="room-bar__link" onClick={() => onChange(piece.id, { size: null })}>
-            Back to its usual size
+          <button type="button" className="icon-action" aria-label="Back to its usual size" title="Back to its usual size" onClick={() => onChange(piece.id, { size: null })}>
+            <Icon name="undo" size={16} />
           </button>
         )}
       </div>

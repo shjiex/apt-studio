@@ -379,11 +379,13 @@ The workspace was laid out again from the owner's Figma frame 216:4506. Where an
 
 **Units.** `units` is `'metric'` or `'imperial'` (saved as `apt-studio-units`). Stored values stay in metres. The room dialog and the Floor and walls sliders still show metres only.
 
+**3 am round on 23 Nov.** Home name is My home. Glass was redone (`--glass-fill` is a gradient now, so always set it with `background`, never `background-color`). Hover never scales; a press is `scale(0.97)`. Underlined text actions became `.icon-action` buttons. The stage buttons have words (`.stage__word`, hidden under 760 px by a container query). Doors open outward, behind the wall, and the Inside view has a dim recess (`RECESS`) behind a doorway. The feng shui check is titled Doorway kept clear. Pin items that share a name get a colour in front (`colourName` in `data/catalog.js`). `DrawnIcon.jsx` holds the hand-drawn icons from Figma. The hosted test link cannot reach Pinterest (its page blocks other sites); the app can.
+
 **First visit.** `apt-studio-welcomed` and `apt-studio-toured` in `localStorage` say whether the welcome and the tips have been seen. Scan your room is shown as Soon and does nothing.
 
 **Room score.** Widened on 23 Nov from research (sources in the README under "A wider room score"). Compass and element rules are left out because the app does not know which way a home faces.
 
-**Realistic.** On by default in the Inside view. `WARM_PASSES` in `PathTraced.jsx` hides the first four passes. `SHARP_AT` in `PreviewPanel.jsx` (64 passes) is where the pill reads Sharp.
+**Realistic.** On by default in the Inside view. `WARM_PASSES` in `PathTraced.jsx` (24 since 3 am on 23 Nov) keeps the normal picture on screen until the traced one is clean enough, and `SPECK_SHADER` removes single bright specks before the smoothing. `SHARP_AT` in `PreviewPanel.jsx` (64 passes) is where the pill reads Sharp.
 
 ## What landed on 22 Nov at about 4 pm PT
 

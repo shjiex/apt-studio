@@ -50,7 +50,10 @@ export function completeHome(home) {
     };
   });
   const isOpenRoomThere = rooms.some((room) => room.id === home.activeRoomId);
-  return { name: home.name || 'My home', activeRoomId: isOpenRoomThere ? home.activeRoomId : rooms[0].id, rooms };
+  // 'Apt 4B' was the name every new home started with. A home still called that was
+  // never named by its owner, so it gets the plain name new homes start with now.
+  const name = !home.name || home.name === 'Apt 4B' ? 'My home' : home.name;
+  return { name, activeRoomId: isOpenRoomThere ? home.activeRoomId : rooms[0].id, rooms };
 }
 
 // localStorage keeps text for this site in this browser. It can be switched off

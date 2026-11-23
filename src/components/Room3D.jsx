@@ -33,6 +33,7 @@ function loadExtra(name) {
 
 const HALL_DEPTH = 1.2; // how far the hall behind a doorway goes back, in metres
 const DOOR_OPEN = THREE.MathUtils.degToRad(75); // how far a door stands open
+const RECESS = '#4B4843'; // the one dim tone of what is behind an open doorway
 const TRIM_COLOR = '#E3E2DE';
 const FIT_COLORS = { fits: '#1FA85A', tight: '#FFE03A', blocked: '#FF4F2B' };
 const FLOOR_PLANE = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
@@ -336,7 +337,6 @@ function Wall({ name, room, mode, inside, plan, daylight, wall, wallPhoto, onGra
     .map((door) => ({ ...doorOpening(door, room), side: door.hinge === 'right' ? 1 : -1, shut: Boolean(door.shut) }));
   // The wall is solid everywhere except at its windows and its doorways.
   const blocks = wallBlocks(frame.length, room.height, [...openings, ...doors], extra);
-  const paint = wall.kind === 'paint' ? wall.color : TRIM_COLOR; // the colour of the hall behind a doorway
 
   // The grip for one window or door: a box around its place on the wall that you
   // cannot see, and on top of it a dark dot in a white ring that you can, so it is
@@ -497,13 +497,14 @@ function Wall({ name, room, mode, inside, plan, daylight, wall, wallPhoto, onGra
             <>
               {/* The door: 4 cm thick, with a knob on each face. The group sits on the hinge
                   and is turned about it. Shut, the door lies in the doorway. Open, it is
-                  swung 75 degrees into the room: not a full 90, so it reads as a door and
-                  not as part of the next wall. With the hinge on the left the shut door
-                  points along +x and opens by turning the other way round the up axis; with
-                  the hinge on the right it points along -x (half a turn) and opens onward. */}
+                  swung 75 degrees away from the room, behind the wall, so it takes no space
+                  from the room and never stands in front of the furniture. Not a full 90, so
+                  it reads as a door and not as part of a wall. With the hinge on the left the
+                  shut door points along +x; with the hinge on the right it points along -x
+                  (half a turn). Either way it opens toward -z, which is out of the room. */}
               <group
                 position={[door.side * door.half, 0, 0]}
-                rotation={[0, door.side === -1 ? -(door.shut ? 0 : DOOR_OPEN) : Math.PI + (door.shut ? 0 : DOOR_OPEN), 0]}
+                rotation={[0, door.side === -1 ? (door.shut ? 0 : DOOR_OPEN) : Math.PI - (door.shut ? 0 : DOOR_OPEN), 0]}
               >
                 <mesh position={[door.half, door.top / 2, 0]} castShadow receiveShadow>
                   <boxGeometry args={[door.half * 2 - 0.02, door.top - 0.02, 0.04]} />
@@ -518,49 +519,44 @@ function Wall({ name, room, mode, inside, plan, daylight, wall, wallPhoto, onGra
               </group>
               {/* the frame around the doorway: two posts and the piece across the top */}
               {[
-                [[-door.half - 0.03, door.top / 2], [0.06, door.top, WALL + 0.03]],
-                [[door.half + 0.03, door.top / 2], [0.06, door.top, WALL + 0.03]],
-                [[0, door.top + 0.03], [door.half * 2 + 0.12, 0.06, WALL + 0.03]],
+                [[-door.half - 0.03, door.top / 2], [0.06, door.top, WALL + 0.05]],
+                [[door.half + 0.03, door.top / 2], [0.06, door.top, WALL + 0.05]],
+                [[0, door.top + 0.03], [door.half * 2 + 0.12, 0.06, WALL + 0.05]],
               ].map(([place, size]) => (
-                <mesh key={place.join()} position={[place[0], place[1], -WALL / 2 + 0.015]} castShadow>
+                // 2.5 cm proud of the wall on both faces, so no face of the frame lies in the
+                // same plane as a face of the wall (two surfaces in one plane flicker)
+                <mesh key={place.join()} position={[place[0], place[1], -WALL / 2]} castShadow>
                   <boxGeometry args={size} />
                   <meshStandardMaterial color="#F6F5F1" roughness={0.5} />
                 </mesh>
               ))}
             </>
           )}
-          {/* From outside (the 3D view) a hall would stick out past the wall and show from
-              above, so there the doorway is closed at the back by a flat dim sheet. You see
-              a dark doorway and not the bright ground beyond it. On the plan the sheet is
-              seen edge on, so it does not show. */}
-          {!inside && mode === 'real' && (
-            <mesh userData={{ helper: true }} position={[0, door.top / 2, -WALL + 0.002]}>
-              <planeGeometry args={[door.half * 2, door.top]} />
-              <meshBasicMaterial color="#6F6B65" />
-            </mesh>
-          )}
-          {/* Seen from inside the room, a short hall lies behind the doorway: a back wall,
-              a floor, a ceiling and two sides, 10 cm wider than the door on each side. Its parts cast and take shadows, so the
-              sun cannot light it from outside. It is only
-              built for the inside view; from above it would stick out of the plan. */}
+          {/* Seen from inside the room, the doorway opens onto a plain dim recess: a back,
+              a floor, a ceiling and two sides, 10 cm wider than the door on each side and
+              all one dark tone, so it reads as shadow behind the open door and not as
+              another room. Its parts cast shadows, so the sun cannot light the room through
+              the doorway. It is only built for the inside view; from above it would stick
+              out of the plan. */}
           {inside && (
             <group position={[0, 0, -WALL]}>
               <mesh position={[0, room.height / 2, -HALL_DEPTH]} castShadow receiveShadow>
                 <planeGeometry args={[door.half * 2 + 0.2, room.height]} />
-                <meshStandardMaterial color={paint} roughness={0.95} side={THREE.DoubleSide} />
+                <meshStandardMaterial color={RECESS} roughness={1} side={THREE.DoubleSide} />
               </mesh>
-              <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.001, -HALL_DEPTH / 2]} receiveShadow>
+              {/* 1 cm above the ground outside, so the two never share a plane */}
+              <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, -HALL_DEPTH / 2]} receiveShadow>
                 <planeGeometry args={[door.half * 2 + 0.2, HALL_DEPTH]} />
-                <meshStandardMaterial color="#A89F92" roughness={0.8} side={THREE.DoubleSide} />
+                <meshStandardMaterial color={RECESS} roughness={1} side={THREE.DoubleSide} />
               </mesh>
-              <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, room.height, -HALL_DEPTH / 2]} castShadow receiveShadow>
+              <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, room.height - 0.01, -HALL_DEPTH / 2]} castShadow receiveShadow>
                 <planeGeometry args={[door.half * 2 + 0.2, HALL_DEPTH]} />
-                <meshStandardMaterial color="#F4F3EF" roughness={0.95} side={THREE.DoubleSide} />
+                <meshStandardMaterial color={RECESS} roughness={1} side={THREE.DoubleSide} />
               </mesh>
               {[-1, 1].map((side) => (
                 <mesh key={side} rotation={[0, Math.PI / 2, 0]} position={[side * (door.half + 0.1), room.height / 2, -HALL_DEPTH / 2]} castShadow receiveShadow>
                   <planeGeometry args={[HALL_DEPTH, room.height]} />
-                  <meshStandardMaterial color={paint} roughness={0.95} side={THREE.DoubleSide} />
+                  <meshStandardMaterial color={RECESS} roughness={1} side={THREE.DoubleSide} />
                 </mesh>
               ))}
             </group>
@@ -571,9 +567,10 @@ function Wall({ name, room, mode, inside, plan, daylight, wall, wallPhoto, onGra
               <meshBasicMaterial color="#CFC9BE" />
             </mesh>
           )}
-          {/* the quarter circle starts at the hinge: it opens to the right of a left hinge and to the left of a right one */}
+          {/* The quarter circle the door swings over, drawn from the hinge. It lies behind
+              the wall, outside the room, because that is the way the door opens. */}
           <mesh userData={{ helper: true }} visible={!inside} rotation={[-Math.PI / 2, 0, 0]} position={[door.side * door.half, 0.004, 0]}>
-            <circleGeometry args={[door.half * 2, 32, door.side === -1 ? -Math.PI / 2 : Math.PI, Math.PI / 2]} />
+            <circleGeometry args={[door.half * 2, 32, door.side === -1 ? 0 : Math.PI / 2, Math.PI / 2]} />
             <meshBasicMaterial color="#D9D8D3" transparent opacity={0.55} depthWrite={false} />
           </mesh>
         </group>

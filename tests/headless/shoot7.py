@@ -24,6 +24,6 @@ async def main():
         await pg.get_by_role('tab', name='3D', exact=True).click(); await pg.wait_for_timeout(4000)
         await pg.screenshot(path=OUT+'smoke-3d.png')
         await pg.goto('http://localhost:4173/login'); await pg.wait_for_timeout(1200)
-        r['login_notice'] = 'set up yet' in (await pg.inner_text('body'))
+        r['login_notice'] = 'switched on' in (await pg.inner_text('body'))
         r['errors'] = logs[:6]; print(json.dumps(r, indent=1)); await b.close()
 asyncio.run(main())

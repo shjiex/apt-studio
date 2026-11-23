@@ -41,7 +41,7 @@ function PinterestImport({ onImport, onCancel }) {
         onSubmit={handleSubmit}
       >
         <h2 id="pinterest-title">Connect a Pinterest board</h2>
-        <p className="dialog__body">Paste the link to a public Pinterest board, and we’ll load up to 50 of its pins.</p>
+        <p className="dialog__body">Paste the link to a public board.</p>
         <div className="field">
           <label htmlFor="board-link">Board link</label>
           <div className={error ? 'field__well has-error' : 'field__well'}>

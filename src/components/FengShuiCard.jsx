@@ -17,10 +17,6 @@ function iconFor(check) {
   return 'compass';
 }
 
-// Where a guideline comes from, in words. Each check carries `from` (see lib/fengshui.js).
-function sourceOf(check) {
-  return check.from === 'Design' ? 'An interior design habit' : 'A feng shui guideline';
-}
 
 // The room's score as a round button in the corner of the preview, the same size
 // as the zoom buttons above it: just the number, with a ring that fills as the
@@ -51,8 +47,8 @@ function FengShuiCard({ pieces, room, isOpen, onToggle }) {
         // the ring: ink up to the score
         style={{ '--score': `${result.score * 3.6}deg` }}
         aria-expanded={isOpen}
-        aria-label={`Room score ${result.score} out of 100`}
-        title="Room score"
+        aria-label={`Feng Shui score ${result.score}`}
+        title="Feng Shui score"
         onClick={onToggle}
       >
         <span className="feng__inner">
@@ -64,7 +60,7 @@ function FengShuiCard({ pieces, room, isOpen, onToggle }) {
         <div className="feng__card">
           <div className="feng__head">
             <strong>{result.score}</strong>
-            <span>Room score, out of 100</span>
+            <span>Feng Shui score</span>
           </div>
 
           {first ? (
@@ -76,7 +72,6 @@ function FengShuiCard({ pieces, room, isOpen, onToggle }) {
                 <span className="feng__gain">+{gainOf(first)}</span>
               </div>
               <p>{first.tip}</p>
-              <span className="feng__from">{sourceOf(first)}</span>
             </div>
           ) : (
             <div className="feng__line">
@@ -99,9 +94,7 @@ function FengShuiCard({ pieces, room, isOpen, onToggle }) {
                     {check.title}
                     <span className="feng__gain">+{gainOf(check)}</span>
                   </summary>
-                  <p>
-                    {check.tip} <span className="feng__from">{sourceOf(check)}</span>
-                  </p>
+                  <p>{check.tip}</p>
                 </details>
               ))}
             </details>

@@ -16,7 +16,7 @@ const TIPS = [
     target: '.stage canvas',
     side: 'inside',
     title: 'Move things in the room',
-    text: 'Click a piece to select it, then drag it. Double click the floor, a wall, a door or a window to change it. On the plan, the round arrows outside the walls resize the room.',
+    text: 'Click a piece to select it, then drag it. Double click the floor, a wall, a door or a window to change it.',
   },
   {
     target: '.stage__tools',
@@ -33,7 +33,7 @@ const TIPS = [
   {
     target: '.stage__score',
     side: 'left',
-    title: 'Your room score',
+    title: 'Your Feng Shui score',
     text: 'It checks things like walkways and where the bed stands, and suggests what to improve first.',
   },
   {
@@ -109,9 +109,7 @@ function Tips({ onDone }) {
         <strong>{tip.title}</strong>
         <p>{tip.text}</p>
         <div className="tip__actions">
-          <button type="button" className="room-bar__link" onClick={onDone}>
-            Skip the tour
-          </button>
+          <Button variant="secondary" size="sm" icon="close" aria-label="Skip the tour" title="Skip the tour" onClick={onDone} />
           <Button variant="primary" size="sm" onClick={() => (isLast ? onDone() : setIndex(index + 1))}>
             {isLast ? 'Done' : 'Next'}
           </Button>

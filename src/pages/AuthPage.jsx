@@ -1,7 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import Button from '../components/Button.jsx';
+import Icon from '../components/Icon.jsx';
+import Logo from '../components/Logo.jsx';
 import { auth, isFirebaseReady } from '../firebase.js';
 
 // Firebase reports errors as codes. These are the ones worth explaining.
@@ -23,6 +25,15 @@ function AuthPage({ mode }) {
   const navigate = useNavigate();
   const isSignup = mode === 'signup';
 
+  // Escape goes back to the room, the same as the cross in the corner of the card.
+  useEffect(() => {
+    function handleKey(event) {
+      if (event.key === 'Escape') navigate('/');
+    }
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [navigate]);
+
   async function handleSubmit(event) {
     event.preventDefault(); // stop the browser from reloading the page
     setError('');
@@ -41,14 +52,18 @@ function AuthPage({ mode }) {
   return (
     <main className="auth">
       <form className="auth__card" onSubmit={handleSubmit}>
-        <Link to="/" className="wordmark">
-          Apt Studio
-        </Link>
+        {/* The way out: back to your room without an account. */}
+        <div className="auth__top">
+          <Logo height={28} />
+          <Link to="/" className="btn btn--secondary btn--md btn--icon-only" aria-label="Back to your room" title="Back to your room">
+            <Icon name="close" />
+          </Link>
+        </div>
         <h1>{isSignup ? 'Create your account' : 'Log in'}</h1>
 
         {!isFirebaseReady && (
           <p className="auth__notice">
-            Accounts aren’t set up yet. Paste your Firebase values into src/firebaseConfig.js and you’ll be able to sign in.
+            Accounts aren’t switched on in this copy of the app yet. You can keep planning without one, and your room stays saved in this browser.
           </p>
         )}
 

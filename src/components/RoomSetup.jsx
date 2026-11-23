@@ -110,18 +110,15 @@ function RoomSetup({ entry, onSave, onCancel, onUsePlan, onRemove, onUseExample 
           <NumberField id="room-length" label="Length" unit="m" value={form.length} error={errors.length} onChange={(text) => updateField('length', text)} />
           <NumberField id="room-height" label="Height" unit="m" value={form.height} error={errors.height} onChange={(text) => updateField('height', text)} />
         </div>
-        <p className="dialog__body">Measure your room from wall to wall. You can always change these numbers later.</p>
 
         {/* Links under the fields: only for a room that already exists. */}
         {!isNew && (
           <div className="dialog__links">
-            <button type="button" className="dialog__link" onClick={onUsePlan}>
-              Take the size from a floor plan
-            </button>
+            <Button variant="secondary" size="sm" icon="image" onClick={onUsePlan}>
+              Size from a floor plan
+            </Button>
             {onRemove && (
-              <button type="button" className="dialog__link dialog__link--danger" onClick={onRemove}>
-                Remove this room
-              </button>
+              <Button variant="secondary" size="sm" icon="trash" aria-label="Remove this room" title="Remove this room" onClick={onRemove} />
             )}
           </div>
         )}

@@ -61,7 +61,7 @@ function FoundFurniture({ onAdd, onClose }) {
         {found && (
           <>
             <p className="dialog__body">
-              We found {found.pieces.length} pieces in your photo and estimated their sizes based on average furniture. Keep the ones that are staying, then drag each one to where it sits in your room.
+              We found {found.pieces.length} pieces in your photo.
             </p>
             <div className="found">
               <div className="found__photo">

@@ -59,27 +59,26 @@ function Welcome({ units, onPlan, onReady, onExample, onAnswers }) {
         {step === 'start' && (
           <>
             <h2 id="welcome-title">How would you like to start?</h2>
-            <p className="dialog__body">Tell us about your room and we’ll set it up for you. You can always change it later.</p>
             <div className="welcome__choices">
               <button type="button" className="welcome__choice" onClick={onPlan}>
                 <Icon name="image" size={20} />
                 <span>
                   <strong>Import a floor plan</strong>
-                  <span>We read the size of your room from a picture of the plan.</span>
+                  <span>From a picture of the plan</span>
                 </span>
               </button>
               <button type="button" className="welcome__choice" onClick={() => setStep('kind')}>
                 <Icon name="ruler" size={20} />
                 <span>
                   <strong>Answer a few questions</strong>
-                  <span>Tell us the kind of room, its size, and where the door and window are.</span>
+                  <span>Kind, size, door and window</span>
                 </span>
               </button>
               <button type="button" className="welcome__choice" onClick={onExample}>
                 <Icon name="sofa" size={20} />
                 <span>
                   <strong>Open the example room</strong>
-                  <span>A furnished living room you can look around and change.</span>
+                  <span>A furnished living room</span>
                 </span>
               </button>
               {/* Scanning a room with a phone is not built into the app yet, so it cannot be chosen. */}
@@ -89,13 +88,13 @@ function Welcome({ units, onPlan, onReady, onExample, onAnswers }) {
                   <strong>
                     Scan your room <span className="tag tag--grey">Soon</span>
                   </strong>
-                  <span>Walk around the room with your phone’s camera.</span>
+                  <span>With your phone’s camera</span>
                 </span>
               </div>
             </div>
-            <button type="button" className="room-bar__link welcome__skip" onClick={onReady}>
-              Skip and start with a ready bedroom
-            </button>
+            <Button variant="secondary" fill icon="bed" onClick={onReady}>
+              Skip to a ready bedroom
+            </Button>
           </>
         )}
 
@@ -130,9 +129,7 @@ function Welcome({ units, onPlan, onReady, onExample, onAnswers }) {
           <>
             <p className="welcome__count">2 of 3</p>
             <h2 id="welcome-title">How big is it?</h2>
-            <p className="dialog__body">
-              Measure from wall to wall. We’ve filled in a usual size for a {kindOf(kind).name.toLowerCase()}, so an estimate is fine for now.
-            </p>
+            <p className="dialog__body">An estimate is fine for now.</p>
             <div className="measures welcome__sizes">
               <label className="measure">
                 <span className="measure__label">
@@ -186,9 +183,7 @@ function Welcome({ units, onPlan, onReady, onExample, onAnswers }) {
           <>
             <p className="welcome__count">3 of 3</p>
             <h2 id="welcome-title">Where are the door and the window?</h2>
-            <p className="dialog__body">
-              Picture the room from above with the back wall at the top. You can drag both along their walls afterwards.
-            </p>
+            <p className="dialog__body">The back wall is at the top of the plan.</p>
             <div className="light__row">
               <strong>
                 <Icon name="door" size={14} /> Door

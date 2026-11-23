@@ -69,7 +69,7 @@ function PlanRooms({ room, onSave, onClose }) {
         {plan && (
           <>
             <p className="dialog__body">
-              We found {plan.rooms.length} rooms on your floor plan. Pick yours and type how wide it is. The plan tells us the room’s shape, and your measurement tells us its real size.
+              We found {plan.rooms.length} rooms. Pick yours and type how wide it is.
             </p>
             <div className="found">
               <div className="found__photo plan__picture">

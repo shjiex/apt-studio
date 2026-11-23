@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import ElementTile from './ElementTile.jsx';
 import Icon from './Icon.jsx';
+import DrawnIcon from './DrawnIcon.jsx';
 import { useSlidingThumb } from '../lib/useSlidingThumb.js';
 
 // The groups shown as chips above the tiles. Each has an icon (a name in Icon.jsx) and
@@ -9,15 +10,15 @@ import { useSlidingThumb } from '../lib/useSlidingThumb.js';
 const GROUPS = [
   { id: 'all', name: 'All', icon: 'grid', categories: null },
   { id: 'board', name: 'From your board', icon: 'pin', categories: null },
-  { id: 'seating', name: 'Sofas and armchairs', icon: 'sofa', categories: ['seating'] },
-  { id: 'beds', name: 'Beds', icon: 'bed', categories: ['beds'] },
-  { id: 'tables', name: 'Tables and chairs', icon: 'dining', categories: ['tables'] },
-  { id: 'desks', name: 'Desks', icon: 'desk', categories: ['desks'] },
-  { id: 'storage', name: 'Storage', icon: 'cube', categories: ['storage'] },
-  { id: 'lighting', name: 'Lighting', icon: 'bulb', categories: ['lighting'] },
-  { id: 'rugs', name: 'Rugs', icon: 'layers', categories: ['rugs'] },
-  { id: 'plants', name: 'Plants', icon: 'plant', categories: ['plants'] },
-  { id: 'wall', name: 'Wall decor', icon: 'frame', categories: ['wall', 'decor'] },
+  { id: 'seating', name: 'Sofas and armchairs', drawn: 'sofa', categories: ['seating'] },
+  { id: 'beds', name: 'Beds', drawn: 'bed', categories: ['beds'] },
+  { id: 'tables', name: 'Tables and chairs', drawn: 'table', categories: ['tables'] },
+  { id: 'desks', name: 'Desks', drawn: 'desk', categories: ['desks'] },
+  { id: 'storage', name: 'Storage', drawn: 'shelf', categories: ['storage'] },
+  { id: 'lighting', name: 'Lighting', drawn: 'floor-lamp', categories: ['lighting'] },
+  { id: 'rugs', name: 'Rugs', drawn: 'rug', categories: ['rugs'] },
+  { id: 'plants', name: 'Plants', drawn: 'plant', categories: ['plants'] },
+  { id: 'wall', name: 'Wall decor', drawn: 'frame', categories: ['wall', 'decor'] },
 ];
 
 // The furniture to add: a search field, a row of group chips, then the tiles.
@@ -78,7 +79,8 @@ function ElementStrip({ items, pieces, onAdd, layout = 'row' }) {
                   setSearch('');
                 }}
               >
-                <Icon name={candidate.icon} size={14} />
+                {/* a furniture group has a hand-drawn icon from the Figma file; All and From your board keep a plain one */}
+                {candidate.drawn ? <DrawnIcon name={candidate.drawn} size={20} /> : <Icon name={candidate.icon} size={14} />}
                 {candidate.name}
               </button>
             );

@@ -177,27 +177,30 @@ function PreviewPanel({
           <Button
             variant={showGrid ? 'primary' : 'glass'}
             icon="measure"
-            aria-label="Measurement grid"
             aria-pressed={showGrid}
             title="Measurement grid"
             onClick={onGrid}
-          />
+          >
+            <span className="stage__word">Grid</span>
+          </Button>
           <Button
             variant={openTool === 'lighting' ? 'primary' : 'glass'}
             icon="bulb"
-            aria-label="Lighting"
             aria-expanded={openTool === 'lighting'}
             title="Lighting"
             onClick={() => onTool('lighting')}
-          />
+          >
+            <span className="stage__word">Lighting</span>
+          </Button>
           <Button
             variant={openTool === 'surfaces' ? 'primary' : 'glass'}
             icon="layers"
-            aria-label="Floor, walls, windows and doors"
             aria-expanded={openTool === 'surfaces'}
             title="Floor, walls, windows and doors"
             onClick={() => onTool('surfaces')}
-          />
+          >
+            <span className="stage__word">Floor and walls</span>
+          </Button>
         </div>
         <div className="stage__history">
           <Button variant="white" size="sm" icon="undo" aria-label="Undo" title="Undo" disabled={!canUndo} onClick={onUndo} />

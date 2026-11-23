@@ -33,7 +33,46 @@ const TEST_SCALE = Number(new URLSearchParams(window.location.search).get('trace
 // For testing where the browser cannot prepare a program in the background (software
 // graphics in a test browser): ?prepare in the address gets the tracer ready anyway.
 // How many passes are averaged before the traced picture is put on screen.
-const WARM_PASSES = 4;
+// At 4 the picture came on screen still full of bright specks. At 24 the grain is fine
+// enough for the two clean-up steps below to deal with, and it is about two seconds on
+// a laptop graphics card. The normal picture stays on screen until then.
+const WARM_PASSES = Number(new URLSearchParams(window.location.search).get('warm')) || 24; // ?warm=3 in the address shows it sooner, for testing on a slow machine
+
+// A clean-up step for the traced picture: remove single bright specks.
+// A traced path now and then finds a very bright spot by luck, and that lands as one
+// pixel far brighter than everything round it. The smoothing step that follows keeps
+// such a pixel, because it only blends a pixel with neighbours that look like it. So
+// before it, each pixel is compared with the eight round it: if it is more than three
+// times as bright as their average, it is replaced by that average.
+const SPECK_SHADER = {
+  uniforms: { map: { value: null }, texel: { value: new THREE.Vector2(1, 1) } },
+  vertexShader: `
+    varying vec2 vUv;
+    void main() {
+      vUv = uv;
+      gl_Position = vec4(position.xy, 0.0, 1.0);
+    }`,
+  fragmentShader: `
+    uniform sampler2D map;
+    uniform vec2 texel; // the size of one pixel, as a share of the picture
+    varying vec2 vUv;
+    float brightness(vec3 colour) {
+      return dot(colour, vec3(0.2126, 0.7152, 0.0722));
+    }
+    void main() {
+      vec4 centre = texture2D(map, vUv);
+      vec3 sum = vec3(0.0);
+      for (int x = -1; x <= 1; x++) {
+        for (int y = -1; y <= 1; y++) {
+          if (x == 0 && y == 0) continue;
+          sum += texture2D(map, vUv + vec2(float(x), float(y)) * texel).rgb;
+        }
+      }
+      vec3 around = sum / 8.0;
+      bool isSpeck = brightness(centre.rgb) > 3.0 * brightness(around) + 0.02;
+      gl_FragColor = isSpeck ? vec4(around, centre.a) : centre;
+    }`,
+};
 const TEST_PREPARE = new URLSearchParams(window.location.search).has('prepare');
 
 // How bright the sky is, in the picture's units, for a sun strength from 0 to 1.
@@ -96,6 +135,10 @@ function PathTraced({ isOn, room, signature, daylight, strength, brightness, onP
     const smooth = new FullScreenQuad(new DenoiseMaterial({ map: null, blending: THREE.NoBlending }));
     smooth.material.sigma = 3; // how far (in pixels) a pixel looks for neighbours
     smooth.material.kSigma = 1.2;
+    // The speck step draws into a picture of its own (`cleaned`), which the smoothing
+    // step then reads from.
+    const speck = new FullScreenQuad(new THREE.ShaderMaterial({ ...SPECK_SHADER, uniforms: THREE.UniformsUtils.clone(SPECK_SHADER.uniforms), depthTest: false, depthWrite: false }));
+    const cleaned = new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, depthBuffer: false });
     const drawPlain = made.renderToCanvasCallback;
     made.renderToCanvasCallback = (target, renderer, quad) => {
       if (made.samples < 2) {
@@ -104,7 +147,16 @@ function PathTraced({ isOn, room, signature, daylight, strength, brightness, onP
       }
       const autoClear = renderer.autoClear;
       renderer.autoClear = false;
-      smooth.material.map = target.texture;
+      // 1. specks out, into `cleaned` (kept the same size as the traced picture)
+      if (cleaned.width !== target.width || cleaned.height !== target.height) cleaned.setSize(target.width, target.height);
+      speck.material.uniforms.map.value = target.texture;
+      speck.material.uniforms.texel.value.set(1 / target.width, 1 / target.height);
+      const drawingTo = renderer.getRenderTarget();
+      renderer.setRenderTarget(cleaned);
+      speck.render(renderer);
+      renderer.setRenderTarget(drawingTo);
+      // 2. smoothing, from `cleaned` onto the screen
+      smooth.material.map = cleaned.texture;
       // How different a neighbour may be and still count as "like it". It starts at
       // about a third of the way from black to white and halves each time the number
       // of passes quadruples (as the grain itself does), so the smoothing fades out
@@ -122,6 +174,9 @@ function PathTraced({ isOn, room, signature, daylight, strength, brightness, onP
       made.dispose();
       smooth.material.dispose();
       smooth.dispose();
+      speck.material.dispose();
+      speck.dispose();
+      cleaned.dispose();
     };
   }, [gl]);
 

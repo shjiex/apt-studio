@@ -22,7 +22,7 @@ async def main():
         await pg.goto('http://localhost:4173/'); await pg.wait_for_timeout(2500)
         r['welcome_shows'] = await pg.get_by_text('How would you like to start?').count() == 1
         r['scan_is_off'] = await pg.locator('.welcome__choice.is-off').count() == 1
-        await pg.get_by_text('Skip and start').click(); await pg.wait_for_timeout(1200)
+        await pg.get_by_text('Skip to a ready bedroom').click(); await pg.wait_for_timeout(1200)
         r['tip_1'] = (await pg.locator('.tip__count').inner_text()).strip()
         tip = await pg.locator('.tip').bounding_box(); ring = await pg.locator('.tip__ring').bounding_box()
         r['tip_on_screen'] = tip['x'] >= 0 and tip['y'] >= 0 and tip['x']+tip['width'] <= 1440 and tip['y']+tip['height'] <= 900
@@ -66,7 +66,7 @@ async def main():
                 png = await pg.screenshot(clip={'x': box['x']+6, 'y': box['y']+box['height']/2-2, 'width': 4, 'height': 4})
                 ink = parse(await el.evaluate('el => getComputedStyle(el).color'))
                 r[f'{label} over {name}'] = contrast(Image.open(io.BytesIO(png)).convert('RGB').getpixel((1,1)), ink)
-        await glass('lighting button', '.stage__tools button[aria-label="Lighting"]')
+        await glass('lighting button', '.stage__tools button[title="Lighting"]')
         await glass('view switch, unchosen icon', '.view-switch__option:not(.is-current)')
         await glass('download button', '.stage__corner .btn')
         await glass('rotate over the piece', '.stage__action')

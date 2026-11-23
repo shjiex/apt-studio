@@ -127,7 +127,8 @@ export function keepClear(entry, list, room) {
   return { ...entry, along };
 }
 
-// The floor a door swings over: a square as deep as the door is wide, in front of it.
+// The floor in front of a door that stays clear so you can walk in: a square as deep
+// as the door is wide. (The door itself opens away from the room, behind the wall.)
 // Returned as the square's edges in room coordinates.
 export function doorZone(door, room) {
   const place = doorInRoom(door, room);
@@ -244,7 +245,7 @@ function gapBetween(a, b) {
   return Math.max(gapX, gapZ);
 }
 
-// Does a piece stand on the floor a door swings over?
+// Does a piece stand on the floor in front of a door?
 export function coversDoor(piece, room) {
   const { w, d } = getFootprint(piece);
   return room.doors.some((door) => {

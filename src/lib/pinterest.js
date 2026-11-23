@@ -33,7 +33,13 @@ export async function fetchBoard(username, board) {
   try {
     response = await fetch(`${WIDGET_URL}/${username}/${board}/pins/`);
   } catch (error) {
-    throw new Error('Could not reach Pinterest. Check your connection and try again.');
+    // The shared test link runs on a page that is not allowed to talk to other
+    // sites, so the request never leaves the browser there. Say so, in place of
+    // blaming the person's connection.
+    if (import.meta.env.VITE_DEMO) {
+      throw new Error('This test link can’t reach Pinterest, because the page it runs on blocks other sites. Connecting a board works when the app runs from your computer.');
+    }
+    throw new Error('We couldn’t reach Pinterest. Check your connection and try again.');
   }
   if (response.status === 404) {
     throw new Error('Board not found. Check the link, and make sure the board is public.');

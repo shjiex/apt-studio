@@ -365,6 +365,13 @@ My direction: "create a new design system version with liquid glass", with a flo
 
 My direction: a comment on the logo in the hosted build, "move this to the center". The assistant made the change and measured it.
 
+### Fixes from my 2 am list (23 Nov, 3:15 am), AI-generated
+
+- New: `src/components/DrawnIcon.jsx` (the stroke data is copied from my drawn icons in Figma).
+- Changed: `App.jsx`, `lib/storage.js`, `lib/pinterest.js`, `pages/AuthPage.jsx`, `TopMenus.jsx`, `FengShuiCard.jsx`, `Tips.jsx`, `Welcome.jsx`, `RoomSetup.jsx`, `FoundFurniture.jsx`, `PlanRooms.jsx`, `ShopList.jsx`, `SurfacesPanel.jsx`, `LightingPanel.jsx`, `PhotoStraighten.jsx`, `PinterestImport.jsx`, `PiecePanel.jsx`, `PreviewPanel.jsx`, `ElementStrip.jsx`, `MoodboardPanel.jsx`, `data/catalog.js`, `PathTraced.jsx`, `Room3D.jsx`, `lib/fengshui.js`, `lib/room.js`, and the "round of 23 Nov, 3 am" blocks at the end of `app.css`.
+
+My direction: a list of seventeen points I scheduled for 2:51 am, in my own words in the chat. The assistant read my Figma comments first, reproduced the Pinterest error in the test link and found its cause, read Apple's and other write-ups on Liquid Glass before changing the glass, and made the changes. The choices that are its own: 24 passes before Realistic shows, the colour names for the couches, and the door opening outward as its reading of "open behind it".
+
 ## Chat transcript
 
 TODO: paste the share link or exported transcript of the Claude conversation here.

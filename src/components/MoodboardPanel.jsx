@@ -31,6 +31,9 @@ function MoodboardPanel({ moodboard, pickedIds, pinModels, user, onTogglePick, o
   const isPinterest = moodboard.source === 'pinterest';
   // The furniture found in each sample picture, by picture id: { 'mood-1': [element, ...] }.
   const [elementsByPin, setElementsByPin] = useState({});
+  // The piece of furniture under the pointer, as { imageId, label }, or null. The name
+  // under that picture shows this piece while the pointer is on it.
+  const [hovered, setHovered] = useState(null);
   // The open card of options, or null: { imageId, elementId, left, top } (left and top in pixels on the screen).
   const [open, setOpen] = useState(null);
   const cardRef = useRef(null); // the card, to tell a click inside it from a click outside
@@ -263,6 +266,8 @@ function MoodboardPanel({ moodboard, pickedIds, pinModels, user, onTogglePick, o
                               aria-label={`${element.label} in this picture`}
                               aria-haspopup="dialog"
                               aria-expanded={isOpen}
+                              onMouseEnter={() => setHovered({ imageId: image.id, label: element.label, isTarget: Boolean(element.is_target) })}
+                              onMouseLeave={() => setHovered(null)}
                               onClick={(event) => (isOpen ? setOpen(null) : openOptions(image, element, event.currentTarget))}
                               onKeyDown={(event) => {
                                 // a real button answers Enter and Space, so this one does too
@@ -282,22 +287,34 @@ function MoodboardPanel({ moodboard, pickedIds, pinModels, user, onTogglePick, o
                   </div>
                   {/* Under a picture that has a 3D model: a glass button with the model's name.
                   Pressing it puts that furniture in the room. */}
-                  {model && (
-                    <div className="pin__more">
-                      <div>
-                        <button
-                          type="button"
-                          className="pin__add"
-                          title={`Add this ${model.name.toLowerCase()} in 3D`}
-                          aria-label={`Add this ${model.name.toLowerCase()} in 3D`}
-                          onClick={() => onAddItem(model.type)}
-                        >
-                          <span>{model.name}</span>
-                          <Icon name="plus" size={16} />
-                        </button>
+                  {(() => {
+                    // While the pointer is on a piece in this picture, the name is that piece's.
+                    const pointed = hovered && hovered.imageId === image.id ? hovered : null;
+                    if (!model && !pointed) return null;
+                    // The plus adds the picture's own 3D model, so it shows for that piece only.
+                    const canAdd = model && (!pointed || pointed.isTarget);
+                    const name = pointed && !pointed.isTarget ? pointed.label : model ? model.name : pointed.label;
+                    return (
+                      <div className={pointed ? 'pin__more is-pointed' : 'pin__more'}>
+                        <div>
+                          {canAdd ? (
+                            <button
+                              type="button"
+                              className="pin__add"
+                              title={`Add this ${model.name.toLowerCase()} in 3D`}
+                              aria-label={`Add this ${model.name.toLowerCase()} in 3D`}
+                              onClick={() => onAddItem(model.type)}
+                            >
+                              <span>{name}</span>
+                              <Icon name="plus" size={16} />
+                            </button>
+                          ) : (
+                            <span className="pin__add pin__name">{name}</span>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })()}
                 </div>
               );
             })}

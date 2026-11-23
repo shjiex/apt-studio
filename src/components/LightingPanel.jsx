@@ -1,6 +1,7 @@
 import Segmented from './Segmented.jsx';
 import { MONTH_NAMES, PLACES, formatHour, getSun, kelvinToColor, nameOfKelvin, newFixedLight, sunOnWindows } from '../lib/light.js';
 import Slider from './Slider.jsx';
+import Icon from './Icon.jsx';
 
 const KIND_NAMES = { ceiling: 'Ceiling light', wall: 'Wall light', strip: 'LED strip' };
 
@@ -190,9 +191,6 @@ function LightingPanel({ lighting, onChange, windows }) {
                 <dd>{sun.up ? `${Math.round(sun.elevation)}°` : 'Down'}</dd>
               </div>
             </dl>
-            <p className="feng__note">
-              We use sun time here, where 12:00 is the moment the sun is highest. Your clock may read up to an hour or so differently.
-            </p>
           </>
         )}
         {lighting.fixed.map((light) => (
@@ -202,10 +200,12 @@ function LightingPanel({ lighting, onChange, windows }) {
               <span className="light__tools">
                 <button
                   type="button"
-                  className="light__remove"
+                  className="icon-action icon-action--danger"
+                  aria-label={`Remove ${KIND_NAMES[light.kind]}`}
+                  title="Remove"
                   onClick={() => onChange({ ...lighting, fixed: lighting.fixed.filter((other) => other.id !== light.id) })}
                 >
-                  Remove
+                  <Icon name="trash" size={16} />
                 </button>
                 <input
                   type="checkbox"
@@ -276,10 +276,6 @@ function LightingPanel({ lighting, onChange, windows }) {
         </div>
 
         {lighting.lamps.on && <BulbSliders bulb={lighting.lamps} onChange={(lamps) => onChange({ ...lighting, lamps })} />}
-        <p className="feng__note">
-          You can find Kelvin and lumens printed on the bulb or its box. For a sense of scale, an old 60 W bulb gives about 800 lm. Select a
-          lamp in your room if you’d like it to have a bulb of its own.
-        </p>
       </details>
     </div>
   );

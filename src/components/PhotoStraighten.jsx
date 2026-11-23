@@ -75,7 +75,7 @@ function PhotoStraighten({ image, secondName, startSpan, onUse, onCancel }) {
       >
         <h2 id="straighten-title">Mark a rectangle</h2>
         <p className="dialog__body">
-          Drag the four corners onto a rectangle you can measure, such as a block of tiles, and then type its size. If you took the photo straight on, you can leave the corners where they are and type how much of the floor or wall it shows.
+          Drag the four corners onto a rectangle you can measure, then type its size.
         </p>
 
         <div className="straighten" ref={frameRef} onPointerMove={handleMove} onPointerUp={() => setDragging(null)}>
