@@ -35,6 +35,7 @@ function Workspace({
   activeRoomId,
   onPickRoom,
   onAddRoom,
+  onAddExampleRoom,
   onRenameRoom,
   onRemoveRoom,
   onStartOver,
@@ -284,6 +285,17 @@ function Workspace({
     setPast([]);
     setFuture([]);
     setToast({ key: Date.now(), text: `${details.name} added` });
+  }
+
+  // "Open the example room" in that dialog: add the furnished example and open it.
+  // Like a new room, it starts with nothing selected and nothing to undo.
+  function handleUseExample() {
+    onAddExampleRoom();
+    setIsAddingRoom(false);
+    setSelectedId(null);
+    setPast([]);
+    setFuture([]);
+    setToast({ key: Date.now(), text: 'The example room is open. You can change anything you like.' });
   }
 
   function handleDeleteRoom() {
@@ -536,7 +548,7 @@ function Workspace({
       )}
 
       {/* The same dialog with no room handed in makes a new one. */}
-      {isAddingRoom && <RoomSetup onSave={handleCreateRoom} onCancel={() => setIsAddingRoom(false)} />}
+      {isAddingRoom && <RoomSetup onSave={handleCreateRoom} onUseExample={handleUseExample} onCancel={() => setIsAddingRoom(false)} />}
 
       {isConnecting && <PinterestImport onImport={handleImport} onCancel={() => setIsConnecting(false)} />}
 
