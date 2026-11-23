@@ -81,7 +81,49 @@ expect('crowded room fails open floor', check(crowded, base, 'Enough open floor'
 // example room scores 100
 const e = ex.exampleRoom();
 const score = feng.getFengShui(e.pieces, e.size);
-expect('example room score', score.score, 100);
+// The example room copies a photo where the sofa floats in the middle with its back
+// to the door, so those two sofa checks fail and the rest pass.
+expect('example room score', score.score, 78);
+expect('example room failed checks', score.checks.filter((entry) => !entry.passes).map((entry) => entry.title), ['Sofa backed by a wall', 'Sofa can see the door']);
+// every check says where it comes from
+expect('every check has a source', score.checks.every((entry) => entry.from === 'Feng shui' || entry.from === 'Design'), true);
+
+// the wider checks
+// bed: head on the back wall, door in the front wall off to one side: the door is ahead of you
+expect('door ahead of the bed is seen', check([{ ...bed, x: -1.2 }], doorAside, 'You can see the door from bed'), true);
+// door in the back wall, behind the pillows
+const doorBehindBed = { ...base, doors: [{ id: 'door', wall: 'back', along: 0.9, width: 0.85 }] };
+expect('door behind the pillows is not seen', check([{ ...bed, x: -1.2 }], doorBehindBed, 'You can see the door from bed'), false);
+expect('pillows next to the door fail', check([{ ...bed, x: 1.0 }], doorBehindBed, 'Pillows away from the door'), false);
+expect('pillows across from the door pass', check([{ ...bed, x: -1.2 }], doorAside, 'Pillows away from the door'), true);
+// a mirror on the front wall looks straight at a bed whose head is on the back wall
+const mirrorAhead = room.clampToRoom({ id: 'm', type: 'wall_mirror', x: 0, z: 5, rotation: 0 }, base);
+expect('mirror across from the bed faces it', check([bed, mirrorAhead], base, 'No mirror facing the bed'), false);
+const mirrorAside = room.clampToRoom({ id: 'm', type: 'wall_mirror', x: 1.6, z: 5, rotation: 0 }, base);
+expect('mirror off to the side does not', check([bed, mirrorAside], base, 'No mirror facing the bed'), true);
+expect('no mirror, no mirror check', check([bed], base, 'No mirror facing the bed'), undefined);
+// sofa: back to the back wall, facing the front
+const sofa = room.clampToRoom({ id: 's', type: 'sofa', x: 0, z: -5, rotation: 0 }, base);
+expect('sofa against a wall is backed', check([sofa], base, 'Sofa backed by a wall'), true);
+expect('sofa in the middle is not backed', check([{ ...sofa, z: 0 }], base, 'Sofa backed by a wall'), false);
+expect('sofa under a back window fails', check([sofa], backWindow, 'Sofa not in front of a window'), false);
+expect('sofa facing the door wall sees the door', check([sofa], doorAside, 'Sofa can see the door'), true);
+expect('sofa with the door behind it does not', check([{ ...sofa, z: 0, rotation: 180 }], doorInLine, 'Sofa can see the door'), false);
+const sofaDepth = catalog.sizeOf(sofa).d;
+const tableDepth = catalog.sizeOf({ type: 'coffee_table' }).d;
+const tableAt = (gap) => ({ id: 'c', type: 'coffee_table', x: 0, z: sofa.z + sofaDepth / 2 + gap + tableDepth / 2, rotation: 0 });
+expect('coffee table 40 cm away is in reach', check([sofa, tableAt(0.4)], base, 'Coffee table within reach'), true);
+expect('coffee table 90 cm away is not', check([sofa, tableAt(0.9)], base, 'Coffee table within reach'), false);
+// desk against the back wall, looking at it
+expect('desk right against a wall faces the wall', check([deskFacingFront], base, 'Desk looks into the room'), false);
+expect('desk turned round looks into the room', check([{ ...deskFacingBack, z: -0.3 }], base, 'Desk looks into the room'), true);
+// walkway: a wardrobe wall to wall between the door and the bed cuts the bed off
+const longRoom = { width: 3, length: 6, height: 2.6, windows: [], doors: [{ id: 'door', wall: 'front', along: 0.5, width: 0.85 }] };
+const farBed = room.clampToRoom({ id: 'b', type: 'bed', x: 0, z: -5, rotation: 0 }, longRoom);
+expect('nothing in the way: walkway passes', check([farBed], longRoom, 'A clear walkway from the door'), true);
+const wall = [-1, 0, 1].map((i) => ({ id: `w${i}`, type: 'wardrobe_wide', x: i * 1.0, z: 1.0, rotation: 0 }));
+expect('furniture across the room: walkway fails', check([farBed, ...wall], longRoom, 'A clear walkway from the door'), false);
+expect('no bed, sofa or desk: no walkway check', check([], longRoom, 'A clear walkway from the door'), undefined);
 // A new piece goes where it fits, turned 90 degrees if it has to. The starter bedroom
 // (3.6 by 3 m with a bed) has no room for the 2.27 m couch from the first sample
 // moodboard picture as it comes, so it should come in turned, and not on top of the bed.

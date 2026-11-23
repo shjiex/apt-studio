@@ -622,6 +622,50 @@ project continues.
   Icons on the stage glass read 4.86 to 1 over black and 12.94 to 1 over white. Words on the
   tip card read 16.09 and 19.18. Words in the top bar read 18.68 or more.
 
+### A wider room score (23 Nov, 1:30 am)
+
+- **Why.** The score had nine checks, almost all about the bed. I asked for it to be more
+  comprehensive after research, so it now reads a living room and a desk as carefully as a
+  bedroom. A room is scored on up to 22 checks, and only the ones that apply to its furniture
+  are counted.
+- **What the research said.** The form school of feng shui is about where things stand, and
+  its main idea is the commanding position: the bed, sofa and desk have a solid wall behind
+  them and a view of the door, without standing straight in line with it. The compass school
+  (which way the home faces, the elements, colours) needs facts the app does not have, so it
+  is left out. Interior designers add distances that can be measured the same way.
+- **New bed checks.** You can see the door from bed (the door is ahead of the pillow, not
+  level with it or behind it). Pillows away from the door (at least 40% of the room's corner
+  to corner length). No mirror facing the bed (only when the room has a mirror).
+- **New sofa checks.** Backed by a wall (within 30 cm, and no window behind it). Not in front
+  of a window. Can see the door. Coffee table within reach, 30 to 55 cm from the front edge.
+- **New desk and table checks.** The desk looks into the room in place of a wall right in
+  front of it. A dining table has 90 cm to the walls so chairs can slide out.
+- **A clear walkway from the door.** The floor is cut into 10 cm squares. A square is open
+  when a person 75 cm wide fits there. A flood fill from the door has to reach the bed, the
+  sofa and the desk (`walkableTo` in `lib/fengshui.js`).
+- **Where each check comes from.** Every check has `from`, either Feng shui or Design, and
+  the card says which under the tip (`FengShuiCard.jsx`).
+- **Left out on purpose.** Schools of feng shui disagree about a mirror facing a door, so the
+  app does not score it.
+- **The example room now scores 78.** Its sofa floats in the middle with its back to the
+  door, as in the photo it copies, so two sofa checks fail. The score used to be 100 because
+  nothing looked at the sofa.
+- **Checks.** `node tests/logic/check-logic.mjs` has 22 new lines for these and all pass. The
+  score takes about 1 ms for the example room and 9 ms for an 8 by 8 m room.
+- **Sources read.**
+  [Homes & Gardens on furniture placement](https://www.homesandgardens.com/interior-design/feng-shui-furniture-placement),
+  [Homes & Gardens on bed placement](https://www.homesandgardens.com/interior-design/bedrooms/feng-shui-bed-placement),
+  [Dummies on the commanding position](https://www.dummies.com/article/home-auto-hobbies/home-improvement-appliances/decorating/applying-feng-shui-principles-to-your-bed-199703),
+  [Castlery on bedroom layout](https://www.castlery.com/uk/blog/feng-shui-for-bedroom),
+  [Livingetc on sofa placement](https://www.livingetc.com/us/advice/feng-shui-sofa-placement),
+  [Livingetc on a sofa in front of a window](https://www.livingetc.com/us/advice/feng-shui-sofa-in-front-of-window),
+  [Ideal Home on sofa placement](https://idealhome.co.uk/living-room/where-to-place-a-sofa-for-feng-shui),
+  [Greatist on desk placement](https://greatist.com/happiness/ultimate-beginners-guide-feng-shui),
+  [Livingetc on a mirror facing a door](https://www.livingetc.com/advice/feng-shui-mirror-facing-door),
+  [Houzz on how much space you need](https://www.houzz.com/magazine/how-much-space-you-need-and-what-to-do-if-you-dont-have-it-stsetivw-vs~95713633),
+  [Apartment Therapy on living room measurements](https://www.apartmenttherapy.com/living-room-layouts-the-ideal-measurements-for-everything-in-the-room-206734),
+  [Apartment Therapy on furniture spacing](https://www.apartmenttherapy.com/dimensions-to-follow-proper-furniture-spacing-basics-149156).
+
 ## Components
 
 | Component | What it does |

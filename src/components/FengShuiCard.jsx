@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import Icon from './Icon.jsx';
 import { getFengShui } from '../lib/fengshui.js';
 
@@ -5,13 +6,20 @@ import { getFengShui } from '../lib/fengshui.js';
 // recognised before it is read.
 function iconFor(check) {
   const title = check.title.toLowerCase();
-  if (title.includes('bed')) return 'bed';
+  if (title.includes('bed') || title.includes('pillow')) return 'bed';
+  if (title.includes('sofa') || title.includes('coffee')) return 'sofa';
+  if (title.includes('plant')) return 'plant';
   if (title.includes('desk')) return 'desk';
   if (title.includes('door')) return 'open';
   if (title.includes('window') || title.includes('light') || title.includes('lamp')) return 'bulb';
   if (title.includes('rug')) return 'layers';
   if (title.includes('walk') || title.includes('floor') || title.includes('room to')) return 'measure';
   return 'compass';
+}
+
+// Where a guideline comes from, in words. Each check carries `from` (see lib/fengshui.js).
+function sourceOf(check) {
+  return check.from === 'Design' ? 'An interior design habit' : 'A feng shui guideline';
 }
 
 // The room's score as a round button in the corner of the preview, the same size
@@ -24,7 +32,9 @@ function iconFor(check) {
 //
 // Whether the card is open is kept in Workspace, so only one panel is open at a time.
 function FengShuiCard({ pieces, room, isOpen, onToggle }) {
-  const result = getFengShui(pieces, room);
+  // Worked out again only when the furniture or the room changes, because one of
+  // the checks (the walkway) walks over the whole floor.
+  const result = useMemo(() => getFengShui(pieces, room), [pieces, room]);
 
   const possible = result.checks.reduce((sum, check) => sum + check.points, 0);
   const failing = result.checks.filter((check) => !check.passes).sort((a, b) => b.points - a.points);
@@ -66,6 +76,7 @@ function FengShuiCard({ pieces, room, isOpen, onToggle }) {
                 <span className="feng__gain">+{gainOf(first)}</span>
               </div>
               <p>{first.tip}</p>
+              <span className="feng__from">{sourceOf(first)}</span>
             </div>
           ) : (
             <div className="feng__line">
@@ -88,7 +99,9 @@ function FengShuiCard({ pieces, room, isOpen, onToggle }) {
                     {check.title}
                     <span className="feng__gain">+{gainOf(check)}</span>
                   </summary>
-                  <p>{check.tip}</p>
+                  <p>
+                    {check.tip} <span className="feng__from">{sourceOf(check)}</span>
+                  </p>
                 </details>
               ))}
             </details>

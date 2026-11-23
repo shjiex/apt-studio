@@ -102,7 +102,7 @@ Without `src/firebaseConfig.js` the app runs in visitor mode: everything works, 
 | `lib/light.js` | `DEFAULT_LIGHTING`, `PLACES`, `sunPosition(latitude, month, hour)`, `getSun`, `sunOnWindows`, bulbs and fixed lights, colour temperature |
 | `lib/surface.js` | `DEFAULT_SURFACES`, 12 named `WALL_PAINTS`, `loadPhoto`, `canvasToTile` |
 | `lib/straighten.js` | The perspective maths behind `PhotoStraighten` |
-| `lib/fengshui.js` | `getFengShui(pieces, room)`: nine measured checks, a score out of 100, tips |
+| `lib/fengshui.js` | `getFengShui(pieces, room)`: up to 22 measured checks for the bed, sofa, desk, dining table and the room (each with `from`: Feng shui or Design), a score out of 100, tips. `walkableTo` is a flood fill for the 75 cm walkway check |
 | `lib/storage.js` | Load and save the moodboard and the home, in the browser and in Firestore; `completeHome` fills in what an older save lacks |
 | `lib/pinterest.js` | `parseBoardUrl`, `fetchBoard` (public board feed, no key) |
 | `lib/models.js` | `loadModel(url)`: loads a `.glb` once and remembers it |
@@ -149,7 +149,7 @@ See section 9. `pipeline/models/` holds downloaded weights and must never be com
 
 **The Realistic picture.** In the Inside view, Realistic switches `PathTraced.jsx` on. It hands the scene to `WebGLPathTracer` (5 bounces, low-resolution preview first, one traced pixel per screen point), then a denoise pass whose strength falls as passes add up. The stage shows the pass count, a Brightness slider (exposure) and Save picture, which downloads `apt-studio-<room>.png`. **It has only ever run on software graphics in tests. Nobody has seen it on a real graphics card.** The owner says it takes too long to load (section 12).
 
-**Fit and score.** `getFit(piece, pieces, room)` returns fits, tight or blocked from overlaps, wall clearance and door swing. `getFengShui` runs nine measured checks and returns a score and tips. The card shows one thing to do first, then "N more to improve" and "N already good".
+**Fit and score.** `getFit(piece, pieces, room)` returns fits, tight or blocked from overlaps, wall clearance and door swing. `getFengShui` runs up to 22 measured checks (only those that apply to the furniture in the room) and returns a score and tips. The example room scores 78 because its sofa floats with its back to the door. The card shows one thing to do first, then "N more to improve" and "N already good".
 
 **Catalog and pin items.** `CATALOG` has 14 pieces. `Workspace.jsx` reads `public/models/pins/manifest.json` and calls `setPinItems`, which adds the furniture made from moodboard photos. Only the six sample photos have models. As far as the code shows, pins from a board the person connects get no 3D model unless the pipeline is run on them and the manifest rebuilt. There is no server.
 
@@ -377,6 +377,8 @@ The workspace was laid out again from the owner's Figma frame 216:4506. Where an
 **Units.** `units` is `'metric'` or `'imperial'` (saved as `apt-studio-units`). Stored values stay in metres. The room dialog and the Floor and walls sliders still show metres only.
 
 **First visit.** `apt-studio-welcomed` and `apt-studio-toured` in `localStorage` say whether the welcome and the tips have been seen. Scan your room is shown as Soon and does nothing.
+
+**Room score.** Widened on 23 Nov from research (sources in the README under "A wider room score"). Compass and element rules are left out because the app does not know which way a home faces.
 
 **Realistic.** On by default in the Inside view. `WARM_PASSES` in `PathTraced.jsx` hides the first four passes. `SHARP_AT` in `PreviewPanel.jsx` (64 passes) is where the pill reads Sharp.
 

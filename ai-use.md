@@ -342,6 +342,15 @@ My direction: look through the IKEA and Planner 5D categories I had open, and ad
 
 My direction: the start should ask questions before it assumes a room, with import first and a skip to a generic room. Tips should be small popups next to the features. My Figma note said the Inside view should already try to be realistic and should tell me how long to wait. The assistant wrote the welcome, the tips and the Sharpening pill.
 
+### A wider room score (23 Nov, 1:30 am), AI-generated
+
+- `src/lib/fengshui.js`: the helpers `backOf`, `doorBehind`, `doorDistance`, `inFrontOf` and `walkableTo`, the new checks in `checkBed`, `checkSofa`, `checkDesk`, `checkDining` and `checkRoom`, and `from` on every check.
+- `src/components/FengShuiCard.jsx`: the source line under a tip, and `useMemo` around the score.
+- `tests/logic/check-logic.mjs`: 22 new lines.
+- `src/pages/Workspace.jsx`: the welcome is skipped when a saved home is already in the browser.
+
+My direction: "fengshui should also be more comprehensive after you conduct deep research". The assistant searched the web, read the sources listed in the README, chose which guidelines can be measured from what the app knows, and wrote the checks. The thresholds (30 cm behind a sofa, 40% of the corner to corner length, 75 cm for a walkway) are its choices from the ranges in those sources, and I can change them at the top of each check.
+
 ## Chat transcript
 
 TODO: paste the share link or exported transcript of the Claude conversation here.

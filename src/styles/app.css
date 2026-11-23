@@ -3695,3 +3695,15 @@ a.btn {
     width 420ms var(--flow),
     height 420ms var(--flow);
 }
+
+/* ---------- room score: where a guideline comes from ---------- */
+.feng__from {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-muted);
+}
+
+.feng__first .feng__from {
+  display: block;
+}

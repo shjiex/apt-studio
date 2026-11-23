@@ -82,7 +82,10 @@ function Workspace({
   const [tab, setTab] = useState('preview'); // which panel a phone shows
   // The welcome questions show on a first visit, and again after "Start over".
   // 'apt-studio-welcomed' in the browser's storage remembers that they were seen.
-  const [isWelcoming, setIsWelcoming] = useState(() => !localStorage.getItem('apt-studio-welcomed'));
+  // Someone who already has a saved home from an earlier visit is not asked again.
+  const [isWelcoming, setIsWelcoming] = useState(
+    () => !localStorage.getItem('apt-studio-welcomed') && !localStorage.getItem('apt-studio-home'),
+  );
   // The tour of small tips beside the controls. It follows the welcome the first time.
   const [isTouring, setIsTouring] = useState(false);
   // The section to the right of the room: is it open, and is it showing the moodboard or the shop list?
