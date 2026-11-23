@@ -254,14 +254,36 @@ export function coversDoor(piece, room) {
   });
 }
 
+// Does a piece that hangs on a wall cover part of a window or a doorway in that wall?
+// Both are looked at as rectangles on the wall: how far along it, and how high up.
+export function coversOpening(piece, room) {
+  if (!piece.wall) return false; // not put on a wall yet
+  const item = getItem(piece.type);
+  const { w, h } = sizeOf(piece);
+  const middle = piece.hang === undefined ? item.hang : piece.hang; // how high its middle is
+  // along the back and front walls a place is its x, along the left and right walls its z
+  const runsAcross = piece.wall === 'back' || piece.wall === 'front';
+  const along = runsAcross ? piece.x : piece.z;
+  const openings = [...room.windows.map((win) => windowInRoom(win, room)), ...room.doors.map((door) => doorInRoom(door, room))];
+  return openings.some((opening) => {
+    if (opening.wall !== piece.wall) return false;
+    const openingAlong = runsAcross ? opening.x : opening.z;
+    const overlapsAlong = Math.abs(along - openingAlong) < w / 2 + opening.half;
+    const overlapsUp = middle + h / 2 > opening.bottom && middle - h / 2 < opening.top;
+    return overlapsAlong && overlapsUp;
+  });
+}
+
 // 'fits', 'tight' or 'blocked' for one piece.
 // A rug can sit under anything, so it always fits. Something that hangs on a wall is
-// only in the way of other things on the same wall. Furniture on the floor is checked
-// against the door swings and against the other furniture on the floor.
+// in the way of other things on the same wall, and is blocked where it would cover a
+// window or a doorway. Furniture on the floor is checked against the door swings and
+// against the other furniture on the floor.
 export function getFit(piece, pieces, room) {
   if (liesFlat(piece)) return 'fits';
   const onWall = hangsOnWall(piece.type);
   if (!onWall && coversDoor(piece, room)) return 'blocked';
+  if (onWall && coversOpening(piece, room)) return 'blocked';
   let closest = Infinity;
   for (const other of pieces) {
     if (other.id === piece.id || liesFlat(other)) continue;

@@ -421,6 +421,12 @@ My direction: "realistic mode really doesn't work, i see spots everywhere". The 
 
 My direction: I asked for imperial units in my midnight list, and this was on the list of gaps left from it. The assistant finished it while working through the night. The choices that are its own: feet with one decimal in the fields, and comparing a typed size in the unit it was typed in.
 
+### A print cannot hang over a window (23 Nov, 5:20 am), AI-generated
+
+- Changed: `lib/room.js`, `tests/logic/check-logic.mjs`.
+
+My direction: this was on the list of gaps left from the wall decor I asked for at midnight. The assistant closed it while working through the night. The choice that is its own: a covered window or doorway reads Blocked, not Tight.
+
 ## Chat transcript
 
 TODO: paste the share link or exported transcript of the Claude conversation here.

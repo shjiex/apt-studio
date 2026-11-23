@@ -141,6 +141,21 @@ for (const piece of e.pieces) {
   expect(`example room ${piece.type} fits`, room.getFit(piece, e.pieces, e.size), 'fits');
 }
 
+// something on the wall may not cover a window or a doorway
+const windowWall = { ...base, windows: [{ id: 'w', wall: 'back', along: 0.5, width: 1.0, bottom: 0.9, top: 2.0 }] };
+const printOnWindow = room.clampToRoom({ id: 'p', type: 'wall_art', x: 0, z: -5, rotation: 0 }, windowWall);
+expect('a print over the window is blocked', room.getFit(printOnWindow, [printOnWindow], windowWall), 'blocked');
+const printBeside = room.clampToRoom({ id: 'p', type: 'wall_art', x: 1.4, z: -5, rotation: 0 }, windowWall);
+expect('a print beside the window fits', room.getFit(printBeside, [printBeside], windowWall), 'fits');
+const printOtherWall = room.clampToRoom({ id: 'p', type: 'wall_art', x: -5, z: 0, rotation: 0 }, windowWall);
+expect('a print on another wall fits', room.getFit(printOtherWall, [printOtherWall], windowWall), 'fits');
+const doorWall = { ...base, doors: [{ id: 'door', wall: 'front', along: 0.5, width: 0.85 }] };
+const mirrorOnDoor = room.clampToRoom({ id: 'm', type: 'wall_mirror', x: 0, z: 5, rotation: 0 }, doorWall);
+expect('a mirror across a doorway is blocked', room.getFit(mirrorOnDoor, [mirrorOnDoor], doorWall), 'blocked');
+const newPrint = room.findOpenSpot('wall_art', [], windowWall);
+const placed = room.clampToRoom({ id: 'n', type: 'wall_art', ...newPrint }, windowWall);
+expect('a new print is given a place clear of the window', room.getFit(placed, [placed], windowWall), 'fits');
+
 // room-sized lengths typed in metres or in feet
 const units = await server.ssrLoadModule('/src/lib/units.js');
 expect('3.6 m shown in feet', units.toBig(3.6, 'imperial'), 11.8);

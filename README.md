@@ -884,6 +884,17 @@ project continues.
 - **Also.** On a narrow stage, where the middle buttons sit one row up, the plan is fitted
   above both rows.
 
+### A print cannot hang over a window (23 Nov, 5:20 am)
+
+- **The gap.** Something for the wall (a print, a mirror, a wall lamp) could sit on top of a
+  window or across a doorway and still read Fits.
+- **Fixed in `lib/room.js`.** `coversOpening` looks at the piece and at each window and doorway
+  in its wall as rectangles on that wall (how far along, how high up). Where they overlap,
+  `getFit` answers Blocked. A new wall piece is given a place clear of them, because
+  `findOpenSpot` already looks for a place that fits.
+- **Checked.** Five new checks in `tests/logic/check-logic.mjs`: over the window, beside it, on
+  another wall, across a doorway, and where a new print lands.
+
 ## Components
 
 | Component | What it does |

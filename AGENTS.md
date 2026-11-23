@@ -373,7 +373,7 @@ The workspace was laid out again from the owner's Figma frame 216:4506. Where an
 
 **Pieces.** A piece can have `size` (its own size), `tint`, `finish` (`'matte'`, `'gloss'`, `'metal'`), `hang` (height on the wall) and `wall`. Always read a size through `sizeOf(piece)`. A click selects, a drag of the selected piece moves it. Duplicate was removed on the owner's request.
 
-**Wall decor.** `hangsOnWall(type)` pieces go through `snapToWall` in `lib/room.js`, are left out of the floor checks, and collide only with each other. A wall piece can still cover a window.
+**Wall decor.** `hangsOnWall(type)` pieces go through `snapToWall` in `lib/room.js`, are left out of the floor checks, and collide only with each other. Since 5:20 am on 23 Nov a wall piece over a window or a doorway reads Blocked (`coversOpening` in `lib/room.js`).
 
 **Room.** The orbit turns all the way round and `lowWalls` in `Room3D.jsx` drops the walls on the camera's side. Size arrows on the plan resize the room. Rooms are rectangles only.
 
