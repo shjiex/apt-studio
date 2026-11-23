@@ -433,6 +433,12 @@ My direction: this was on the list of gaps left from the wall decor I asked for 
 
 My direction: from my 2 am list, "this UI should not read as a text wall; add icons where needed" and "shouldn't have the same name of furniture be shown more than once". The assistant found the Shop tab still read that way while looking at the test link on my Mac. The choice that is its own: one row per piece with a tag button, in place of the sentence.
 
+### The skip button on the welcome screen is a button again (23 Nov, 12:15 pm), AI-generated
+
+- Changed: `styles/app.css`.
+
+My direction: "Keep working on it until 7:50 am". The assistant found this while looking at the welcome screen in its test browser. Its session stopped at about 5:30 am before the fix was committed, and it shipped the fix when I asked about GitHub at noon.
+
 ## Chat transcript
 
 TODO: paste the share link or exported transcript of the Claude conversation here.

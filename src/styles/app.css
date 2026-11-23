@@ -4291,3 +4291,10 @@ a.btn {
   font-size: 14px;
   font-weight: 500;
 }
+
+/* A full-width button that sits straight in a dialog (not in a row of buttons) keeps
+   its own height. `flex: 1` is what makes two buttons in a row share the width, but
+   in a dialog, which stacks its parts, it squeezed a lone button flat. */
+.dialog > .btn--fill {
+  flex: none;
+}

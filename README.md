@@ -907,6 +907,14 @@ project continues.
 - **Seen on my Mac** in the test link, and checked after the change in the test browser: the
   card's top is inside the stage, and the tag button opens the armchair's panel.
 
+### The skip button on the welcome screen is a button again (23 Nov, 12:15 pm)
+
+- **Found** at 5:30 am, shipped at noon. On the first screen a new visitor sees, Skip to a
+  ready bedroom was squeezed to a flat strip 20 px tall. A full-width button placed straight
+  in a dialog had `flex: 1`, which is right for two buttons sharing a row and wrong in a
+  dialog that stacks its parts.
+- **Fixed in `styles/app.css`.** Such a button keeps its own height (48 px, measured).
+
 ## Components
 
 | Component | What it does |
