@@ -40,6 +40,8 @@ function PreviewPanel({
   onRedo,
   onZoom,
   onCanvasReady,
+  isScoreOpen,
+  onToggleScore,
 }) {
   const selectedPiece = pieces.find((piece) => piece.id === selectedId);
 
@@ -118,7 +120,7 @@ function PreviewPanel({
         </div>
 
         <div className="stage__score">
-          <FengShuiCard pieces={pieces} room={room} />
+          <FengShuiCard pieces={pieces} room={room} isOpen={isScoreOpen} onToggle={onToggleScore} />
         </div>
 
         <div className="stage__zoom">

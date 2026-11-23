@@ -1,15 +1,14 @@
-import { useState } from 'react';
 import Button from './Button.jsx';
 
 // The download button in the top bar. Pressing it opens two choices:
 // a picture of what is on screen, or the room as a file.
 // The room file is what pipeline/render_room.py reads to make a photo render.
-function DownloadMenu({ onPicture, onRoomFile }) {
-  const [isOpen, setIsOpen] = useState(false);
-
+// Whether the menu is open is kept in Workspace, so only one panel is open at a time.
+function DownloadMenu({ onPicture, onRoomFile, isOpen, onToggle, onClose }) {
+  // Do the chosen download, then close the menu.
   function choose(action) {
     action();
-    setIsOpen(false);
+    onClose();
   }
 
   return (
@@ -20,7 +19,7 @@ function DownloadMenu({ onPicture, onRoomFile }) {
         aria-label="Download"
         aria-expanded={isOpen}
         title="Download"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={onToggle}
       />
 
       {isOpen && (

@@ -397,6 +397,20 @@ project continues.
   the furniture choices, `shoot42.py` the example room). `AGENTS.md` is the handoff for a coding
   agent.
 
+### One panel at a time, and glass without outside shadows (22 Nov, 6:30 pm)
+
+- **One panel at a time.** Lighting, Floor and walls, Download and the room score card used to
+  open on top of each other. `Workspace.jsx` now keeps which one is open (`openPanel`), so opening
+  one closes the one before, pressing its button again closes it, and Escape closes it. With a
+  piece selected, the first Escape closes the panel and the second clears the selection.
+- **No shadow outside the glass.** The 4:11 pm rule, finished. The view switch thumb, the
+  segmented thumb and the toast keep only their inner highlight. Every glass surface that uses
+  `--glass-edge` ends in a 1 px hairline. Pressed states were already inner shadows, so they stay.
+  Dialogs and the account menu are solid white, not glass, and keep their soft shadow.
+- **Contrast, measured.** Text on glass over a black and a white backdrop, measured in a headless
+  browser before and after. Lowest reading 5.34 to 1 (glass groups over black). The toast reads
+  11.39 to 1 over white and 19.57 to 1 over black, the same as before.
+
 ## Components
 
 | Component | What it does |

@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import Button from './Button.jsx';
 import Segmented from './Segmented.jsx';
 import { MONTH_NAMES, PLACES, formatHour, getSun, kelvinToColor, nameOfKelvin, newFixedLight, sunOnWindows } from '../lib/light.js';
@@ -63,8 +62,8 @@ export function BulbSliders({ bulb, onChange }) {
 // daylight (which way the window faces, the time of day), the lights fixed to the
 // room (ceiling, wall, strip: where, Kelvin, lumens) and the bulb lamps start with.
 // The room changes as you move the controls.
-function LightingMenu({ lighting, onChange, windows }) {
-  const [isOpen, setIsOpen] = useState(false);
+// Whether the panel is open is kept in Workspace, so only one panel is open at a time.
+function LightingMenu({ lighting, onChange, windows, isOpen, onToggle }) {
   const sun = getSun(lighting);
 
   // Replace one fixed light with a changed copy.
@@ -80,7 +79,7 @@ function LightingMenu({ lighting, onChange, windows }) {
         aria-label="Lighting"
         aria-expanded={isOpen}
         title="Lighting"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={onToggle}
       />
 
       {isOpen && (

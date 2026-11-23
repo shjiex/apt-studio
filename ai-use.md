@@ -249,6 +249,13 @@ My direction: "keep going with scheduled tasks to polish the rest of everything 
 
 My direction: "set up Firebase and Pinterest integration, I'll declunk the UI. Also prepare and update a comprehensive handoff document for Codex. add more blender models. adjust the realistic version so it doesn't take as long to load. the 2d render is a little buggy as some outline keep flickering. each element in the moodboard image should have different options to choose which furniture, but note that simpler images work best." and, about the Figma screen with the photo, "this should be an example room available for users to use". The assistant split the work across parallel sessions. Choosing the TV stand as the sideboard and painting the arches as a wall picture were the assistant's choices.
 
+### One panel at a time, and glass without outside shadows (22 Nov, 6:30 pm), AI-generated
+
+- `src/pages/Workspace.jsx` (`openPanel`, `togglePanel`, Escape), `src/components/PreviewPanel.jsx`, `LightingMenu.jsx`, `SurfacesMenu.jsx`, `DownloadMenu.jsx` and `FengShuiCard.jsx` (their open state now comes from Workspace).
+- `src/styles/app.css`: the outer shadows of the view switch thumb, the segmented thumb and the toast.
+
+My direction: "the liquid glass should avoid shadows beyond its borders, or minimize it, because it's too much now", and "continue where I left off". Closing the other panels when one opens was the assistant's fix for panels overlapping during the demo.
+
 ## Chat transcript
 
 TODO: paste the share link or exported transcript of the Claude conversation here.

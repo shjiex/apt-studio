@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import Icon from './Icon.jsx';
 import { getFengShui } from '../lib/fengshui.js';
 
@@ -22,8 +21,9 @@ function iconFor(check) {
 // The card eases you in. It shows ONE thing to do first (the failed check worth
 // the most points) with its tip. Everything else is folded away: the other things
 // to improve, and the checks that already pass.
-function FengShuiCard({ pieces, room }) {
-  const [isOpen, setIsOpen] = useState(false);
+//
+// Whether the card is open is kept in Workspace, so only one panel is open at a time.
+function FengShuiCard({ pieces, room, isOpen, onToggle }) {
   const result = getFengShui(pieces, room);
 
   const possible = result.checks.reduce((sum, check) => sum + check.points, 0);
@@ -43,7 +43,7 @@ function FengShuiCard({ pieces, room }) {
         aria-expanded={isOpen}
         aria-label={`Room score ${result.score} out of 100`}
         title="Room score"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={onToggle}
       >
         <span className="feng__inner">
           <strong>{result.score}</strong>

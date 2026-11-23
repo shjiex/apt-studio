@@ -88,8 +88,8 @@ function WindowSlider({ label, value, min, max, onChange }) {
 // the floor (the built-in oak or a photo of your own floor), the walls (a paint
 // colour or a photo) and the windows (which wall, where along it, how big).
 // The room changes as you choose.
-function SurfacesMenu({ surfaces, onChange, room, onRoomChange }) {
-  const [isOpen, setIsOpen] = useState(false);
+// Whether the panel is open is kept in Workspace, so only one panel is open at a time.
+function SurfacesMenu({ surfaces, onChange, room, onRoomChange, isOpen, onToggle }) {
   const { floor, wall } = surfaces;
 
   // Replace one window with a changed copy, or take it out.
@@ -137,7 +137,7 @@ function SurfacesMenu({ surfaces, onChange, room, onRoomChange }) {
         aria-label="Floor, walls, windows and doors"
         aria-expanded={isOpen}
         title="Floor, walls, windows and doors"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={onToggle}
       />
 
       {isOpen && (

@@ -72,6 +72,9 @@ function Workspace({
   const [isShopping, setIsShopping] = useState(false); // is the shop list open?
   const [isFinding, setIsFinding] = useState(false); // is the "already in your room" dialog open?
   const [isPickingPlan, setIsPickingPlan] = useState(false); // is the floor plan picker open?
+  // Which small panel is open over the room: 'lighting', 'surfaces', 'download',
+  // 'score', or null for none. Keeping it here means only one is open at a time.
+  const [openPanel, setOpenPanel] = useState(null);
   const [tab, setTab] = useState('preview'); // which panel a phone shows
   const [showGrid, setShowGrid] = useState(true);
   const [zoom, setZoom] = useState(1); // 1 fits the room; bigger is closer
@@ -217,6 +220,13 @@ function Workspace({
     );
   }
 
+  // Open a panel by its name. Pressing the button of the panel that is already
+  // open closes it. Opening a different one closes the one before.
+  function togglePanel(name) {
+    if (openPanel === name) setOpenPanel(null);
+    else setOpenPanel(name);
+  }
+
   function handleZoom(nextZoom) {
     setZoom(Math.min(Math.max(nextZoom, 0.5), 3));
   }
@@ -231,6 +241,11 @@ function Workspace({
         event.preventDefault();
         if (event.shiftKey) handleRedo();
         else handleUndo();
+        return;
+      }
+      // Escape closes an open panel first, before it clears the selection.
+      if (event.key === 'Escape' && openPanel) {
+        setOpenPanel(null);
         return;
       }
       if (!selectedId) return;
@@ -426,12 +441,31 @@ function Workspace({
             title="Measurement grid"
             onClick={() => setShowGrid(!showGrid)}
           />
-          <LightingMenu lighting={lighting} onChange={setLighting} windows={room.windows} />
-          <SurfacesMenu surfaces={surfaces} onChange={setSurfaces} room={room} onRoomChange={changeRoom} />
+          <LightingMenu
+            lighting={lighting}
+            onChange={setLighting}
+            windows={room.windows}
+            isOpen={openPanel === 'lighting'}
+            onToggle={() => togglePanel('lighting')}
+          />
+          <SurfacesMenu
+            surfaces={surfaces}
+            onChange={setSurfaces}
+            room={room}
+            onRoomChange={changeRoom}
+            isOpen={openPanel === 'surfaces'}
+            onToggle={() => togglePanel('surfaces')}
+          />
           <Button variant="secondary" icon="link" onClick={() => setIsShopping(true)}>
             Shop list
           </Button>
-          <DownloadMenu onPicture={handleDownload} onRoomFile={handleDownloadRoom} />
+          <DownloadMenu
+            onPicture={handleDownload}
+            onRoomFile={handleDownloadRoom}
+            isOpen={openPanel === 'download'}
+            onToggle={() => togglePanel('download')}
+            onClose={() => setOpenPanel(null)}
+          />
         </div>
       </header>
 
@@ -458,6 +492,8 @@ function Workspace({
           room={room}
           pieces={pieces}
           selectedId={selectedId}
+          isScoreOpen={openPanel === 'score'}
+          onToggleScore={() => togglePanel('score')}
           view={view}
           showGrid={showGrid}
           lighting={lighting}
