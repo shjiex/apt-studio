@@ -312,6 +312,13 @@ My direction: "it doesn't look like the liquid glass loads right, it should look
 
 My direction: "complete what was left off". The assistant opened the hosted build on my MacBook, timed the Realistic picture there, and copied over the files my GitHub upload had missed. No app code changed in this round.
 
+### The moodboard filter row and the furniture choice card (22 Nov, 10:45 pm), AI-generated
+
+- `src/styles/app.css`: the "moodboard filter row keeps its height" block at the end.
+- `src/components/MoodboardPanel.jsx`: the layout effect that keeps the card on screen now stops above the tab bar.
+
+My direction: finish the handoff list (the card's contrast and its phone layout were open items). The assistant found the shrinking filter row in a screenshot and fixed it.
+
 ## Chat transcript
 
 TODO: paste the share link or exported transcript of the Claude conversation here.

@@ -547,6 +547,17 @@ project continues.
 - **The hosted demo.** `src/demoFiles.json` now lists the model files of the new hosted build,
   because the first one can no longer be republished.
 
+### The moodboard filter row and the furniture choice card (22 Nov, 10:45 pm)
+
+- **Filter row.** On a short screen the All, Picked and In 3D chips shrank to a sliver once the
+  note above the pins made the moodboard longer than the window. A row that can scroll sideways
+  is allowed to shrink inside a column, so the row now has `flex: none` and keeps its 32 px.
+- **Furniture choice card on a phone.** The card stopped 12 px above the bottom of the window,
+  which on a phone is under the tab bar. It now stops 8 px above the tab bar when the tab bar is
+  shown (`MoodboardPanel.jsx`).
+- **Measured.** Ink text on the card reads 4.86 to 1 over black and 12.94 to 1 over white. Text
+  inside a choice row reads 11.11 to 1 over black. AA needs 4.5.
+
 ## Components
 
 | Component | What it does |
