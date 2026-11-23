@@ -237,6 +237,18 @@ My direction: outlines should cover the whole predicted object even when a table
 
 My direction: "keep going with scheduled tasks to polish the rest of everything with the liquid glass as well". Making grey labels ink inside glass panels was the assistant's way of keeping AA.
 
+### Flowing choice rows, an example room, six more models and furniture choices per picture (22 Nov, 4:10 pm), AI-generated
+
+- `src/components/Segmented.jsx`, `src/lib/useSlidingThumb.js`, and the eight choice rows in `LightingMenu.jsx` and `SurfacesMenu.jsx`; `ViewSwitch.jsx` rewritten to use the hook.
+- `src/data/exampleRoom.js`, the example block in `RoomSetup.jsx`, `src/styles/example-room.css`, `handleAddExampleRoom` in `App.jsx`, `handleUseExample` in `Workspace.jsx`, and the wall picture `public/example/colour-block-wall.jpg` (drawn by a script).
+- Six Blender models and their catalog entries: `pipeline/furniture_lib.py`, `pipeline/bake_catalog.py`, `public/models/catalog/`, `public/furniture/`, `src/data/catalog.js`.
+- Furniture choices per picture: `MoodboardPanel.jsx`, `src/styles/moodboard-options.css`, `pipeline/pin2object.py`, `public/models/pins/manifest.json`.
+- `Room3D.jsx`, `PathTraced.jsx` and the new `RoomEffects.jsx` (plan flicker and a faster start for the Realistic picture).
+- `src/data/moodboard.js` (tags and credits re-paired), `AGENTS.md`, `tests/headless/`.
+- The Firebase project was created in the Firebase console by the assistant through my browser, at my request. No code came from that.
+
+My direction: "set up Firebase and Pinterest integration, I'll declunk the UI. Also prepare and update a comprehensive handoff document for Codex. add more blender models. adjust the realistic version so it doesn't take as long to load. the 2d render is a little buggy as some outline keep flickering. each element in the moodboard image should have different options to choose which furniture, but note that simpler images work best." and, about the Figma screen with the photo, "this should be an example room available for users to use". The assistant split the work across parallel sessions. Choosing the TV stand as the sideboard and painting the arches as a wall picture were the assistant's choices.
+
 ## Chat transcript
 
 TODO: paste the share link or exported transcript of the Claude conversation here.

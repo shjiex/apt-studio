@@ -359,6 +359,44 @@ project continues.
   solid colour when the system asks for less transparency or more contrast.
 - `shoot38.py` measures the lighting panel as well: lowest reading 4.99 to 1.
 
+### Flowing choice rows, an example room, six more models and furniture choices per picture (22 Nov, 4:10 pm)
+
+- **Choice rows.** `Segmented.jsx` draws every small choice row in the lighting panel and the
+  floor-and-walls panel (compass side, a light's wall, oak or your photo, paint or your photo,
+  a window's or door's wall, hinge side, open or shut). One dark thumb slides from the old choice
+  to the new one and stretches on the way. The sliding and the stretch live in
+  `src/lib/useSlidingThumb.js`, a custom hook that `ViewSwitch.jsx` uses too, so the two do not
+  repeat each other. The buttons keep their names and `aria-pressed`.
+- **Example room.** The add-room dialog has "Or start from an example". "Open the example room"
+  adds `Colour block living room` (4.6 by 3.8 by 2.6 m) as a new room: eleven catalog pieces placed
+  after the sample photo `mood-2.jpg`, a window on the left wall, early evening light, warm lamps,
+  and a painted wall (`public/example/colour-block-wall.jpg`, drawn for this and used through the
+  existing "Your photo" wall option). It is in `src/data/exampleRoom.js`. It is a model of the
+  photo's layout and colours. It is not the photo: the art, the shelves and the small things on
+  them are not modelled.
+- **Six more models made in Blender.** Dining chair, TV stand, wardrobe, side table, floor mirror
+  and pouf, built in `pipeline/furniture_lib.py`, baked by `pipeline/bake_catalog.py` and listed in
+  `src/data/catalog.js` with tile pictures. The catalog has 20 pieces now.
+- **Furniture choices per picture.** Every piece of furniture found in a sample moodboard picture
+  has its own outline (4 to 6 per picture, written by `pin2object.py --manifest` into `elements` in
+  the pins manifest). Pressing one opens a card that lists the model made from that picture first
+  and then the catalog pieces of that kind, each with an Add button. A note above the board says
+  that simpler pictures work best.
+- **Plan flicker and a faster Realistic picture.** The effects pass (`RoomEffects.jsx`) and the
+  path tracer (`PathTraced.jsx`) are fetched only when a view needs them, so the plan opens
+  without them. Changes in `Room3D.jsx` aim at the flickering outlines on the plan. This part was
+  not verified before the session ended.
+- **Glass without a drop shadow.** `--glass-edge` in `src/styles/app.css` ends in a 1 px hairline
+  in place of the soft shadow that reached outside the glass.
+- **Sample photo tags.** The tags and credits of four sample photos (`mood-2` to `mood-5`) were
+  attached to the wrong files. They are paired by what each picture shows now.
+- **Firebase.** The project `apt-studio-cb84e` exists: Email/Password sign-in is on, and the
+  Firestore database has `firestore.rules` published. Pasting its config into
+  `src/firebaseConfig.js` is the one step left, and the first real save and load has not been run.
+- **Tests and handoff.** The headless test scripts are in `tests/headless/` (`shoot41.py` covers
+  the furniture choices, `shoot42.py` the example room). `AGENTS.md` is the handoff for a coding
+  agent.
+
 ## Components
 
 | Component | What it does |
@@ -370,14 +408,16 @@ project continues.
 | `Room3D` | The Three.js canvas. Contains `Scene`, `CameraRig`, `RoomShell`, `MeasureGrid` and `Piece`. |
 | `FurnitureModel`, `GlbModel` | Shows a piece's 3D model file at its real size. The simple version built from boxes stands in while the file loads or if it fails. |
 | `ViewSwitch` | The view switch: 2D, 3D and Inside. |
+| `Segmented` | A row of choices with one thumb that slides to the chosen one (which wall, hinge side, oak or your photo). |
 | `PathTraced` | The realistic picture of the inside view: follows light as it bounces, and clears up pass by pass. |
+| `RoomEffects` | The extra pass over the 3D and inside pictures: soft shadow in corners and camera-like tone mapping. Fetched only when a view needs it. |
 | `SelectionBar` | Name, size, fit tag, Rotate and Remove for the selected piece. |
 | `FitTag` | The Fits / Tight / Blocked label. |
 | `ElementStrip`, `ElementTile` | The search field, the group chips, the row of furniture tiles, and one tile. |
-| `MoodboardPanel` | Right panel: the connected board's pins (or sample photos), which can be picked, with search, filters and Explore. |
+| `MoodboardPanel` | Right panel: the connected board's pins (or sample photos), which can be picked, with search, filters and Explore. Each piece of furniture found in a sample picture is a button that opens a card of furniture to choose from. |
 | `PinterestImport` | Dialog that takes a board link and loads its pins. |
 | `AccountButton` | A round icon: a link to log in for visitors, a small menu with email and "Log out" when signed in. |
-| `RoomSetup` | The room dialog: kind, name and size. Also makes a new room. |
+| `RoomSetup` | The room dialog: kind, name and size. Also makes a new room, or opens the example room. |
 | `RoomTabs` | The row under the top bar: the home's name, one tab per room, and + to add one. |
 | `SurfacesMenu` | The floor, walls and windows button and its panel: oak or your photo, paint or your photo, and a card per window and per door. |
 | `PhotoStraighten` | Dialog for a floor or wall photo: drag four corners onto a rectangle and type its size. |
@@ -394,8 +434,9 @@ project continues.
 | `Button`, `Icon` | Shared button and inline SVG icons. |
 
 Plain functions live in `src/lib/`: `room.js` (clamping, overlap, fit), `pinterest.js` (board link
-parsing and loading pins) and `storage.js` (Firestore load and save). The furniture list is in
-`src/data/catalog.js`.
+parsing and loading pins) and `storage.js` (Firestore load and save). `useSlidingThumb.js` is a
+custom hook shared by `ViewSwitch` and `Segmented`. The furniture list is in
+`src/data/catalog.js` and the example room in `src/data/exampleRoom.js`.
 
 ## Packages
 
