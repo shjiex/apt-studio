@@ -312,6 +312,27 @@ def make(pin_dir, out_dir, do_preview=False):
     return entry
 
 
+# Fields that other scripts add to an image's entry, which this script does not make.
+# pin2object.py --manifest adds 'elements' (the furniture choices for each thing
+# found in the picture). Rebuilding an image's model here keeps them.
+KEPT_FIELDS = ('elements',)
+
+
+def merge_manifest(new_entries, old_entries):
+    """The manifest after this run: the entries just made, plus the entries for other
+    images that were already in the list (a run on one image must not drop the rest)."""
+    old_by_id = {e['id']: e for e in old_entries}
+    for e in new_entries:
+        before = old_by_id.get(e['id'], {})
+        for field in KEPT_FIELDS:
+            if field in before and field not in e:
+                e[field] = before[field]
+    done = {e['id'] for e in new_entries}
+    merged = [e for e in old_entries if e['id'] not in done] + new_entries
+    merged.sort(key=lambda e: e['id'])
+    return merged
+
+
 if __name__ == '__main__':
     argv = sys.argv[1:]
     ap = argparse.ArgumentParser()
@@ -324,10 +345,7 @@ if __name__ == '__main__':
         e = make(d, a.out, a.preview)
         if e:
             manifest.append(e); print('MODEL', e['id'][:36], e['name'], e['backend'], e['size'], e['bytes'] // 1024, 'KB')
-    # keep entries for other images that are already in the list (a run on one image must not drop the rest)
     path = os.path.join(a.out, 'manifest.json')
     if os.path.exists(path):
-        done = {e['id'] for e in manifest}
-        manifest = [e for e in json.load(open(path)) if e['id'] not in done] + manifest
-        manifest.sort(key=lambda e: e['id'])
+        manifest = merge_manifest(manifest, json.load(open(path)))
     json.dump(manifest, open(path, 'w'), indent=1)
