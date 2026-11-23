@@ -52,26 +52,30 @@ function RoomTabs({ homeName, rooms, activeRoomId, onRenameHome, onPick, onEdit,
         </button>
       )}
 
-      <div className="room-tabs" role="tablist" aria-label="Rooms in this home">
-        {rooms.map((entry) => {
-          const isOpen = entry.id === activeRoomId;
-          return (
-            <button
-              type="button"
-              key={entry.id}
-              role="tab"
-              aria-selected={isOpen}
-              className={isOpen ? 'room-tab is-current' : 'room-tab'}
-              title={isOpen ? 'Change this room' : `Open ${entry.name}`}
-              onClick={() => (isOpen ? onEdit() : onPick(entry.id))}
-            >
-              <Icon name={kindOf(entry.kind).icon} size={16} />
-              {entry.name}
-              {/* the open room also shows its size */}
-              {isOpen && <span className="room-tab__size">{formatRoom(entry.size)}</span>}
-            </button>
-          );
-        })}
+      {/* The glass pill holds the room tabs and the + button. Only the tabs are in the
+          tab list, because a tab list may hold nothing but tabs. */}
+      <div className="room-tabs">
+        <div className="room-tabs__list" role="tablist" aria-label="Rooms in this home">
+          {rooms.map((entry) => {
+            const isOpen = entry.id === activeRoomId;
+            return (
+              <button
+                type="button"
+                key={entry.id}
+                role="tab"
+                aria-selected={isOpen}
+                className={isOpen ? 'room-tab is-current' : 'room-tab'}
+                title={isOpen ? 'Change this room' : `Open ${entry.name}`}
+                onClick={() => (isOpen ? onEdit() : onPick(entry.id))}
+              >
+                <Icon name={kindOf(entry.kind).icon} size={16} />
+                {entry.name}
+                {/* the open room also shows its size */}
+                {isOpen && <span className="room-tab__size">{formatRoom(entry.size)}</span>}
+              </button>
+            );
+          })}
+        </div>
         <button type="button" className="room-tab room-tab--add" aria-label="Add a room" title="Add a room" onClick={onAdd}>
           <Icon name="plus" size={16} />
         </button>

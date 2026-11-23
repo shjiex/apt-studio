@@ -2787,3 +2787,13 @@ a.btn {
     transform-origin: top center;
   }
 }
+
+/* ---------- the list inside the room tabs pill ----------
+   RoomTabs.jsx keeps the tabs in their own list inside the pill, with the + button
+   beside it, so the list holds only tabs. The list lays its tabs out in a row with
+   the same gap as the pill, so nothing moves on screen. */
+.room-tabs__list {
+  display: flex;
+  flex: none;
+  gap: inherit;
+}

@@ -293,6 +293,12 @@ My direction: "Keep working on it nonstop autonomously". The assistant noticed t
 
 My direction: "Keep working on it nonstop autonomously". The assistant found the couch landing on the bed while preparing the demo path.
 
+### Accessibility check with axe (22 Nov, 9:15 pm), AI-generated
+
+- `src/pages/Workspace.jsx` (the divider's values), `src/components/RoomTabs.jsx` (the tab list inside the pill), `src/styles/app.css` (the `room-tabs__list` block at the end).
+
+My direction: "Keep working on it nonstop autonomously". Running axe, and which findings to fix, were the assistant's choices.
+
 ## Chat transcript
 
 TODO: paste the share link or exported transcript of the Claude conversation here.

@@ -501,6 +501,19 @@ project continues.
   used to land on the bed as Blocked. It now comes in turned 90 degrees beside the bed and Fits.
   Three new lines in `tests/logic/check-logic.mjs` cover it ({n} checks, all passing).
 
+### Accessibility check with axe (22 Nov, 9:15 pm)
+
+- **What ran.** The axe accessibility checker (axe-core 4, in a headless browser, not added to
+  the project) on the main screen, the Lighting panel and the room dialog.
+- **Fixed.** The moodboard divider is a separator you can move, so it now says where it is
+  (`aria-valuenow`, `aria-valuemin`, `aria-valuemax`). The room tabs pill held the + button inside
+  its tab list, where only tabs belong; the tabs now have their own list (`room-tabs__list`) inside
+  the pill, with the + button beside it. The tab row is pixel for pixel the same as before.
+- **Left as is.** axe asks for a furniture tile's visible text to be in its name. The name is
+  "Add Bed. 1 in the room.", which has the visible label; axe also counts the small number badge.
+  The room dialog puts `role="dialog"` on a form, which axe rates minor. No contrast problems
+  were reported.
+
 ## Components
 
 | Component | What it does |

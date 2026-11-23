@@ -553,6 +553,10 @@ function Workspace({
           role="separator"
           aria-orientation="vertical"
           aria-label="Resize the moodboard"
+          // A separator you can move tells screen readers where it is now and how far it goes.
+          aria-valuenow={moodboardWidth}
+          aria-valuemin={MIN_MOODBOARD_WIDTH}
+          aria-valuemax={MAX_MOODBOARD_WIDTH}
           tabIndex={0}
           onPointerDown={handleDividerDown}
           onKeyDown={handleDividerKey}
