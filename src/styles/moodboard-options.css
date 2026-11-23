@@ -1,0 +1,223 @@
+/* ---------- moodboard: choose furniture for each piece in a picture ----------
+   Used by MoodboardPanel.jsx. Every piece of furniture found in a picture gets an
+   outline that works as a button, and a small glass card lists furniture of that
+   kind to choose from. The glass values (--glass-fill, --glass-filter, --glass-edge)
+   are the ones the rest of the app uses, set in app.css. */
+
+/* The note above the pins. Plain ink on the panel, so it reads on any screen. */
+.board-note {
+  margin: 0 0 var(--space-3);
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--grey);
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Holds the picture and, over it, the outlines. */
+.pin-frame {
+  position: relative; /* the outlines are placed against this box */
+}
+
+/* The drawing that carries the outlines. It covers the picture exactly, and lets
+   presses through everywhere except on an outline, so pressing the picture beside
+   the furniture still picks the pin. */
+.pin-elements {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* One outline. Invisible until the pointer or the keyboard is on the picture. */
+.pin-element {
+  fill: rgba(255, 255, 255, 0);
+  stroke: rgba(255, 255, 255, 0);
+  stroke-width: 2px;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke; /* the line stays 2 px however the picture is stretched */
+  pointer-events: all; /* the whole shape takes presses, not only its line */
+  cursor: pointer;
+  outline: none; /* the focus ring is drawn with the stroke below */
+  transition:
+    fill 140ms,
+    stroke 140ms;
+}
+
+/* pointer or keyboard on the picture: every outline shows, thin and white */
+.pin-card:hover .pin-element,
+.pin-card:focus-within .pin-element {
+  stroke: rgba(255, 255, 255, 0.92);
+  filter: drop-shadow(0 1px 2px rgba(15, 15, 14, 0.5));
+}
+
+/* the outline under the pointer, or the one whose card is open: lit from inside */
+.pin-element:hover,
+.pin-element.is-open {
+  fill: rgba(255, 255, 255, 0.34);
+  stroke: var(--white);
+  stroke-width: 3px;
+}
+
+/* the outline the keyboard is on: an ink line with a white glow, clear on light and dark pictures */
+.pin-element:focus-visible {
+  fill: rgba(255, 255, 255, 0.34);
+  stroke: var(--ink);
+  stroke-width: 3px;
+  filter: drop-shadow(0 0 2px var(--white)) drop-shadow(0 0 2px var(--white));
+}
+
+/* pressed: the shape darkens for a moment, like a button going in */
+.pin-element:active {
+  fill: rgba(15, 15, 14, 0.22);
+  transition-duration: 90ms;
+}
+
+/* a touch screen has no pointer to hover with, so the outlines always show */
+@media (hover: none) {
+  .pin-element {
+    stroke: rgba(255, 255, 255, 0.92);
+    filter: drop-shadow(0 1px 2px rgba(15, 15, 14, 0.5));
+  }
+}
+
+/* ---------- the card of options ---------- */
+.pin-options {
+  position: fixed; /* placed on the screen by MoodboardPanel.jsx (left and top) */
+  z-index: 60;
+  width: min(320px, calc(100vw - 24px)); /* 320 is CARD_WIDTH in MoodboardPanel.jsx */
+  max-height: calc(100vh - 24px);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 20px;
+  background: var(--glass-fill);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  box-shadow: var(--glass-edge);
+  color: var(--ink); /* text on glass is ink, never grey */
+  animation: pin-options-in 160ms ease-out;
+}
+
+@keyframes pin-options-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+}
+
+.pin-options__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.pin-options__head h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.pin-options__lead {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+/* a list for screen readers, drawn without list marks */
+.pin-options__list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-y: auto; /* a long list scrolls inside the card */
+}
+
+/* one choice: its picture, its name and size, and its Add button */
+.pin-options__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.55); /* the same inner block the other glass panels use */
+}
+
+.pin-options__thumb {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--white);
+  overflow: hidden;
+}
+
+.pin-options__thumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.pin-options__text {
+  flex: 1;
+  min-width: 0; /* lets a long name wrap instead of pushing the button out */
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--ink);
+}
+
+.pin-options__text strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* The Add and Close buttons are the app's own .btn, so they already have its hover
+   and focus looks. Pressed, they sink in like the other buttons on glass. */
+.pin-options .btn:active:not(:disabled) {
+  transform: translateY(1px) scale(0.97);
+  box-shadow: inset 0 2px 5px rgba(15, 15, 14, 0.28);
+  transition-duration: 90ms;
+}
+
+/* No blur available, or the person asked for less see-through or more contrast: a solid white card. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .pin-options {
+    background: var(--white);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (prefers-contrast: more) {
+  .pin-options {
+    background: var(--white);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .pin-options__row {
+    background: var(--grey);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pin-options {
+    animation: none;
+  }
+
+  .pin-element {
+    transition: none;
+  }
+}

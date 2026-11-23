@@ -1,0 +1,71 @@
+/* The "Or start from an example" block at the bottom of the add-room dialog
+   (components/RoomSetup.jsx). It sits on the dialog's solid white, so the
+   muted grey text is allowed here (grey is only ruled out on glass). */
+
+/* With the example block the dialog is taller, so on a short screen it scrolls
+   inside itself and never runs off the page. :has() picks only the dialog that
+   holds the block, so every other dialog stays as it was. */
+.dialog:has(.example-room) {
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+}
+
+.example-room {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--grey-strong); /* a hairline between the form and the example */
+}
+
+.example-room__lead {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* the picture on the left, the words on the right */
+.example-room__card {
+  display: flex;
+  gap: var(--space-3);
+  align-items: flex-start;
+}
+
+.example-room__picture {
+  flex: none; /* keeps its size when the words are long */
+  width: 96px;
+  height: 96px;
+  border-radius: var(--radius-sm);
+  object-fit: cover; /* fill the square and crop what does not fit */
+  background: var(--grey); /* shown while the photo loads */
+}
+
+.example-room__words {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0; /* lets long words wrap inside the row */
+}
+
+.example-room__words h3 {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.example-room__size {
+  font-variant-numeric: tabular-nums; /* digits of equal width, like other sizes in the app */
+}
+
+.example-room__words p {
+  color: var(--ink-muted);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* The button spans the block. Button.jsx's `fill` sets flex: 1, which is meant for
+   buttons side by side in a row. In this column it would squash the button's
+   height, so here the button keeps its own height and takes the full width. */
+.example-room .btn {
+  flex: none;
+  width: 100%;
+}
