@@ -807,6 +807,8 @@ project continues.
 - **The plan and the buttons.** On a short stage the row of buttons along the bottom covered the
   arrow under the room and the width written there. The plan is now fitted into the part of the
   stage above that row, whatever the height of the stage (`buttonsShare` in `Room3D.jsx`).
+  Since 4:30 am it also keeps clear of the download button and the view switch on the right
+  edge (`sideShare`), which a wide room used to run under.
 - **Tools at the side.** The three tab names and the cross did not fit, so the cross sat on top
   of Floor and walls. The section is 368 px wide, and on a small window the cross has a row of
   its own. The furniture tiles there touched each other and now have 8 px between them.

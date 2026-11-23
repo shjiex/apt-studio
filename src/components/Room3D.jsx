@@ -142,9 +142,12 @@ function CameraRig({ view, room, zoom, orbit, look, stand }) {
     // fifth on a short stage, an eighth on a tall one). The plan is fitted into the
     // rest, so the buttons never cover the room or the arrow under it.
     const buttonsShare = Math.min(72 / state.size.height, 0.3);
+    // The same for the controls that stand along the right edge (the download button
+    // and the view switch): a strip about 64 px wide.
+    const sideShare = Math.min(64 / state.size.width, 0.2);
     const topDistance = Math.max(
       (room.length / 2 + margin) / (1 - buttonsShare) / Math.tan(verticalFov / 2),
-      (room.width / 2 + margin) / Math.tan(horizontalFov / 2)
+      (room.width / 2 + margin) / (1 - sideShare) / Math.tan(horizontalFov / 2)
     );
     // From an angle, fit a ball that wraps the whole room.
     const radius = 0.5 * Math.hypot(room.width, room.length, room.height);
@@ -172,12 +175,15 @@ function CameraRig({ view, room, zoom, orbit, look, stand }) {
     // space left for them is all at the bottom. distance x tan(half the lens angle)
     // is half the height of floor in view, in metres.
     const forward = distance * Math.tan(verticalFov / 2) * buttonsShare * (1 - t);
+    // In the same way it aims a little to the right of the middle, which moves the
+    // room left by half the width of the strip of controls on the right edge.
+    const sideways = distance * Math.tan(horizontalFov / 2) * sideShare * (1 - t);
     camera.position.set(
-      distance * Math.sin(tilt) * Math.sin(turn),
+      distance * Math.sin(tilt) * Math.sin(turn) + sideways,
       distance * Math.cos(tilt),
       distance * Math.sin(tilt) * Math.cos(turn) + forward
     );
-    camera.lookAt(0, room.height * 0.3 * t, forward);
+    camera.lookAt(sideways, room.height * 0.3 * t, forward);
     camera.updateProjectionMatrix();
   });
 
