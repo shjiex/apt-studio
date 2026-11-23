@@ -238,20 +238,36 @@ export function getFit(piece, pieces, room) {
   return 'fits';
 }
 
-// Find the first open spot for a new piece by trying a grid of positions.
+// Find a spot for a new piece. It tries a grid of positions, first with the piece
+// as it comes (turned 0 degrees) and then turned 90 degrees. A spot where it fits
+// is best; failing that, one where it is only tight. If there is neither, it goes in
+// the middle of the room, where its tag shows Blocked.
+// Gives back { x, z, rotation }.
 export function findOpenSpot(type, pieces, room) {
   // A rug goes in the middle; it can sit under other furniture.
-  if (type === 'rug') return { x: 0, z: 0 };
+  if (type === 'rug') return { x: 0, z: 0, rotation: 0 };
+  for (const wanted of ['fits', 'tight']) {
+    for (const rotation of [0, 90]) {
+      const spot = firstSpotWhere(type, rotation, wanted, pieces, room);
+      if (spot) return spot;
+    }
+  }
+  return { x: 0, z: 0, rotation: 0 };
+}
+
+// The first position on a 25 cm grid where a piece of this type, turned this way,
+// gets the wanted tag ('fits' or 'tight'). null if there is none.
+function firstSpotWhere(type, rotation, wanted, pieces, room) {
   const step = 0.25;
   for (let z = -room.length / 2; z <= room.length / 2; z += step) {
     for (let x = -room.width / 2; x <= room.width / 2; x += step) {
-      const candidate = clampToRoom({ id: 'new', type, x, z, rotation: 0 }, room);
-      if (getFit(candidate, pieces, room) === 'fits') {
-        return { x: candidate.x, z: candidate.z };
+      const candidate = clampToRoom({ id: 'new', type, x, z, rotation }, room);
+      if (getFit(candidate, pieces, room) === wanted) {
+        return { x: candidate.x, z: candidate.z, rotation };
       }
     }
   }
-  return { x: 0, z: 0 };
+  return null;
 }
 
 // Floor area in square metres, rounded to one decimal.

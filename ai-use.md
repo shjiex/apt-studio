@@ -287,6 +287,12 @@ My direction: "Keep working on it nonstop autonomously". The handoff noted there
 
 My direction: "Keep working on it nonstop autonomously". The assistant noticed the shop list did not close with Escape while checking the demo path.
 
+### A new piece looks for room turned, too (22 Nov, 9:10 pm), AI-generated
+
+- `src/lib/room.js` (`findOpenSpot`, `firstSpotWhere`), `src/pages/Workspace.jsx` (the two places a new piece is made), `tests/logic/check-logic.mjs`.
+
+My direction: "Keep working on it nonstop autonomously". The assistant found the couch landing on the bed while preparing the demo path.
+
 ## Chat transcript
 
 TODO: paste the share link or exported transcript of the Claude conversation here.

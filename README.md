@@ -489,6 +489,18 @@ project continues.
   shows in the shop list with its total ($249.99 for one piece), Download gives a 229 kB PNG of the
   stage and a room file with the room, pieces, lighting, surfaces and camera. Nothing needed fixing.
 
+### A new piece looks for room turned, too (22 Nov, 9:10 pm)
+
+- **Where a new piece lands.** `findOpenSpot` in `src/lib/room.js` tried only the piece as it
+  comes, and with no spot where it fit, it put the piece in the middle of the room, often on top
+  of the bed. It now tries the piece turned 90 degrees as well, then a spot where it is only
+  Tight, before falling back to the middle. It gives back the turn too, and `handleAddItem` and
+  `handleAddExisting` in `Workspace.jsx` use it. Pieces that fit as they come land exactly
+  where they did before.
+- **Checked.** The 2.27 m couch from the first sample picture, added to the starter bedroom,
+  used to land on the bed as Blocked. It now comes in turned 90 degrees beside the bed and Fits.
+  Three new lines in `tests/logic/check-logic.mjs` cover it ({n} checks, all passing).
+
 ## Components
 
 | Component | What it does |

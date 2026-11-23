@@ -6,6 +6,7 @@
 //
 // The app's files are loaded through Vite, the same tool that runs the app, because
 // they use Vite features (import.meta.env) that plain Node does not know.
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { createServer } from 'vite';
 
@@ -14,6 +15,7 @@ const server = await createServer({ root: projectFolder, logLevel: 'error', serv
 const room = await server.ssrLoadModule('/src/lib/room.js');
 const feng = await server.ssrLoadModule('/src/lib/fengshui.js');
 const ex = await server.ssrLoadModule('/src/data/exampleRoom.js');
+const catalog = await server.ssrLoadModule('/src/data/catalog.js');
 
 let failures = 0;
 // Print one result. `got` is what the app's code answered, `want` is the right answer.
@@ -80,6 +82,18 @@ expect('crowded room fails open floor', check(crowded, base, 'Enough open floor'
 const e = ex.exampleRoom();
 const score = feng.getFengShui(e.pieces, e.size);
 expect('example room score', score.score, 100);
+// A new piece goes where it fits, turned 90 degrees if it has to. The starter bedroom
+// (3.6 by 3 m with a bed) has no room for the 2.27 m couch from the first sample
+// moodboard picture as it comes, so it should come in turned, and not on top of the bed.
+const manifest = JSON.parse(readFileSync(new URL('../../public/models/pins/manifest.json', import.meta.url)));
+catalog.setPinItems(manifest);
+const starterBed = { id: 'bed-1', type: 'bed', x: -1.0, z: -0.45, rotation: 0, existing: true };
+const couchSpot = room.findOpenSpot('pin-mood-1', [starterBed], room.DEFAULT_ROOM);
+const couch = { id: 'new', type: 'pin-mood-1', ...couchSpot };
+expect('couch in the starter bedroom is not blocked', room.getFit(couch, [starterBed, couch], room.DEFAULT_ROOM) !== 'blocked', true);
+expect('couch in the starter bedroom comes in turned', couchSpot.rotation, 90);
+expect('a desk in an empty room comes in as it is', room.findOpenSpot('desk', [], base).rotation, 0);
+
 // every piece in the example room should fit
 for (const piece of e.pieces) {
   expect(`example room ${piece.type} fits`, room.getFit(piece, e.pieces, e.size), 'fits');

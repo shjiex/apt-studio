@@ -150,7 +150,7 @@ function Workspace({
   function handleAddItem(type) {
     const item = getItem(type);
     const spot = findOpenSpot(type, pieces, room);
-    const newPiece = { id: `${type}-${Date.now()}`, type, x: spot.x, z: spot.z, rotation: 0, existing: false };
+    const newPiece = { id: `${type}-${Date.now()}`, type, x: spot.x, z: spot.z, rotation: spot.rotation, existing: false };
     changePieces([...pieces, newPiece], `${item.name} added`);
     setSelectedId(newPiece.id);
   }
@@ -179,7 +179,7 @@ function Workspace({
       const spot = findOpenSpot(type, nextPieces, room);
       nextPieces = [
         ...nextPieces,
-        { id: `${type}-own-${Date.now()}-${index}`, type, x: spot.x, z: spot.z, rotation: 0, existing: true },
+        { id: `${type}-own-${Date.now()}-${index}`, type, x: spot.x, z: spot.z, rotation: spot.rotation, existing: true },
       ];
     });
     changePieces(nextPieces, `${types.length} of your pieces added`);
