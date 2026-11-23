@@ -415,6 +415,12 @@ My direction: "Keep working on it until 7:50 am. Mostly the Pinterest access, 3D
 
 My direction: "realistic mode really doesn't work, i see spots everywhere". The assistant compared the realistic picture on my Mac at several stages, before and after each change. The choices that are its own: 0.9 and the floor of 0.08 for the smoothing, and showing the traced picture only once it is Sharp (64 passes) in place of at 24.
 
+### Feet in the room dialog, the floor plan and the sliders (23 Nov, 5:10 am), AI-generated
+
+- Changed: `lib/units.js`, `RoomSetup.jsx`, `PlanRooms.jsx`, `PhotoStraighten.jsx`, `SurfacesPanel.jsx`, `ToolsPanel.jsx`, `pages/Workspace.jsx`, `Room3D.jsx`, `tests/logic/check-logic.mjs`.
+
+My direction: I asked for imperial units in my midnight list, and this was on the list of gaps left from it. The assistant finished it while working through the night. The choices that are its own: feet with one decimal in the fields, and comparing a typed size in the unit it was typed in.
+
 ## Chat transcript
 
 TODO: paste the share link or exported transcript of the Claude conversation here.

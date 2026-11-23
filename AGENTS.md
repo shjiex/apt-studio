@@ -377,7 +377,9 @@ The workspace was laid out again from the owner's Figma frame 216:4506. Where an
 
 **Room.** The orbit turns all the way round and `lowWalls` in `Room3D.jsx` drops the walls on the camera's side. Size arrows on the plan resize the room. Rooms are rectangles only.
 
-**Units.** `units` is `'metric'` or `'imperial'` (saved as `apt-studio-units`). Stored values stay in metres. The room dialog and the Floor and walls sliders still show metres only.
+**Units.** `units` is `'metric'` or `'imperial'` (saved as `apt-studio-units`). Stored values stay in metres.
+
+**5:10 am on 23 Nov.** Imperial now reaches every dialog: `bigUnit`, `toBig`, `fromBig` in `lib/units.js` are used by `RoomSetup`, `PlanRooms` and `PhotoStraighten` (which take a `units` prop), and the Floor and walls sliders print with `formatLength`. `Welcome.jsx` still has its own copy of the feet conversion.
 
 **5 am on 23 Nov.** The denoise allowance in `PathTraced.jsx` is `max(0.9 / sqrt(samples), 0.08)` divided by the exposure (it was 0.6, and a flat wall was grainy at 64 passes on the M4). `WARM_PASSES` is 64, equal to `SHARP_AT`, so the traced picture appears when the pill says Sharp and a grainy one is never shown.
 

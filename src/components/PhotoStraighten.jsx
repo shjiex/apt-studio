@@ -3,6 +3,7 @@ import Button from './Button.jsx';
 import NumberField from './NumberField.jsx';
 import { canvasToTile } from '../lib/surface.js';
 import { straightenPhoto } from '../lib/straighten.js';
+import { bigUnit, fromBig, toBig } from '../lib/units.js';
 
 const CORNER_NAMES = ['Top left', 'Top right', 'Bottom right', 'Bottom left'];
 
@@ -11,11 +12,12 @@ const CORNER_NAMES = ['Top left', 'Top right', 'Bottom right', 'Bottom left'];
 // that rectangle (see lib/straighten.js) and uses it as the repeating picture.
 // A photo shot square on needs no dragging: the corners start on the whole photo.
 // `secondName` is 'Deep' for a floor and 'Up' for a wall.
-function PhotoStraighten({ image, secondName, startSpan, onUse, onCancel }) {
+// `units` is 'metric' or 'imperial': the two sizes are typed in metres or in feet.
+function PhotoStraighten({ image, secondName, startSpan, units, onUse, onCancel }) {
   // The corners as fractions of the photo: [0, 0] is its top left, [1, 1] its bottom right.
   const [corners, setCorners] = useState([[0, 0], [1, 0], [1, 1], [0, 1]]);
-  const [across, setAcross] = useState(String(startSpan));
-  const [second, setSecond] = useState(String(Math.round((startSpan / (image.width / image.height)) * 100) / 100));
+  const [across, setAcross] = useState(String(toBig(startSpan, units)));
+  const [second, setSecond] = useState(String(toBig(startSpan / (image.width / image.height), units)));
   const [error, setError] = useState('');
   const [dragging, setDragging] = useState(null); // which corner is held, 0 to 3
   const frameRef = useRef(null);
@@ -51,10 +53,14 @@ function PhotoStraighten({ image, secondName, startSpan, onUse, onCancel }) {
 
   function handleSubmit(event) {
     event.preventDefault();
-    const width = Number(across);
-    const depth = Number(second);
-    if (!(width >= 0.1 && width <= 10) || !(depth >= 0.1 && depth <= 10)) {
-      setError('Enter both sizes in metres, between 0.1 and 10.');
+    // both in metres, whichever unit was typed
+    const width = fromBig(Number(across), units);
+    const depth = fromBig(Number(second), units);
+    // 0.1 and 10 m, as they come out when typed in the chosen unit (0.3 ft is 0.09 m)
+    const smallest = fromBig(toBig(0.1, units), units);
+    const largest = fromBig(toBig(10, units), units);
+    if (!(width >= smallest && width <= largest) || !(depth >= smallest && depth <= largest)) {
+      setError(`Enter both sizes, between ${toBig(0.1, units)} and ${toBig(10, units)} ${bigUnit(units)}.`);
       return;
     }
     const flat = straightenPhoto(image, corners, width / depth);
@@ -98,8 +104,8 @@ function PhotoStraighten({ image, secondName, startSpan, onUse, onCancel }) {
         </div>
 
         <div className="dialog__fields dialog__fields--two">
-          <NumberField id="straighten-across" label="Across" unit="m" value={across} onChange={setAcross} />
-          <NumberField id="straighten-second" label={secondName} unit="m" value={second} onChange={setSecond} />
+          <NumberField id="straighten-across" label="Across" unit={bigUnit(units)} value={across} onChange={setAcross} />
+          <NumberField id="straighten-second" label={secondName} unit={bigUnit(units)} value={second} onChange={setSecond} />
         </div>
         {error && <p className="field__error">{error}</p>}
 

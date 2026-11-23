@@ -866,6 +866,24 @@ project continues.
   clean too. The pane the assistant looks through runs slowly in the background, so how many
   seconds Sharp takes on my screen is for me to see.
 
+### Feet in the room dialog, the floor plan and the sliders (23 Nov, 5:10 am)
+
+- **The gap.** With Preferences set to Imperial, the room dialog, the floor plan dialog, the
+  photo straightening dialog and the sliders under Floor and walls still showed metres.
+- **Fixed.** `lib/units.js` has three more functions: `bigUnit` (m or ft), `toBig` (metres, or
+  feet with one decimal, for a field) and `fromBig` (what was typed, back to metres). The room
+  dialog, `PlanRooms.jsx` and `PhotoStraighten.jsx` use them for their fields, limits and
+  messages. The sliders in `SurfacesPanel.jsx` write their value with `formatLength`, so a
+  window reads 3 ft 11 in wide. Rooms are still saved in metres.
+- **A limit that agrees with itself.** 1.5 m is 4.9 ft, and 4.9 ft is 1.49 m. A typed value is
+  compared in the unit it was typed in, so the smallest size the message names is accepted, and
+  it is saved as the 1.5 m it stands for.
+- **Checked.** In Imperial the new room dialog opens with 15.1, 12.5 and 8.2 ft, saves 4.9 ft
+  as a room, and the window sliders read in feet and inches. `tests/logic/check-logic.mjs` has
+  seven new checks for the conversions.
+- **Also.** On a narrow stage, where the middle buttons sit one row up, the plan is fitted
+  above both rows.
+
 ## Components
 
 | Component | What it does |

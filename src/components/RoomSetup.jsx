@@ -6,17 +6,20 @@ import { EXAMPLE_ROOM } from '../data/exampleRoom.js';
 import { asset } from '../lib/paths.js';
 import { formatRoom } from '../lib/room.js';
 import { ROOM_KINDS, kindOf } from '../lib/rooms.js';
+import { bigUnit, fromBig, toBig } from '../lib/units.js';
 import '../styles/example-room.css';
 
+// The smallest and largest a room may be, in metres.
 const LIMITS = {
   width: { min: 1.5, max: 12 },
   length: { min: 1.5, max: 12 },
   height: { min: 2, max: 5 },
 };
 
-// Turn a size in numbers into the text the three fields hold.
-function sizeToText(size) {
-  return { width: String(size.width), length: String(size.length), height: String(size.height) };
+// Turn a size in metres into the text the three fields hold: metres, or feet when
+// Preferences is set to Imperial (toBig in lib/units.js).
+function sizeToText(size, units) {
+  return { width: String(toBig(size.width, units)), length: String(toBig(size.length, units)), height: String(toBig(size.height, units)) };
 }
 
 // The room dialog: what kind of room it is, its name and its size.
@@ -24,13 +27,14 @@ function sizeToText(size) {
 // The link under the fields opens the floor plan picker instead.
 // A new room can also start from the example (data/exampleRoom.js): `onUseExample`
 // is called when the person presses "Open the example room".
-function RoomSetup({ entry, onSave, onCancel, onUsePlan, onRemove, onUseExample }) {
+// `units` is 'metric' or 'imperial'. The room is always saved in metres.
+function RoomSetup({ entry, units, onSave, onCancel, onUsePlan, onRemove, onUseExample }) {
   const isNew = !entry;
   const start = entry || { name: 'Living room', kind: 'living', size: kindOf('living').size };
   const [kind, setKind] = useState(start.kind);
   const [name, setName] = useState(start.name);
   // The size fields hold text while the person types; we turn it into numbers on save.
-  const [form, setForm] = useState(sizeToText(start.size));
+  const [form, setForm] = useState(sizeToText(start.size, units));
   const [errors, setErrors] = useState({});
 
   function updateField(field, text) {
@@ -42,7 +46,7 @@ function RoomSetup({ entry, onSave, onCancel, onUsePlan, onRemove, onUseExample 
   function pickKind(nextKind) {
     const nameIsDefault = ROOM_KINDS.some((candidate) => candidate.name === name) || name.trim() === '';
     if (nameIsDefault) setName(kindOf(nextKind).name);
-    if (isNew) setForm(sizeToText(kindOf(nextKind).size));
+    if (isNew) setForm(sizeToText(kindOf(nextKind).size, units));
     setKind(nextKind);
   }
 
@@ -51,12 +55,15 @@ function RoomSetup({ entry, onSave, onCancel, onUsePlan, onRemove, onUseExample 
     const size = {};
     const nextErrors = {};
     for (const field of ['width', 'length', 'height']) {
-      const number = Number(form[field]);
+      // what was typed, as metres (rounded to the centimetre)
+      const typed = Number(form[field]);
+      const metres = fromBig(typed, units);
       const { min, max } = LIMITS[field];
-      if (Number.isNaN(number) || number < min || number > max) {
-        nextErrors[field] = `Enter a ${field} between ${min} and ${max} m`;
+      // compared in the unit that was typed, so the limits named in the message are themselves allowed
+      if (form[field].trim() === '' || Number.isNaN(typed) || typed < toBig(min, units) || typed > toBig(max, units)) {
+        nextErrors[field] = `Enter a ${field} between ${toBig(min, units)} and ${toBig(max, units)} ${bigUnit(units)}`;
       }
-      size[field] = number;
+      size[field] = Math.min(Math.max(metres, min), max); // 4.9 ft is 1.49 m: saved as the 1.5 m it stands for
     }
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length === 0) {
@@ -106,9 +113,9 @@ function RoomSetup({ entry, onSave, onCancel, onUsePlan, onRemove, onUseExample 
         </div>
 
         <div className="dialog__fields">
-          <NumberField id="room-width" label="Width" unit="m" value={form.width} error={errors.width} onChange={(text) => updateField('width', text)} />
-          <NumberField id="room-length" label="Length" unit="m" value={form.length} error={errors.length} onChange={(text) => updateField('length', text)} />
-          <NumberField id="room-height" label="Height" unit="m" value={form.height} error={errors.height} onChange={(text) => updateField('height', text)} />
+          <NumberField id="room-width" label="Width" unit={bigUnit(units)} value={form.width} error={errors.width} onChange={(text) => updateField('width', text)} />
+          <NumberField id="room-length" label="Length" unit={bigUnit(units)} value={form.length} error={errors.length} onChange={(text) => updateField('length', text)} />
+          <NumberField id="room-height" label="Height" unit={bigUnit(units)} value={form.height} error={errors.height} onChange={(text) => updateField('height', text)} />
         </div>
 
         {/* Links under the fields: only for a room that already exists. */}

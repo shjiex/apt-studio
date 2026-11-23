@@ -141,6 +141,16 @@ for (const piece of e.pieces) {
   expect(`example room ${piece.type} fits`, room.getFit(piece, e.pieces, e.size), 'fits');
 }
 
+// room-sized lengths typed in metres or in feet
+const units = await server.ssrLoadModule('/src/lib/units.js');
+expect('3.6 m shown in feet', units.toBig(3.6, 'imperial'), 11.8);
+expect('3.6 m shown in metres', units.toBig(3.6, 'metric'), 3.6);
+expect('11.8 ft typed, in metres', units.fromBig(11.8, 'imperial'), 3.6);
+expect('3.456 m typed, to the centimetre', units.fromBig(3.456, 'metric'), 3.46);
+expect('the smallest room in feet', units.toBig(1.5, 'imperial'), 4.9);
+expect('the big unit in Imperial', units.bigUnit('imperial'), 'ft');
+expect('a slider length in feet and inches', units.formatLength(1.2, 'imperial'), '3 ft 11 in');
+
 // Pinterest board links, in the shapes people paste them
 const pinterest = await server.ssrLoadModule('/src/lib/pinterest.js');
 const boardOf = (text) => {

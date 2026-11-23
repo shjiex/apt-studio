@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react';
 import Button from './Button.jsx';
 import NumberField from './NumberField.jsx';
+import { bigUnit, formatLength, fromBig, toBig } from '../lib/units.js';
 import { asset } from '../lib/paths.js';
 
 // A dialog for taking the room's size from a floor plan. It reads the rooms
 // that pipeline/plan2room.py found in a plan picture and draws each one over
 // the picture. You pick your room and type ONE length you know. A picture has
 // no scale, so that one length is what turns pixels into metres.
-function PlanRooms({ room, onSave, onClose }) {
+// `units` is 'metric' or 'imperial': the length is typed in metres or in feet.
+function PlanRooms({ room, units, onSave, onClose }) {
   const [plan, setPlan] = useState(null); // null while loading, false if there is no plan
   const [picked, setPicked] = useState(null); // the number of the chosen room
-  const [across, setAcross] = useState(''); // what the person typed: the room's size left to right, in metres
+  const [across, setAcross] = useState(''); // what the person typed: the room's size left to right, in metres or feet
   const [error, setError] = useState('');
 
   useEffect(() => {
@@ -27,23 +29,27 @@ function PlanRooms({ room, onSave, onClose }) {
     setError('');
     // If the plan file already knows its scale, fill the length in.
     const next = plan.rooms.find((candidate) => candidate.number === number);
-    setAcross(plan.metres_per_pixel ? (next.across_px * plan.metres_per_pixel).toFixed(2) : '');
+    setAcross(plan.metres_per_pixel ? String(toBig(next.across_px * plan.metres_per_pixel, units)) : '');
   }
 
   // The room is across_px wide and down_px long on the picture. The typed
   // width gives metres per pixel, and the same scale gives the length.
-  const width = Number(across);
+  const width = fromBig(Number(across), units); // in metres, whichever unit was typed
   const isWidthOk = across !== '' && !Number.isNaN(width) && width > 0;
   const length = pickedRoom && isWidthOk ? (width / pickedRoom.across_px) * pickedRoom.down_px : null;
 
   function handleSubmit(event) {
     event.preventDefault();
-    if (!isWidthOk || width < 1.5 || width > 12 || length < 1.5 || length > 12) {
-      setError('The app handles rooms from 1.5 to 12 m on each side');
+    // 1.5 and 12 m, as they come out when typed in the chosen unit (4.9 ft is 1.49 m)
+    const smallest = fromBig(toBig(1.5, units), units);
+    const largest = fromBig(toBig(12, units), units);
+    if (!isWidthOk || width < smallest || width > largest || length < smallest || length > largest) {
+      setError(`The app handles rooms from ${toBig(1.5, units)} to ${toBig(12, units)} ${bigUnit(units)} on each side`);
       return;
     }
     // Round to the centimetre. The ceiling height is not on a plan, so it stays.
-    onSave({ width: Math.round(width * 100) / 100, length: Math.round(length * 100) / 100, height: room.height });
+    const keep = (metres) => Math.min(Math.max(Math.round(metres * 100) / 100, 1.5), 12);
+    onSave({ width: keep(width), length: keep(length), height: room.height });
   }
 
   return (
@@ -130,7 +136,7 @@ function PlanRooms({ room, onSave, onClose }) {
                     <NumberField
                       id="plan-across"
                       label={`Room ${picked}, left to right`}
-                      unit="m"
+                      unit={bigUnit(units)}
                       value={across}
                       error={error}
                       onChange={(text) => {
@@ -139,7 +145,7 @@ function PlanRooms({ room, onSave, onClose }) {
                       }}
                     />
                     <p className="plan__result">
-                      {length ? `Your room: ${width.toFixed(2)} × ${length.toFixed(2)} m` : 'Read it off the plan, or measure that wall.'}
+                      {length ? `Your room: ${formatLength(width, units)} × ${formatLength(length, units)}` : 'Read it off the plan, or measure that wall.'}
                     </p>
                   </>
                 )}

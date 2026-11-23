@@ -10,7 +10,7 @@ const NAMES = { furniture: 'Furniture', lighting: 'Lighting', surfaces: 'Floor a
 // floor and walls panel, so they open beside the room and leave it uncovered.
 // In the "tools at the side" layout it also holds the furniture, and stays open.
 // `tabs` lists which of the three it offers. The cross closes the section.
-function ToolsPanel({ tab, tabs, onTab, onClose, items, boardName, pieces, onAddItem, lighting, onLighting, surfaces, onSurfaces, room, onRoomChange }) {
+function ToolsPanel({ tab, tabs, onTab, onClose, items, boardName, pieces, onAddItem, lighting, onLighting, surfaces, onSurfaces, room, onRoomChange, units }) {
   return (
     <section className="panel tools" aria-label={NAMES[tab]}>
       <header className="tools__head">
@@ -26,7 +26,7 @@ function ToolsPanel({ tab, tabs, onTab, onClose, items, boardName, pieces, onAdd
 
       {tab === 'furniture' && <ElementStrip items={items} pieces={pieces} onAdd={onAddItem} layout="grid" boardName={boardName} />}
       {tab === 'lighting' && <LightingPanel lighting={lighting} onChange={onLighting} windows={room.windows} />}
-      {tab === 'surfaces' && <SurfacesPanel surfaces={surfaces} onChange={onSurfaces} room={room} onRoomChange={onRoomChange} />}
+      {tab === 'surfaces' && <SurfacesPanel surfaces={surfaces} onChange={onSurfaces} room={room} onRoomChange={onRoomChange} units={units} />}
     </section>
   );
 }

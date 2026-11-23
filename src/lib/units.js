@@ -35,6 +35,23 @@ export function fromSmall(value, units) {
   return units === 'imperial' ? value * INCH : value / 100;
 }
 
+// The name of the big unit, to print after a number field for a room-sized length.
+export function bigUnit(units) {
+  return units === 'imperial' ? 'ft' : 'm';
+}
+
+// A room-sized length as the number put in a field: metres to the centimetre, or
+// feet with one decimal (11.8).
+export function toBig(metres, units) {
+  if (units === 'imperial') return Math.round((metres / FOOT) * 10) / 10;
+  return Math.round(metres * 100) / 100;
+}
+
+// What a person typed in the big unit, back to metres (to the centimetre).
+export function fromBig(value, units) {
+  return Math.round((units === 'imperial' ? value * FOOT : value) * 100) / 100;
+}
+
 // A floor area: "10.8 m²", or "116 ft²".
 export function formatArea(squareMetres, units) {
   if (units !== 'imperial') return `${Number(squareMetres.toFixed(1))} m²`;

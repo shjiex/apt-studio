@@ -3,12 +3,13 @@ import PhotoStraighten from './PhotoStraighten.jsx';
 import Segmented from './Segmented.jsx';
 import { WALL_NAMES, keepClear, newDoor, newWindow } from '../lib/room.js';
 import { WALL_PAINTS, loadPhoto } from '../lib/surface.js';
+import { formatLength } from '../lib/units.js';
 import Slider from './Slider.jsx';
 import Icon from './Icon.jsx';
 
 // The part both the floor and the walls share: pick a photo, mark a rectangle on
 // it (PhotoStraighten), then say how much it shows.
-function PhotoControls({ surface, id, hint, secondName, onChange }) {
+function PhotoControls({ surface, id, hint, secondName, units, onChange }) {
   const [error, setError] = useState('');
   const [chosen, setChosen] = useState(null); // the photo just picked, while its corners are being marked
 
@@ -44,6 +45,7 @@ function PhotoControls({ surface, id, hint, secondName, onChange }) {
         <PhotoStraighten
           image={chosen}
           secondName={secondName}
+          units={units}
           startSpan={surface.span}
           onUse={(tile) => {
             const next = { ...surface, ...tile, kind: 'photo' };
@@ -58,7 +60,7 @@ function PhotoControls({ surface, id, hint, secondName, onChange }) {
       {surface.photo ? (
         <label className="light__row">
           <span>
-            The photo shows <strong>{surface.span.toFixed(1)} m</strong> from left to right
+            The photo shows <strong>{formatLength(surface.span, units)}</strong> from left to right
           </span>
           <Slider
             min="0.3"
@@ -75,12 +77,13 @@ function PhotoControls({ surface, id, hint, secondName, onChange }) {
   );
 }
 
-// One slider row in a window's card: a label, the value in metres, and the slider.
-function WindowSlider({ label, value, min, max, onChange }) {
+// One slider row in a window's card: a label, the value (in metres, or in feet and
+// inches when Preferences is set to Imperial), and the slider.
+function WindowSlider({ label, value, min, max, units, onChange }) {
   return (
     <label className="light__row">
       <span>
-        {label} <strong>{value.toFixed(2)} m</strong>
+        {label} <strong>{formatLength(value, units)}</strong>
       </span>
       <Slider
         aria-label={label}
@@ -100,7 +103,7 @@ function WindowSlider({ label, value, min, max, onChange }) {
 // The sizes of each window and door sit under a fold of their own, so the panel
 // stays short until you ask for the detail.
 // The room changes as you choose.
-function SurfacesPanel({ surfaces, onChange, room, onRoomChange }) {
+function SurfacesPanel({ surfaces, onChange, room, onRoomChange, units }) {
   const { floor, wall } = surfaces;
 
   // Replace one window with a changed copy, or take it out.
@@ -157,7 +160,7 @@ function SurfacesPanel({ surfaces, onChange, room, onRoomChange }) {
           />
         </div>
         {floor.kind === 'photo' && (
-          <PhotoControls
+          <PhotoControls units={units}
             surface={floor}
             id="floor-photo"
             secondName="Deep"
@@ -211,7 +214,7 @@ function SurfacesPanel({ surfaces, onChange, room, onRoomChange }) {
             </p>
           </div>
         ) : (
-          <PhotoControls
+          <PhotoControls units={units}
             surface={wall}
             id="wall-photo"
             secondName="Up"
@@ -255,15 +258,15 @@ function SurfacesPanel({ surfaces, onChange, room, onRoomChange }) {
                 onChange={(event) => changeWindow({ ...win, along: Number(event.target.value) })}
               />
             </label>
-            <WindowSlider label="Width" value={win.width} min={0.4} max={3} onChange={(width) => changeWindow({ ...win, width })} />
-            <WindowSlider
+            <WindowSlider units={units} label="Width" value={win.width} min={0.4} max={3} onChange={(width) => changeWindow({ ...win, width })} />
+            <WindowSlider units={units}
               label="Bottom edge"
               value={win.bottom}
               min={0}
               max={1.5}
               onChange={(bottom) => changeWindow({ ...win, bottom, top: Math.max(win.top, bottom + 0.3) })}
             />
-            <WindowSlider
+            <WindowSlider units={units}
               label="Top edge"
               value={win.top}
               min={1}
@@ -305,7 +308,7 @@ function SurfacesPanel({ surfaces, onChange, room, onRoomChange }) {
                 onChange={(event) => changeDoor({ ...door, along: Number(event.target.value) })}
               />
             </label>
-            <WindowSlider label="Width" value={door.width} min={0.6} max={1.6} onChange={(width) => changeDoor({ ...door, width })} />
+            <WindowSlider units={units} label="Width" value={door.width} min={0.6} max={1.6} onChange={(width) => changeDoor({ ...door, width })} />
             {/* which edge the hinge is on, as you face the door from inside the room */}
             <div className="light__row">
               <span>Hinge</span>

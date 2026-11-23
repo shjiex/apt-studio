@@ -611,6 +611,7 @@ function Workspace({
             onSurfaces={setSurfaces}
             room={room}
             onRoomChange={changeRoom}
+            units={units}
           />
         )}
         <PreviewPanel
@@ -739,10 +740,11 @@ function Workspace({
       {isTouring && !isWelcoming && !isPickingPlan && <Tips onDone={finishTour} />}
 
       {isFinding && <FoundFurniture onAdd={handleAddExisting} onClose={() => setIsFinding(false)} />}
-      {isPickingPlan && <PlanRooms room={room} onSave={handleSaveSize} onClose={() => setIsPickingPlan(false)} />}
+      {isPickingPlan && <PlanRooms room={room} units={units} onSave={handleSaveSize} onClose={() => setIsPickingPlan(false)} />}
 
       {isEditingRoom && (
         <RoomSetup
+          units={units}
           entry={activeRoom}
           onSave={handleSaveRoom}
           onCancel={() => setIsEditingRoom(false)}
@@ -755,7 +757,7 @@ function Workspace({
       )}
 
       {/* The same dialog with no room handed in makes a new one. */}
-      {isAddingRoom && <RoomSetup onSave={handleCreateRoom} onUseExample={handleUseExample} onCancel={() => setIsAddingRoom(false)} />}
+      {isAddingRoom && <RoomSetup units={units} onSave={handleCreateRoom} onUseExample={handleUseExample} onCancel={() => setIsAddingRoom(false)} />}
 
       {isConnecting && (
         <PinterestImport

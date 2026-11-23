@@ -141,7 +141,9 @@ function CameraRig({ view, room, zoom, orbit, look, stand }) {
     // the size of the stage. This is the share of the stage's height it takes (a
     // fifth on a short stage, an eighth on a tall one). The plan is fitted into the
     // rest, so the buttons never cover the room or the arrow under it.
-    const buttonsShare = Math.min(72 / state.size.height, 0.3);
+    // (On a stage under 460 px wide the three middle buttons sit one row up, see
+    // app.css, so there the buttons take 128 px.)
+    const buttonsShare = Math.min((state.size.width < 460 ? 128 : 72) / state.size.height, 0.3);
     // The same for the controls that stand along the right edge (the download button
     // and the view switch): a strip about 64 px wide.
     const sideShare = Math.min(64 / state.size.width, 0.2);
