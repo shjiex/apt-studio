@@ -3,16 +3,21 @@ import ElementTile from './ElementTile.jsx';
 import Icon from './Icon.jsx';
 import { useSlidingThumb } from '../lib/useSlidingThumb.js';
 
-// The groups shown as chips above the tiles. Each lists the catalog categories it holds.
+// The groups shown as chips above the tiles. Each has an icon (a name in Icon.jsx) and
+// lists the catalog categories it holds. The groups follow the way furniture shops sort
+// their ranges, with wall decor as a group of its own.
 const GROUPS = [
-  { id: 'all', name: 'All', categories: null },
-  { id: 'board', name: 'From your board', categories: null },
-  { id: 'seating', name: 'Seating', categories: ['seating'] },
-  { id: 'tables', name: 'Desks and tables', categories: ['desks'] },
-  { id: 'storage', name: 'Storage', categories: ['storage'] },
-  { id: 'beds', name: 'Beds', categories: ['beds'] },
-  { id: 'lighting', name: 'Lighting', categories: ['lighting'] },
-  { id: 'decor', name: 'Rugs and plants', categories: ['decor', 'plants'] },
+  { id: 'all', name: 'All', icon: 'grid', categories: null },
+  { id: 'board', name: 'From your board', icon: 'pin', categories: null },
+  { id: 'seating', name: 'Sofas and armchairs', icon: 'sofa', categories: ['seating'] },
+  { id: 'beds', name: 'Beds', icon: 'bed', categories: ['beds'] },
+  { id: 'tables', name: 'Tables and chairs', icon: 'dining', categories: ['tables'] },
+  { id: 'desks', name: 'Desks', icon: 'desk', categories: ['desks'] },
+  { id: 'storage', name: 'Storage', icon: 'cube', categories: ['storage'] },
+  { id: 'lighting', name: 'Lighting', icon: 'bulb', categories: ['lighting'] },
+  { id: 'rugs', name: 'Rugs', icon: 'layers', categories: ['rugs'] },
+  { id: 'plants', name: 'Plants', icon: 'plant', categories: ['plants'] },
+  { id: 'wall', name: 'Wall decor', icon: 'frame', categories: ['wall', 'decor'] },
 ];
 
 // The furniture to add: a search field, a row of group chips, then the tiles.
@@ -73,6 +78,7 @@ function ElementStrip({ items, pieces, onAdd, layout = 'row' }) {
                   setSearch('');
                 }}
               >
+                <Icon name={candidate.icon} size={14} />
                 {candidate.name}
               </button>
             );

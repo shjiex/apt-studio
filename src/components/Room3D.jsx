@@ -713,6 +713,9 @@ function Piece({ piece, fit, isSelected, plan, onPointerDown }) {
   const item = getItem(piece.type);
   const size = sizeOf(piece); // its own size if it was changed, or the catalog's
   const footprint = getFootprint({ ...piece, rotation: 0 });
+  // Something that hangs on a wall is lifted to its height there. `hang` is where its
+  // middle is above the floor, so its bottom edge is half its height lower.
+  const lift = item.wall ? (piece.hang === undefined ? item.hang : piece.hang) - size.h / 2 : 0;
   const group = useRef(null);
   const age = useRef(0); // seconds since this piece appeared
 
@@ -724,25 +727,25 @@ function Piece({ piece, fit, isSelected, plan, onPointerDown }) {
     age.current = PREFERS_LESS_MOTION ? SETTLE_TIME : Math.min(age.current + delta, SETTLE_TIME);
     const done = 1 - Math.pow(1 - age.current / SETTLE_TIME, 3); // 0 to 1, easing out
     group.current.scale.setScalar(0.85 + 0.15 * done);
-    group.current.position.y = 0.12 * (1 - done);
+    group.current.position.y = lift + 0.12 * (1 - done);
   });
 
   return (
     <group
       ref={group}
-      position={[piece.x, 0, piece.z]}
+      position={[piece.x, lift, piece.z]}
       rotation={[0, -THREE.MathUtils.degToRad(piece.rotation), 0]}
       onPointerDown={(event) => onPointerDown(event, piece)}
     >
       {isSelected && (
-        <mesh userData={{ helper: true }} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.006, 0]}>
+        <mesh userData={{ helper: true }} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.006 - lift, 0]}>
           <planeGeometry args={[footprint.w + 0.3, footprint.d + 0.3]} />
           {/* depthWrite off: a see-through mark must not hide what is drawn after it */}
           <meshBasicMaterial color={FIT_COLORS[fit]} transparent opacity={0.3} depthWrite={false} />
         </mesh>
       )}
       {/* the dark patch on the floor under the piece; a rug lies flat and needs none */}
-      {size.h > 0.1 && (
+      {size.h > 0.1 && !item.wall && (
         <mesh userData={{ helper: true }} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.012, 0]} renderOrder={1}>
           <planeGeometry args={[footprint.w * 1.5, footprint.d * 1.5]} />
           <meshBasicMaterial
@@ -758,7 +761,7 @@ function Piece({ piece, fit, isSelected, plan, onPointerDown }) {
       <FurnitureModel
         type={item.baseType || piece.type}
         size={size}
-        color={CATEGORY_COLORS[item.category]}
+        color={item.tone || CATEGORY_COLORS[item.category]}
         muted={piece.existing && plan}
         model={item.model}
         tint={piece.tint}
@@ -782,7 +785,11 @@ function ActionsAnchor({ piece, plan, target }) {
     // the plan, seen from straight above, that would be on the piece, so there they
     // sit behind its back edge.
     if (plan) spot.set(piece.x, 0, piece.z - getFootprint(piece).d / 2 - 0.12);
-    else spot.set(piece.x, size.h + 0.2, piece.z);
+    else {
+      const item = getItem(piece.type);
+      const lift = item.wall ? (piece.hang === undefined ? item.hang : piece.hang) - size.h / 2 : 0;
+      spot.set(piece.x, lift + size.h + 0.2, piece.z);
+    }
     // project() turns a place in the room into a place on screen, from -1 to 1 each way
     spot.project(state.camera);
     const left = (spot.x * 0.5 + 0.5) * state.size.width;

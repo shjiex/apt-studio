@@ -169,6 +169,16 @@ function PiecePanel({ piece, room, fit, units, lighting, onLightingChange, onRot
         <div className="measures">
           <Measure icon="width" label="From left wall" value={toSmall(gaps.left, units)} unit={unit} allowZero onCommit={setFromLeft} />
           <Measure icon="height" label="From back wall" value={toSmall(gaps.back, units)} unit={unit} allowZero onCommit={setFromBack} />
+          {/* Something on a wall can be hung higher or lower. The number is where its middle is. */}
+          {item.wall && (
+            <Measure
+              icon="height"
+              label="Above floor"
+              value={toSmall(piece.hang === undefined ? item.hang : piece.hang, units)}
+              unit={unit}
+              onCommit={(typed) => onChange(piece.id, { hang: Math.min(Math.max(fromSmall(typed, units), size.h / 2), room.height - size.h / 2) })}
+            />
+          )}
           <Measure
             icon="rotate"
             label="Turned"

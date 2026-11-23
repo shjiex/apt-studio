@@ -4,8 +4,8 @@
 // They are a guide, not a rule, and they only look at what this app knows:
 // the walls, the door, the window and the furniture.
 
-import { getItem, sizeOf } from '../data/catalog.js';
-import { coversDoor, doorInRoom, getFootprint, getWallDistances, windowInRoom } from './room.js';
+import { getItem, hangsOnWall, sizeOf } from '../data/catalog.js';
+import { coversDoor, doorInRoom, getFootprint, getWallDistances, windowInRoom, liesFlat } from './room.js';
 
 // 'bed', 'desk' and so on, also for furniture made from a moodboard image.
 function kindOf(piece) {
@@ -129,7 +129,8 @@ function checkDesk(desk, room) {
 }
 
 function checkRoom(pieces, room) {
-  const solid = pieces.filter((piece) => kindOf(piece) !== 'rug');
+  // furniture that stands on the floor: no rugs, and nothing that hangs on a wall
+  const solid = pieces.filter((piece) => !liesFlat(piece) && !hangsOnWall(piece.type));
   const doorBlocked = solid.some((piece) => coversDoor(piece, room));
 
   let covered = 0;

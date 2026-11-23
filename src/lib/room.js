@@ -2,7 +2,7 @@
 // The room is measured in metres with its centre at (0, 0).
 // x runs across the room (width) and z runs front to back (length).
 
-import { getItem, sizeOf } from '../data/catalog.js';
+import { getItem, hangsOnWall, kindOfType, sizeOf } from '../data/catalog.js';
 
 export const DEFAULT_ROOM = {
   width: 3.6,
@@ -169,8 +169,35 @@ export function getFootprint(piece) {
   return turned ? { w: d, d: w } : { w, d };
 }
 
-// Keep a piece fully inside the walls.
+// Put a piece that hangs on a wall (a print, a mirror) flat against the wall it is
+// nearest to, facing into the room. `rotation` says which way it faces: 0 on the back
+// wall, 180 on the front wall, 270 on the left wall and 90 on the right wall.
+export function snapToWall(piece, room) {
+  const { w, d } = sizeOf(piece);
+  const toWalls = {
+    back: piece.z + room.length / 2,
+    front: room.length / 2 - piece.z,
+    left: piece.x + room.width / 2,
+    right: room.width / 2 - piece.x,
+  };
+  const nearest = Object.keys(toWalls).reduce((best, name) => (toWalls[name] < toWalls[best] ? name : best));
+  // how far along the wall it may go: it stays clear of the corners by half its width
+  const keep = (value, half) => Math.min(Math.max(value, -Math.max(half - w / 2, 0)), Math.max(half - w / 2, 0));
+  if (nearest === 'back') return { ...piece, x: keep(piece.x, room.width / 2), z: -room.length / 2 + d / 2, rotation: 0, wall: 'back' };
+  if (nearest === 'front') return { ...piece, x: keep(piece.x, room.width / 2), z: room.length / 2 - d / 2, rotation: 180, wall: 'front' };
+  if (nearest === 'left') return { ...piece, x: -room.width / 2 + d / 2, z: keep(piece.z, room.length / 2), rotation: 270, wall: 'left' };
+  return { ...piece, x: room.width / 2 - d / 2, z: keep(piece.z, room.length / 2), rotation: 90, wall: 'right' };
+}
+
+// A piece lies flat on the floor (a rug) when it is no more than 5 cm high.
+// Other furniture can stand on it.
+export function liesFlat(piece) {
+  return sizeOf(piece).h <= 0.05;
+}
+
+// Keep a piece fully inside the walls. A piece that hangs on a wall goes onto its nearest wall.
 export function clampToRoom(piece, room) {
+  if (hangsOnWall(piece.type)) return snapToWall(piece, room);
   const { w, d } = getFootprint(piece);
   const maxX = Math.max(room.width / 2 - w / 2, 0);
   const maxZ = Math.max(room.length / 2 - d / 2, 0);
@@ -197,6 +224,8 @@ export function getWallDistances(piece, room) {
 // Keep a piece inside the room, and pull it flush to a wall it is nearly touching.
 export function snapToRoom(piece, room) {
   const clamped = clampToRoom(piece, room);
+  if (hangsOnWall(piece.type)) return clamped; // already flat against its wall
+
   const gaps = getWallDistances(clamped, room);
   let { x, z } = clamped;
   if (gaps.left < SNAP_DISTANCE) x -= gaps.left;
@@ -224,17 +253,22 @@ export function coversDoor(piece, room) {
   });
 }
 
-// 'fits', 'tight' or 'blocked' for one piece. A rug can sit under anything.
+// 'fits', 'tight' or 'blocked' for one piece.
+// A rug can sit under anything, so it always fits. Something that hangs on a wall is
+// only in the way of other things on the same wall. Furniture on the floor is checked
+// against the door swings and against the other furniture on the floor.
 export function getFit(piece, pieces, room) {
-  if (piece.type === 'rug') return 'fits';
-  if (coversDoor(piece, room)) return 'blocked';
+  if (liesFlat(piece)) return 'fits';
+  const onWall = hangsOnWall(piece.type);
+  if (!onWall && coversDoor(piece, room)) return 'blocked';
   let closest = Infinity;
   for (const other of pieces) {
-    if (other.id === piece.id || other.type === 'rug') continue;
+    if (other.id === piece.id || liesFlat(other)) continue;
+    if (hangsOnWall(other.type) !== onWall) continue; // a print on the wall and a sofa under it do not collide
     closest = Math.min(closest, gapBetween(piece, other));
   }
   if (closest < 0) return 'blocked';
-  if (closest < 0.15) return 'tight';
+  if (closest < (onWall ? 0.05 : 0.15)) return 'tight';
   return 'fits';
 }
 
@@ -245,7 +279,22 @@ export function getFit(piece, pieces, room) {
 // Gives back { x, z, rotation }.
 export function findOpenSpot(type, pieces, room) {
   // A rug goes in the middle; it can sit under other furniture.
-  if (type === 'rug') return { x: 0, z: 0, rotation: 0 };
+  if (kindOfType(type) === 'rug' || getItem(type).size.h <= 0.05) return { x: 0, z: 0, rotation: 0 };
+  // Something for the wall: try places along the back wall, then the left, the right and the front.
+  if (hangsOnWall(type)) {
+    const starts = [];
+    for (let x = -room.width / 2; x <= room.width / 2; x += 0.25) starts.push({ x, z: -room.length / 2 });
+    for (let z = -room.length / 2; z <= room.length / 2; z += 0.25) starts.push({ x: -room.width / 2, z });
+    for (let z = -room.length / 2; z <= room.length / 2; z += 0.25) starts.push({ x: room.width / 2, z });
+    for (let x = -room.width / 2; x <= room.width / 2; x += 0.25) starts.push({ x, z: room.length / 2 });
+    // the middle of the back wall is tried first, since that is where a print usually goes
+    starts.unshift({ x: 0, z: -room.length / 2 });
+    for (const start of starts) {
+      const candidate = snapToWall({ id: 'new', type, ...start, rotation: 0 }, room);
+      if (getFit(candidate, pieces, room) === 'fits') return { x: candidate.x, z: candidate.z, rotation: candidate.rotation };
+    }
+    return { x: 0, z: -room.length / 2, rotation: 0 };
+  }
   for (const wanted of ['fits', 'tight']) {
     for (const rotation of [0, 90]) {
       const spot = firstSpotWhere(type, rotation, wanted, pieces, room);

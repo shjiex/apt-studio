@@ -1,0 +1,17 @@
+<!doctype html>
+<!-- Draws one catalog piece on a see-through background, for its tile picture.
+     Not part of the app: pipeline/render_tiles.py opens this page once per piece
+     (through "npm run dev") and saves what it shows to public/furniture/. -->
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      html, body { margin: 0; background: transparent; }
+      #stage { width: 320px; height: 320px; }
+    </style>
+  </head>
+  <body>
+    <div id="stage"></div>
+    <script type="module" src="./tiles.jsx"></script>
+  </body>
+</html>
