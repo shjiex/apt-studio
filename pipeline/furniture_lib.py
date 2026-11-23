@@ -375,9 +375,99 @@ def bookcase():
             x += w + 0.004
     return dict(az=-30, el=16)
 
+# ---------- six more pieces (added 22 Nov, afternoon). Fronts face -Y, like the ones above. ----------
+def dining_chair():
+    wx = wood('oak_x', *OAK, axis='X'); wz = wood('oak_z', *OAK, axis='Z')
+    pad = fabric('seat_pad', (0.31, 0.34, 0.31), weave=240.0, wrinkle=0.1)
+    W, D, H, seat = 0.45, 0.50, 0.85, 0.45
+    box((W - 0.03, D - 0.09, 0.028), (0, -0.03, seat - 0.014), wx, 0.006, 4)
+    box((W - 0.07, D - 0.14, 0.03), (0, -0.035, seat + 0.012), pad, 0.014, 6)
+    for sx in (-1, 1):
+        # front legs stop under the seat; back legs run up and hold the backrest
+        leg((sx * (W / 2 - 0.045), -(D / 2 - 0.06), seat - 0.028), (sx * (W / 2 - 0.022), -(D / 2 - 0.025), 0), 0.02, 0.012, wz)
+        leg((sx * (W / 2 - 0.035), D / 2 - 0.03, H - 0.012), (sx * (W / 2 - 0.022), D / 2 - 0.085, 0), 0.016, 0.013, wz)
+    # two rails across the back, leaning the same way as the back legs
+    box((W - 0.07, 0.022, 0.11), (0, D / 2 - 0.036, H - 0.08), wx, 0.008, 4, rot=(math.radians(-4), 0, 0))
+    box((W - 0.07, 0.018, 0.04), (0, D / 2 - 0.052, seat + 0.19), wx, 0.006, 3, rot=(math.radians(-4), 0, 0))
+    return dict(az=-38, el=18)
+
+def tv_stand():
+    wx = wood('walnut_x', *WALNUT, axis='X'); wz = wood('walnut_z', *WALNUT, axis='Z')
+    brass = plain('brass', (0.83, 0.62, 0.30), 0.28, 1.0)
+    dark = plain('inside', (0.13, 0.10, 0.08), 0.8)
+    W, D, H, foot, t = 1.5, 0.40, 0.50, 0.14, 0.022
+    body = H - foot; zc = foot + body / 2
+    box((W, D, t), (0, 0, H - t / 2), wx, 0.005, 4)
+    box((W, D, t), (0, 0, foot + t / 2), wx, 0.004)
+    for x in (-(W / 2 - t / 2), -W / 6, W / 6, W / 2 - t / 2):      # two ends and two dividers
+        box((t, D - 0.004, body - 2 * t), (x, 0, zc), wx, 0.003)
+    box((W - 2 * t, 0.008, body - 2 * t), (0, D / 2 - 0.008, zc), dark, 0.0)   # back panel, dark so the open middle reads as a hollow
+    box((W / 3 - t, D - 0.04, 0.018), (0, 0.01, zc), wx, 0.003)               # one shelf in the open middle
+    door_w = W / 3 - 1.5 * t - 0.006
+    for sx in (-1, 1):                                                         # a door on each side, knob near the middle
+        xc = sx * (W / 3 - t / 4)
+        box((door_w, 0.016, body - 2 * t - 0.006), (xc, -D / 2 + 0.008, zc), wx, 0.003)
+        cyl(0.011, 0.02, (xc - sx * (door_w / 2 - 0.04), -D / 2 - 0.01, zc + 0.05), brass, rot=(math.pi / 2, 0, 0))
+    _four_legs(W, D, foot, wz, inset=0.07)
+    return dict(az=-30, el=20)
+
+def wardrobe():
+    wx = wood('oak_x', *OAK, axis='X'); wz = wood('oak_z', *OAK, axis='Z')
+    brass = plain('brass', (0.83, 0.62, 0.30), 0.28, 1.0)
+    W, D, H, foot, lid = 1.0, 0.56, 1.9, 0.10, 0.03
+    body = H - foot - lid                                                      # the body stops under the top, so no two faces share a plane
+    box((W, D, body), (0, 0, foot + body / 2), wz, 0.006, 4)                   # the body, grain running up
+    for sx in (-1, 1):                                                         # two doors, a long brass pull on each
+        box((W / 2 - 0.012, 0.014, body - 0.03), (sx * W / 4, -D / 2 - 0.005, foot + body / 2), wz, 0.003)
+        cyl(0.007, 0.26, (sx * 0.045, -D / 2 - 0.026, foot + body * 0.5), brass)
+    box((W + 0.02, D + 0.01, lid), (0, 0, H - lid / 2), wx, 0.005, 3)          # the top sits a little proud of the body
+    _four_legs(W, D, foot, wz, inset=0.06, r_top=0.026, r_bot=0.017)
+    return dict(az=-30, el=12)
+
+def side_table():
+    wx = wood('walnut_x', *WALNUT, axis='X')
+    blk = plain('black', (0.09, 0.09, 0.09), 0.45)
+    R, H = 0.225, 0.50
+    cyl(R, 0.024, (0, 0, H - 0.012), wx, bevel=0.005)                          # round top
+    cyl(0.016, H - 0.036, (0, 0, 0.012 + (H - 0.036) / 2), blk)                # one stem
+    cyl(0.15, 0.012, (0, 0, 0.006), blk, bevel=0.004)                          # a flat round foot
+    return dict(az=-30, el=22)
+
+def floor_mirror():
+    wx = wood('oak_x', *OAK, axis='X'); wz = wood('oak_z', *OAK, axis='Z')
+    # a real mirror cannot be baked into a picture, so the glass is a pale, glossy sheet with soft bands
+    glass = banded('mirror', (0.70, 0.77, 0.82), (0.90, 0.93, 0.95), scale=(0.8, 0.8, 1.6), rough=0.08)
+    W, H, t, lean = 0.60, 1.70, 0.03, math.radians(6)
+    def tilted(size, x, y, z, mat, bevel):
+        # every part is turned about the floor line (the X axis), so the whole mirror leans back together
+        yy = y * math.cos(lean) + z * math.sin(lean); zz = -y * math.sin(lean) + z * math.cos(lean)
+        return box(size, (x, yy, zz), mat, bevel, 3, rot=(-lean, 0, 0))
+    for sx in (-1, 1):
+        tilted((t, 0.028, H), sx * (W / 2 - t / 2), 0, H / 2, wz, 0.004)
+    tilted((W - 2 * t, 0.028, t), 0, 0, H - t / 2, wx, 0.004)
+    tilted((W - 2 * t, 0.028, t), 0, 0, t / 2, wx, 0.004)
+    tilted((W - 2 * t, 0.006, H - 2 * t), 0, -0.006, H / 2, glass, 0.0)
+    tilted((W - 2 * t, 0.006, H - 2 * t), 0, 0.006, H / 2, wx, 0.0)            # a board behind the glass
+    # one strut behind holds it up, like an easel
+    zs = 1.25; top = (0, 0.014 * math.cos(lean) + zs * math.sin(lean), zs * math.cos(lean))
+    leg(top, (0, 0.36, 0), 0.012, 0.012, wz)
+    return dict(az=-28, el=10)
+
+def pouf():
+    fab = fabric('pouf', (0.36, 0.44, 0.52), weave=140.0, wrinkle=0.25)
+    R, H = 0.25, 0.40
+    tall = H - 0.012 - 0.004                                                   # the base below, and the button 4 mm proud above
+    bpy.ops.mesh.primitive_cylinder_add(radius=R, depth=tall, location=(0, 0, 0.012 + tall / 2), vertices=64)
+    _finish(bpy.context.object, fab, 0.085, 8)                                 # a wide bevel rounds the top and bottom edges
+    cyl(0.02, 0.012, (0, 0, H - 0.006), fab, bevel=0.004)                      # the button in the middle of the top
+    cyl(R - 0.06, 0.012, (0, 0, 0.006), plain('pouf_base', (0.10, 0.10, 0.10), 0.7), bevel=0.002)   # a dark base lifts it off the floor
+    return dict(az=-30, el=22)
+
 OBJECTS = dict(desk=desk, chair=chair, shelf=shelf, lamp=lamp, bed=bed, plant=plant, rug=rug, sofa=sofa,
                nightstand=nightstand, dresser=dresser, coffee_table=coffee_table, armchair=armchair,
-               dining_table=dining_table, bookcase=bookcase)
+               dining_table=dining_table, bookcase=bookcase,
+               dining_chair=dining_chair, tv_stand=tv_stand, wardrobe=wardrobe, side_table=side_table,
+               floor_mirror=floor_mirror, pouf=pouf)
 
 # ---------- scene ----------
 def render(name, res=640, samples=96):

@@ -55,6 +55,28 @@ FURNITURE = {
     'mat': ('rug', 1.2, 0.8, 0.02, 0.35),
 }
 
+# ---- every piece of furniture in the picture, for the app's "which furniture is this" card ----
+# detector label -> the closest piece in the app's own catalog (the `type` in src/data/catalog.js),
+# where the catalog has something finer than the broad type above. A label that is not listed
+# here keeps its broad type ('couch' stays 'sofa').
+CLOSEST_KIND = {
+    'armchair': 'armchair', 'rocking chair': 'armchair',
+    'nightstand': 'nightstand', 'side cabinet': 'nightstand',
+    'dresser': 'dresser', 'bureau': 'dresser', 'cabinet': 'dresser', 'tv cabinet': 'dresser',
+    'bookshelf': 'bookcase', 'bookcase': 'bookcase',
+    'cocktail table': 'coffee_table', 'glass table': 'coffee_table', 'side table': 'coffee_table',
+    'table': 'dining_table', 'kitchen table': 'dining_table', 'dinning table': 'dining_table',
+    'round table': 'dining_table',
+}
+# broad type -> the group the app files it under (the `category` of a catalog entry)
+GROUP_OF = {'sofa': 'seating', 'chair': 'seating', 'bed': 'beds', 'desk': 'desks', 'shelf': 'storage',
+            'lamp': 'lighting', 'plant': 'plants', 'rug': 'decor'}
+# what the app calls each kind: the heading of the card and the spoken name of the outline
+KIND_NAMES = {'sofa': 'Sofa', 'chair': 'Chair', 'armchair': 'Armchair', 'bed': 'Bed', 'desk': 'Desk',
+              'coffee_table': 'Coffee table', 'dining_table': 'Table', 'shelf': 'Shelf',
+              'nightstand': 'Nightstand', 'dresser': 'Dresser', 'bookcase': 'Bookcase',
+              'lamp': 'Lamp', 'plant': 'Plant', 'rug': 'Rug'}
+
 _det = None
 _mat = None
 
@@ -246,6 +268,47 @@ def whole_outline(target, objs, W, H, kind):
     return outline, sorted(set(added))
 
 
+def list_elements(scored, objs, W, H, target, target_outline, pin_id, limit=6):
+    """Every piece of furniture found in the picture, best first, not only the one target.
+
+    The app draws each one's outline on the picture as a button, and offers furniture of the
+    same kind to choose from. `scored` is the list score_objects() made (best first), so the
+    target is always the first element."""
+    kept = []
+    for _, o in scored:
+        x1, y1, x2, y2 = o['box']
+        if o is not target and (x2 - x1) * (y2 - y1) < 0.012 * W * H:
+            continue                                   # too small on the picture to press
+        broad = FURNITURE[o['label']][0]
+        group = GROUP_OF[broad]
+        # The detector sometimes names one thing twice (a sofa that is also a "loveseat").
+        # Two finds in the same group whose shapes mostly cover each other are the same thing.
+        twice = False
+        for k in kept:
+            both = (o['mask'] & k['_obj']['mask']).sum()
+            smaller = max(1, min(o['mask'].sum(), k['_obj']['mask'].sum()))
+            if k['group'] == group and both / smaller > 0.6:
+                twice = True
+        if twice:
+            continue
+        # the target's outline was already worked out with the matting model's help: reuse it
+        outline = target_outline if o is target else whole_outline(o, objs, W, H, broad)[0]
+        if len(outline) < 3:
+            continue
+        kind = CLOSEST_KIND.get(o['label'], broad)
+        kept.append(dict(_obj=o, kind=kind, group=group, label=KIND_NAMES.get(kind, kind.replace('_', ' ').capitalize()),
+                         seen_as=o['label'], outline=outline,
+                         box=[round(x1 / W, 4), round(y1 / H, 4), round(x2 / W, 4), round(y2 / H, 4)],
+                         confidence=round(o['conf'], 3), is_target=o is target))
+        if len(kept) == limit:
+            break
+    elements = []
+    for n, k in enumerate(kept, 1):
+        del k['_obj']                                  # the mask is working data, not for the file
+        elements.append(dict(id=f'{pin_id}-e{n}', **k))
+    return elements
+
+
 def to_hex(c):
     return '#%02x%02x%02x' % tuple(int(max(0, min(255, round(v)))) for v in c)
 
@@ -356,6 +419,8 @@ def process(path_or_img, out_dir, pin_id, meta=None):
                ready_for_3d=bool(o['cut_sides'] == 0 and o['occlusion'] < 0.15))
     result['target'] = tgt
     result['alternates'] = [describe(s2, o2) for s2, o2 in scored[1:6]]
+    # every piece of furniture in the picture, for the app's choice of furniture per element
+    result['elements'] = list_elements(scored, objs, W, H, o, outline, pin_id)
     json.dump(result, open(os.path.join(d, 'target.json'), 'w'), indent=1)
     return result
 
@@ -375,6 +440,8 @@ if __name__ == '__main__':
     ap.add_argument('--images'); ap.add_argument('--board')
     ap.add_argument('--out', default=os.path.join(HERE, 'out', 'pins'))
     ap.add_argument('--id')
+    # the app's list of pin models: each entry with a matching id gets its `elements`, nothing else changes
+    ap.add_argument('--manifest')
     a = ap.parse_args()
     jobs = []
     if a.board:
@@ -397,3 +464,13 @@ if __name__ == '__main__':
         print(pid[:38].ljust(40), (t['label'] + ' -> ' + t['type'] + ('  ready' if t['ready_for_3d'] else '  partial')) if t else 'none')
         index.append(r)
     json.dump(index, open(os.path.join(a.out, 'targets.json'), 'w'), indent=1)
+    if a.manifest:
+        # Add `elements` to the app's manifest without touching any other field. object2glb.py
+        # writes the manifest; run this again after it, because it does not know about elements.
+        entries = json.load(open(a.manifest))
+        found = {r['id']: r.get('elements', []) for r in index}
+        for entry in entries:
+            if entry['id'] in found:
+                entry['elements'] = found[entry['id']]
+        json.dump(entries, open(a.manifest, 'w'), indent=1)
+        print('elements written to', a.manifest)

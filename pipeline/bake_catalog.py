@@ -9,7 +9,8 @@ import bpy, sys, os, math
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import furniture_lib as furn
 
-ROUGH = dict(desk=0.5, chair=0.85, shelf=0.55, lamp=0.6, bed=0.9, plant=0.7, rug=0.97, sofa=0.92, armchair=0.92)
+ROUGH = dict(desk=0.5, chair=0.85, shelf=0.55, lamp=0.6, bed=0.9, plant=0.7, rug=0.97, sofa=0.92, armchair=0.92,
+             dining_chair=0.6, tv_stand=0.5, wardrobe=0.55, side_table=0.45, floor_mirror=0.3, pouf=0.92)
 
 
 def bake(name, res, out_dir):
