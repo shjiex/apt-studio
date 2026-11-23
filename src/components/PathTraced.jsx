@@ -204,11 +204,14 @@ function PathTraced({ isOn, room, signature, daylight, strength, brightness, onP
       // 2. smoothing, from `cleaned` onto the screen
       smooth.material.map = cleaned.texture;
       // How different a neighbour may be and still count as "like it". It starts at
-      // about a third of the way from black to white and halves each time the number
-      // of passes quadruples (as the grain itself does), so the smoothing fades out
-      // as the real picture comes in. The picture is stored before exposure is
-      // applied, so the allowance is divided by the exposure.
-      smooth.material.threshold = 0.3 / Math.sqrt(Math.max(made.samples, 4) / 4) / renderer.toneMappingExposure;
+      // about a third of the way from black to white and shrinks as passes come in,
+      // so the smoothing eases off as the real picture arrives. It shrinks a little
+      // slower than the grain does (the power 0.35, where the grain goes by 0.5) and
+      // never below 0.08, because on a MacBook (M4) a flat wall still showed fine grain at 64
+      // passes when it followed the grain exactly. The picture is stored before
+      // exposure is applied, so the allowance is divided by the exposure.
+      const allowance = Math.max(0.3 / Math.pow(Math.max(made.samples, 4) / 4, 0.35), 0.08);
+      smooth.material.threshold = allowance / renderer.toneMappingExposure;
       smooth.render(renderer);
       renderer.autoClear = autoClear;
     };

@@ -379,6 +379,8 @@ The workspace was laid out again from the owner's Figma frame 216:4506. Where an
 
 **Units.** `units` is `'metric'` or `'imperial'` (saved as `apt-studio-units`). Stored values stay in metres. The room dialog and the Floor and walls sliders still show metres only.
 
+**5 am on 23 Nov.** The denoise allowance in `PathTraced.jsx` is `max(0.3 / (samples / 4) ^ 0.35, 0.08)` divided by the exposure; with the square root it had, a flat wall was grainy at 64 passes on the M4.
+
 **4:50 am on 23 Nov.** `tests/headless/shoot-pinterest.py` connects a board inside the app with `widgets.pinterest.com` and `i.pinimg.com` answered by Playwright routes (the pins sit in two columns, so find a picture by its `src`, not its place). A container query on the stage's height reads the stage as short on phones (its height comes from `min-height` there), so a media query puts the zoom buttons back on the right on phones 820 px tall or more.
 
 **4:25 am on 23 Nov.** Windows and doors are grabbed on the plan only (`grip()` in `Room3D.jsx` returns early unless `plan`), their round handles are drawn on the plan only, and a window sill is left out on a lowered wall in 3D. The 3D fit factor is 0.96.
