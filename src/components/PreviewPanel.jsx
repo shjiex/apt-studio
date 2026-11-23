@@ -42,6 +42,8 @@ function PreviewPanel({
   onCanvasReady,
   isScoreOpen,
   onToggleScore,
+  roomId,
+  startView,
 }) {
   const selectedPiece = pieces.find((piece) => piece.id === selectedId);
 
@@ -50,6 +52,8 @@ function PreviewPanel({
       <div className="stage">
         <Room3D
           room={room}
+          roomId={roomId}
+          startView={startView}
           pieces={pieces}
           selectedId={selectedId}
           view={view}

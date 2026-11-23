@@ -591,7 +591,9 @@ function RoomShell({ room, tallSide, daylight, surfaces, inside, plan, onGrab })
           plan={plan}
           daylight={daylight}
           wall={wall}
-          wallPhoto={wallPhoto}
+          // A wall picture can be on one wall only: `onlyOn` names that wall, and
+          // the other walls are painted in the wall colour. Without it, every wall has it.
+          wallPhoto={!wall.onlyOn || wall.onlyOn === name ? wallPhoto : null}
           onGrab={onGrab}
         />
       ))}
@@ -740,7 +742,13 @@ function Piece({ piece, fit, isSelected, plan, onPointerDown }) {
 
 // Everything inside the canvas. Kept separate from Room3D so it can use
 // pointer events from React Three Fiber.
-function Scene({ room, pieces, selectedId, view, showGrid, zoom, lighting, surfaces, realistic, brightness, onPasses, onRoomChange, onSelect, onMove, onDragStart }) {
+// Where you stand and which way you look when you first step inside a room that
+// does not say. Yaw 0 faces the back wall; -38 turns you toward the back left corner.
+const FIRST_LOOK = { yaw: -38, pitch: -6 };
+
+// `roomId` says which room this is, and `startView` is that room's own first inside
+// view ({ stand: { x, z }, look: { yaw, pitch } }), if it has one (the example room does).
+function Scene({ room, roomId, startView, pieces, selectedId, view, showGrid, zoom, lighting, surfaces, realistic, brightness, onPasses, onRoomChange, onSelect, onMove, onDragStart }) {
   // While a piece is being dragged we remember which one, and where on the
   // piece the pointer grabbed it, so it does not jump to the pointer.
   const [drag, setDrag] = useState(null);
@@ -749,9 +757,16 @@ function Scene({ room, pieces, selectedId, view, showGrid, zoom, lighting, surfa
   // The window or door being slid along its wall on the plan: { list, id }, or null.
   const [grab, setGrab] = useState(null);
   // Which way you look in the inside view, in degrees. yaw 0 faces the window wall.
-  const [look, setLook] = useState({ yaw: -38, pitch: -6 });
+  const [look, setLook] = useState((startView && startView.look) || FIRST_LOOK);
   // Where you stand in the inside view: { x, z } after a click on the floor, or null for the usual corner.
-  const [stand, setStand] = useState(null);
+  const [stand, setStand] = useState((startView && startView.stand) || null);
+  // Opening another room starts the inside view afresh, from that room's own start if
+  // it has one. Otherwise a spot clicked in one room would be kept in the next.
+  useEffect(() => {
+    setStand((startView && startView.stand) || null);
+    setLook((startView && startView.look) || FIRST_LOOK);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [roomId]);
   // Where an orbit or look drag began: { x, y, and the angles then }, or null when not dragging the view.
   const orbitStart = useRef(null);
 
@@ -875,7 +890,7 @@ function Scene({ room, pieces, selectedId, view, showGrid, zoom, lighting, surfa
     pieces,
     lighting,
     [surfaces.floor.kind, surfaces.floor.span, (surfaces.floor.photo || '').length],
-    [surfaces.wall.kind, surfaces.wall.color, surfaces.wall.span, (surfaces.wall.photo || '').length],
+    [surfaces.wall.kind, surfaces.wall.color, surfaces.wall.span, (surfaces.wall.photo || '').length, surfaces.wall.onlyOn],
     selectedId,
   ]);
 
@@ -1032,7 +1047,7 @@ function Scene({ room, pieces, selectedId, view, showGrid, zoom, lighting, surfa
   );
 }
 
-function Room3D({ room, pieces, selectedId, view, showGrid, zoom, lighting, surfaces, realistic, brightness, onPasses, onRoomChange, onSelect, onMove, onDragStart, onZoom, onCanvasReady }) {
+function Room3D({ room, roomId, startView, pieces, selectedId, view, showGrid, zoom, lighting, surfaces, realistic, brightness, onPasses, onRoomChange, onSelect, onMove, onDragStart, onZoom, onCanvasReady }) {
   return (
     <Canvas
       shadows="soft"
@@ -1046,6 +1061,8 @@ function Room3D({ room, pieces, selectedId, view, showGrid, zoom, lighting, surf
     >
       <Scene
         room={room}
+        roomId={roomId}
+        startView={startView}
         pieces={pieces}
         selectedId={selectedId}
         view={view}

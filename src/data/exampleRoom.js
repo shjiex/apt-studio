@@ -70,14 +70,20 @@ export function exampleRoom() {
       hour: 18,
       lamps: { ...DEFAULT_LIGHTING.lamps, on: true, kelvin: 2400 },
     },
-    // The oak floor every room starts with. The walls use a picture in place of plain
-    // paint: cream with four arches of colour, drawn for this example (public/example).
-    // One copy of the picture is 4.6 m wide, so it covers the back wall exactly once.
-    // `aspect` is the picture's width divided by its height. `color` is the cream the
-    // walls go back to when the person switches from the picture to paint.
+    // The oak floor every room starts with. The back wall, behind the sideboard, has a
+    // picture in place of plain paint: cream with four arches of colour, drawn for this
+    // example (public/example). One copy of the picture is 4.6 m wide, so it covers the
+    // back wall exactly once. `onlyOn` keeps it to that wall, as in the photo, and the
+    // other walls are painted in `color`, the same cream. `aspect` is the picture's
+    // width divided by its height.
     surfaces: {
       ...DEFAULT_SURFACES,
-      wall: { kind: 'photo', color: '#EFE6D2', photo: asset('/example/colour-block-wall.jpg'), aspect: 1839 / 1040, span: 4.6 },
+      wall: { kind: 'photo', color: '#EFE6D2', photo: asset('/example/colour-block-wall.jpg'), aspect: 1839 / 1040, span: 4.6, onlyOn: 'back' },
     },
+    // The first inside view, set up like the photo: standing behind the sofa, near the
+    // front wall, looking straight at the sideboard and the arches on the back wall.
+    // `stand` is in metres from the middle of the room; yaw 0 faces the back wall and
+    // pitch is how far you look down, in degrees.
+    insideView: { stand: { x: -0.2, z: 1.45 }, look: { yaw: 0, pitch: -8 } },
   };
 }

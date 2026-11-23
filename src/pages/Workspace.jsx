@@ -494,6 +494,8 @@ function Workspace({
           selectedId={selectedId}
           isScoreOpen={openPanel === 'score'}
           onToggleScore={() => togglePanel('score')}
+          roomId={activeRoom.id}
+          startView={activeRoom.insideView}
           view={view}
           showGrid={showGrid}
           lighting={lighting}

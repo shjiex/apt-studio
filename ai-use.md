@@ -262,6 +262,13 @@ My direction: "the liquid glass should avoid shadows beyond its borders, or mini
 
 My direction: "adjust the realistic version so it doesn't take as long to load" (from earlier) and "Keep working on it nonstop autonomously". Preparing the program while you look around, and reading the room again on the click so late-loading models are included, were the assistant's choices after timing each step.
 
+### The example room looks more like its photo, and object2glb keeps furniture choices (22 Nov, 8:50 pm), AI-generated
+
+- `src/data/exampleRoom.js` (`onlyOn`, `insideView`), `src/components/Room3D.jsx` (the wall picture per wall, `FIRST_LOOK`, the inside view starting afresh per room), `PreviewPanel.jsx` and `Workspace.jsx` (passing the room's id and start view), `SurfacesMenu.jsx` (a new photo covers every wall).
+- `pipeline/object2glb.py` (`KEPT_FIELDS`, `merge_manifest`).
+
+My direction: "this should be an example room available for users to use" and "Keep working on it nonstop autonomously". The handoff's to-do list named the wall picture on one wall and the first camera position. Where to stand was the assistant's choice, read from the photo.
+
 ## Chat transcript
 
 TODO: paste the share link or exported transcript of the Claude conversation here.

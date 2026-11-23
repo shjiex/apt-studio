@@ -432,6 +432,23 @@ project continues.
   room, switching on, and leaving and coming back with Realistic on all work. Not yet seen on a
   real graphics card.
 
+### The example room looks more like its photo, and object2glb keeps furniture choices (22 Nov, 8:50 pm)
+
+- **Arches on the back wall only.** A wall picture can now be kept to one wall: `onlyOn` in
+  `surfaces.wall` names it, and the other walls take the wall colour. The example room sets
+  `onlyOn: 'back'`, so the arches sit behind the sideboard as in `mood-2.jpg` and the other walls
+  are cream. Choosing a new wall photo in Floor and walls covers every wall again.
+- **A first inside view like the photo.** A room can carry `insideView` (where you stand and
+  which way you look). The example room starts behind the sofa, looking at the sideboard and the
+  arches. Opening another room now starts its inside view afresh, where before a spot clicked in
+  one room was kept in the next.
+- **`object2glb.py` keeps `elements`.** Rebuilding an image's model used to drop the furniture
+  choices that `pin2object.py --manifest` adds to its manifest entry. `merge_manifest` now keeps
+  them, so the order of the two scripts no longer matters. Tested without Blender on sample entries.
+- **Checked.** The example room in 3D and Inside, then the bedroom's inside view back in its
+  usual corner. The checks used a stand-in wall picture, because `public/example` is not on GitHub.
+- **Still open from the handoff.** The sofa colour choice, the art and the shelves.
+
 ## Components
 
 | Component | What it does |

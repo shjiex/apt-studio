@@ -45,7 +45,10 @@ function PhotoControls({ surface, id, hint, secondName, onChange }) {
           secondName={secondName}
           startSpan={surface.span}
           onUse={(tile) => {
-            onChange({ ...surface, ...tile, kind: 'photo' });
+            const next = { ...surface, ...tile, kind: 'photo' };
+            // A new photo covers every wall, even where the old picture was on one wall only.
+            delete next.onlyOn;
+            onChange(next);
             closeChosen();
           }}
           onCancel={closeChosen}
