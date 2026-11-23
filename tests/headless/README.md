@@ -32,6 +32,7 @@ await pg.add_init_script("localStorage.setItem('apt-studio-welcomed','yes'); loc
 
 | Script | Covers |
 |---|---|
+| `shoot-pinterest.py` | Connecting a Pinterest board inside the app, with Pinterest's feed and pictures stood in for (the test machine cannot reach Pinterest): the four kinds of link that are not boards, a missing board, a link pasted inside a message, 49 pins shown, the count chip, blank and coded descriptions, picks kept after a reload, and going back to the sample photos |
 | `shoot-account.py` | Accounts against the Firebase Auth emulator (the steps to start it are at the top of the script): sign up, the plain mistakes caught on the card, the eye that shows the password, the account menu saying the account could not be reached, log out, a wrong password, the reset link, log in, staying signed in after a reload, an email that is taken |
 | `shoot7.py` | Smoke test: the app loads, tiles are there, a piece is added, the login page opens, no console errors |
 | `shoot16.py` | The panel for the selected piece (size, link, actions) |

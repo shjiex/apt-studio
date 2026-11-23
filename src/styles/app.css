@@ -4086,7 +4086,7 @@ a.btn {
   container-type: size;
 }
 
-@container (max-height: 470px) {
+@container (max-height: 420px) {
   .stage__zoom {
     right: auto;
     left: var(--space-4);
@@ -4259,5 +4259,15 @@ a.btn {
 
   .stage__real {
     right: 72px;
+  }
+}
+
+/* On a phone the stage is 52% of the screen's height. On a tall phone that is enough
+   for the whole column on the right, so the zoom buttons stay there. (The rule above
+   reads the stage as short on phones, where its height comes from min-height.) */
+@media (max-width: 900px) and (min-height: 820px) {
+  .stage__zoom {
+    left: auto;
+    right: var(--space-4);
   }
 }

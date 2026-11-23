@@ -376,7 +376,7 @@ My direction: a list of seventeen points I scheduled for 2:51 am, in my own word
 
 - Changed: `PathTraced.jsx`, `Room3D.jsx`, `styles/app.css`.
 
-My direction: "realistic mode really doesn't work, i see spots everywhere", and at 3:23 am "Keep working on it until 7:50 am. Mostly the Pinterest access, 3D environment, Firebase and login". The assistant looked at the test link in the browser on my Mac, saw that specks were still there at Sharp, and tried the brightness limit and the median pass until both rooms were clean there. It also saw the black doorway and the hidden plus button on my Mac and fixed them. The choices that are its own: the limit of six times white, the 1.8 times median threshold, the glow of the recess (two divided by the exposure), 42% for the right section and 470 px as the height where the zoom buttons move.
+My direction: "realistic mode really doesn't work, i see spots everywhere", and at 3:23 am "Keep working on it until 7:50 am. Mostly the Pinterest access, 3D environment, Firebase and login". The assistant looked at the test link in the browser on my Mac, saw that specks were still there at Sharp, and tried the brightness limit and the median pass until both rooms were clean there. It also saw the black doorway and the hidden plus button on my Mac and fixed them. The choices that are its own: the limit of six times white, the 1.8 times median threshold, the glow of the recess (two divided by the exposure), 42% for the right section and 420 px as the height where the zoom buttons move.
 
 ### A Pinterest importer checked against the real feed (23 Nov, 3:50 am), AI-generated
 
@@ -402,6 +402,12 @@ My direction: "Keep working on it until 7:50 am. Mostly the Pinterest access, 3D
 - Changed: `Room3D.jsx`.
 
 My direction: "the door is glitchy" and "Keep working on it until 7:50 am. Mostly the Pinterest access, 3D environment, Firebase and login". The assistant turned the room on my Mac, moved the door by accident, put it back with undo, and then changed the code so it cannot happen. The choice that is its own: windows and doors are dragged on the plan only. If I want them draggable in 3D again, the two lines are in `grip()` in `Room3D.jsx`.
+
+### Connecting a board tried inside the app, and zoom buttons on phones (23 Nov, 4:50 am), AI-generated
+
+- New: `tests/headless/shoot-pinterest.py`. Changed: `styles/app.css`.
+
+My direction: "Keep working on it until 7:50 am. Mostly the Pinterest access, 3D environment, Firebase and login". The assistant read the real feed once more from my browser to copy its shape into the test, then ran the app's own flow against that. The choice that is its own: 820 px as the phone height where the zoom buttons stay on the right.
 
 ## Chat transcript
 

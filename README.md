@@ -839,6 +839,18 @@ project continues.
 - **Checked.** Dragging the door along its wall on the plan still works in the test browser.
   From the window side in 3D nothing floats.
 
+### Connecting a board tried inside the app, and zoom buttons on phones (23 Nov, 4:50 am)
+
+- **Connecting a board, inside the app.** `tests/headless/shoot-pinterest.py` runs the real
+  dialog, importer and moodboard, with only Pinterest's two addresses answered by the test (the
+  test machine cannot reach Pinterest). The answer has the same shape the real feed had this
+  morning: 49 pins, three picture widths, a blank description, a description with a character
+  code. It checks the sentence for a pin link, a profile link, a short link and plain words, a
+  board that does not exist, a link pasted inside a message, the 49 pins, "49 of 312 Pins", two
+  picks kept after a reload, and Back to the sample photos. All of it passes.
+- **Phones.** The rule that moves the zoom buttons to the left on a short stage also fired on
+  phones, where the stage is tall enough. On a phone at least 820 px tall they stay on the right.
+
 ## Components
 
 | Component | What it does |
