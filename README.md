@@ -802,6 +802,24 @@ project continues.
 - **A switch for testing.** A build made with `VITE_EMULATOR=1` talks to the emulator in place
   of the real Firebase (`firebase.js`).
 
+### The plan stays clear of the buttons, and the tools at the side fit (23 Nov, 4:10 am)
+
+- **The plan and the buttons.** On a short stage the row of buttons along the bottom covered the
+  arrow under the room and the width written there. The plan is now fitted into the part of the
+  stage above that row, whatever the height of the stage (`buttonsShare` in `Room3D.jsx`).
+- **Tools at the side.** The three tab names and the cross did not fit, so the cross sat on top
+  of Floor and walls. The section is 368 px wide, and on a small window the cross has a row of
+  its own. The furniture tiles there touched each other and now have 8 px between them.
+- **Narrow stage, narrow side section.** On a stage under 460 px wide the three middle buttons
+  move up one row so they no longer sit on undo and redo. The line above the moodboard pictures
+  stays on one line.
+- **Seen on my Mac in the test link.** At 1440 by 900 the plan, the turn in 3D and dragging a
+  tile onto the floor all work, and undo took the piece away again.
+- **Figma.** The fourteen screens in "Screens to adjust" now match the build: the logo in the
+  middle, My home, words on Grid, Lighting and Floor and walls, Feng Shui score, and Settings
+  items without the lines under them. The Liquid glass frame in v5 has a new paragraph with the
+  values the build uses since 3 am. Nothing in v3, v4 or the frames I drew myself was touched.
+
 ## Components
 
 | Component | What it does |

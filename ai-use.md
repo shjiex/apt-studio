@@ -391,6 +391,12 @@ My direction: "Keep working on it until 7:50 am. Mostly the Pinterest access, 3D
 
 My direction: "Keep working on it until 7:50 am. Mostly the Pinterest access, 3D environment, Firebase and login". The assistant could not use my real Firebase project without my yes, so it installed Firebase's emulator on its own machine and ran the account flow there, and wrote a stand-in Firestore for the saving code. The choices that are its own: what the login card checks before asking Firebase, the wording of every message, the reset link appearing only after a wrong password, the states in the account menu and the red mark.
 
+### The plan stays clear of the buttons, and the tools at the side fit (23 Nov, 4:10 am), AI-generated
+
+- Changed: `Room3D.jsx`, `styles/app.css`. In Figma: text and layout changes inside the row "Screens to adjust" and one added paragraph in the v5 Liquid glass frame.
+
+My direction: "Keep working on it until 7:50 am. Mostly the Pinterest access, 3D environment, Firebase and login". The assistant looked at the test link on my Mac at two window sizes and at the tools-at-the-side layout in its own test browser, and fixed what overlapped. The choices that are its own: 72 px as the height kept free for the buttons, 368 px for the tools section, and 460 px as the stage width where the middle buttons move up.
+
 ## Chat transcript
 
 TODO: paste the share link or exported transcript of the Claude conversation here.

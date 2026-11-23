@@ -134,10 +134,16 @@ function CameraRig({ view, room, zoom, orbit, look, stand }) {
     const aspect = state.size.width / state.size.height;
     const verticalFov = THREE.MathUtils.degToRad(camera.fov);
     const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * aspect);
-    // From above the room is a rectangle: fit its length and its width.
+    // From above the room is a rectangle: fit its length and its width, with 0.9 m
+    // around it for the size arrows and the lengths written beside the walls.
     const margin = 0.9;
+    // The row of buttons along the bottom of the stage is about 72 px tall whatever
+    // the size of the stage. This is the share of the stage's height it takes (a
+    // fifth on a short stage, an eighth on a tall one). The plan is fitted into the
+    // rest, so the buttons never cover the room or the arrow under it.
+    const buttonsShare = Math.min(72 / state.size.height, 0.3);
     const topDistance = Math.max(
-      (room.length / 2 + margin + 0.3) / Math.tan(verticalFov / 2),
+      (room.length / 2 + margin) / (1 - buttonsShare) / Math.tan(verticalFov / 2),
       (room.width / 2 + margin) / Math.tan(horizontalFov / 2)
     );
     // From an angle, fit a ball that wraps the whole room.
@@ -162,9 +168,10 @@ function CameraRig({ view, room, zoom, orbit, look, stand }) {
     camera.near = Math.max(0.1, distance - reach);
 
     // In the plan the camera aims a little in front of the middle of the room. That
-    // moves the room up on screen and leaves space at the bottom for the row of
-    // buttons on the stage, so they do not cover the width written under the room.
-    const forward = 0.3 * (1 - t);
+    // moves the room up on screen by half the height of the row of buttons, so the
+    // space left for them is all at the bottom. distance x tan(half the lens angle)
+    // is half the height of floor in view, in metres.
+    const forward = distance * Math.tan(verticalFov / 2) * buttonsShare * (1 - t);
     camera.position.set(
       distance * Math.sin(tilt) * Math.sin(turn),
       distance * Math.cos(tilt),

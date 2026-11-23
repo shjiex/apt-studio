@@ -4078,12 +4078,6 @@ a.btn {
   width: min(var(--moodboard-width, 560px), 400px, 30vw);
 }
 
-/* With the tools open on a small window they are a little narrower too. */
-@media (max-width: 1180px) {
-  .tools {
-    width: 280px;
-  }
-}
 
 /* The stage also measures its own height. On a short stage the right edge cannot
    hold the download button, the view switch, the zoom buttons and the score in one
@@ -4171,4 +4165,79 @@ a.btn {
 
 .auth__card h1 {
   margin-bottom: calc(var(--space-2) * -1);
+}
+
+/* ---------- the tools at the side: tabs that fit, tiles with air between them ---------- */
+/* The three tab names and the close button did not fit in 320 px, so the cross sat on
+   top of "Floor and walls". The section is a little wider, and on a small window the
+   cross takes a row of its own above the tabs. */
+.tools {
+  width: 368px;
+}
+
+.tools .tools__head .light__choices .light__choice {
+  padding: 0 var(--space-2);
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+@media (max-width: 1180px) {
+  .tools {
+    width: 300px;
+  }
+
+  .tools__head {
+    flex-wrap: wrap;
+  }
+
+  .tools__head .side__close {
+    order: -1;
+    margin-left: auto;
+  }
+
+  .tools__head .light__choices {
+    flex: 1 0 100%;
+  }
+}
+
+/* Three tiles to a row with 8 px between them. The coloured square fills its tile,
+   whatever the width of the section. */
+.strip-area--grid .strip {
+  gap: var(--space-3) var(--space-2);
+}
+
+.strip-area--grid .tile {
+  width: calc((100% - 2 * var(--space-2)) / 3);
+  padding: 0 0 var(--space-2);
+}
+
+.strip-area--grid .tile__face {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+}
+
+/* ---------- a narrow stage and a narrow side section ---------- */
+/* With the tools open at the side on a small window the stage is narrow and tall.
+   The three buttons in the middle of its bottom edge then sat on top of undo and
+   redo, so on a narrow stage they move up one row. */
+@container (max-width: 460px) {
+  .stage__tools {
+    bottom: calc(var(--space-4) + var(--control-md) + var(--space-2));
+  }
+}
+
+/* The line above the pictures stays on one line: a long board name is cut short
+   with three dots, and the count and the button keep their words together. */
+.board-row__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.board-row .tag,
+.board-row__connect {
+  flex: none;
+  white-space: nowrap;
 }
