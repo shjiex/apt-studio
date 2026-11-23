@@ -851,16 +851,20 @@ project continues.
 - **Phones.** The rule that moves the zoom buttons to the left on a short stage also fired on
   phones, where the stage is tall enough. On a phone at least 820 px tall they stay on the right.
 
-### A smooth wall at Sharp (23 Nov, 4:55 am)
+### A smooth wall at Sharp, and no grainy picture on the way there (23 Nov, 5:05 am)
 
 - **Seen on my Mac.** With the specks gone, a flat wall in the realistic picture still showed
-  fine grain when the pill said Sharp.
-- **Why.** The smoothing step eased off exactly as fast as the grain shrinks, so at 64 passes
-  it was already too weak for what grain was left.
-- **Fixed in `PathTraced.jsx`.** The allowance of the smoothing now shrinks a little slower
-  than the grain (the power 0.35 in place of a square root) and stops at 0.08. On my Mac the
-  walls of the example room are smooth at Sharp and the edges of the lamp, the shelf and the
-  books are as crisp as before.
+  fine grain, from the moment the picture appeared (24 passes) until after the pill said Sharp.
+- **Why.** The smoothing step eased off as fast as the grain shrinks but started too weak for
+  it, and the picture was put on screen long before it was clean.
+- **Fixed in `PathTraced.jsx`.** The allowance of the smoothing is half as large again (0.9 in
+  place of 0.6, divided by the square root of the passes) and stops at 0.08. The traced picture
+  now waits for 64 passes, the same number at which the pill says Sharp, and the normal picture
+  stays on screen until then with the pill counting up.
+- **Checked on my Mac.** In the example room by day the walls are smooth at Sharp and the edges
+  of the lamp, the shelf and the books are crisp. With Daylight off the lamp-lit picture is
+  clean too. The pane the assistant looks through runs slowly in the background, so how many
+  seconds Sharp takes on my screen is for me to see.
 
 ## Components
 

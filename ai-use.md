@@ -409,11 +409,11 @@ My direction: "the door is glitchy" and "Keep working on it until 7:50 am. Mostl
 
 My direction: "Keep working on it until 7:50 am. Mostly the Pinterest access, 3D environment, Firebase and login". The assistant read the real feed once more from my browser to copy its shape into the test, then ran the app's own flow against that. The choice that is its own: 820 px as the phone height where the zoom buttons stay on the right.
 
-### A smooth wall at Sharp (23 Nov, 4:55 am), AI-generated
+### A smooth wall at Sharp, and no grainy picture on the way there (23 Nov, 5:05 am), AI-generated
 
 - Changed: `PathTraced.jsx`.
 
-My direction: "realistic mode really doesn't work, i see spots everywhere". The assistant compared the realistic picture on my Mac before and after the change. The choices that are its own: the power 0.35 and the floor of 0.08.
+My direction: "realistic mode really doesn't work, i see spots everywhere". The assistant compared the realistic picture on my Mac at several stages, before and after each change. The choices that are its own: 0.9 and the floor of 0.08 for the smoothing, and showing the traced picture only once it is Sharp (64 passes) in place of at 24.
 
 ## Chat transcript
 

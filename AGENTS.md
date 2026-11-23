@@ -379,7 +379,7 @@ The workspace was laid out again from the owner's Figma frame 216:4506. Where an
 
 **Units.** `units` is `'metric'` or `'imperial'` (saved as `apt-studio-units`). Stored values stay in metres. The room dialog and the Floor and walls sliders still show metres only.
 
-**5 am on 23 Nov.** The denoise allowance in `PathTraced.jsx` is `max(0.3 / (samples / 4) ^ 0.35, 0.08)` divided by the exposure; with the square root it had, a flat wall was grainy at 64 passes on the M4.
+**5 am on 23 Nov.** The denoise allowance in `PathTraced.jsx` is `max(0.9 / sqrt(samples), 0.08)` divided by the exposure (it was 0.6, and a flat wall was grainy at 64 passes on the M4). `WARM_PASSES` is 64, equal to `SHARP_AT`, so the traced picture appears when the pill says Sharp and a grainy one is never shown.
 
 **4:50 am on 23 Nov.** `tests/headless/shoot-pinterest.py` connects a board inside the app with `widgets.pinterest.com` and `i.pinimg.com` answered by Playwright routes (the pins sit in two columns, so find a picture by its `src`, not its place). A container query on the stage's height reads the stage as short on phones (its height comes from `min-height` there), so a media query puts the zoom buttons back on the right on phones 820 px tall or more.
 
@@ -399,7 +399,7 @@ The workspace was laid out again from the owner's Figma frame 216:4506. Where an
 
 **Room score.** Widened on 23 Nov from research (sources in the README under "A wider room score"). Compass and element rules are left out because the app does not know which way a home faces.
 
-**Realistic.** On by default in the Inside view. `WARM_PASSES` in `PathTraced.jsx` (24 since 3 am on 23 Nov) keeps the normal picture on screen until the traced one is clean enough, and `SPECK_SHADER` removes single bright specks before the smoothing. `SHARP_AT` in `PreviewPanel.jsx` (64 passes) is where the pill reads Sharp.
+**Realistic.** On by default in the Inside view. `WARM_PASSES` in `PathTraced.jsx` (64 since 5 am on 23 Nov) keeps the normal picture on screen until the traced one is clean enough, and `SPECK_SHADER` removes single bright specks before the smoothing. `SHARP_AT` in `PreviewPanel.jsx` (64 passes) is where the pill reads Sharp.
 
 ## What landed on 22 Nov at about 4 pm PT
 

@@ -33,10 +33,12 @@ const TEST_SCALE = Number(new URLSearchParams(window.location.search).get('trace
 // For testing where the browser cannot prepare a program in the background (software
 // graphics in a test browser): ?prepare in the address gets the tracer ready anyway.
 // How many passes are averaged before the traced picture is put on screen.
-// At 4 the picture came on screen still full of bright specks. At 24 the grain is fine
-// enough for the two clean-up steps below to deal with, and it is about two seconds on
-// a laptop graphics card. The normal picture stays on screen until then.
-const WARM_PASSES = Number(new URLSearchParams(window.location.search).get('warm')) || 24; // ?warm=3 in the address shows it sooner, for testing on a slow machine
+// At 4 the picture came on screen still full of bright specks. At 24 the specks were
+// gone but the walls were still grainy until about 64. So the traced picture now
+// waits for 64 passes, the same number at which the pill on the stage says Sharp
+// (SHARP_AT in PreviewPanel.jsx). The normal picture stays on screen until then, with
+// the pill counting up, so a grainy picture is never shown.
+const WARM_PASSES = Number(new URLSearchParams(window.location.search).get('warm')) || 64; // ?warm=3 in the address shows it sooner, for testing on a slow machine
 
 // A clean-up step for the traced picture: take bright specks out.
 // A traced path now and then finds a very bright spot by luck, and that lands as one
@@ -203,14 +205,14 @@ function PathTraced({ isOn, room, signature, daylight, strength, brightness, onP
       renderer.setRenderTarget(drawingTo);
       // 2. smoothing, from `cleaned` onto the screen
       smooth.material.map = cleaned.texture;
-      // How different a neighbour may be and still count as "like it". It starts at
-      // about a third of the way from black to white and shrinks as passes come in,
-      // so the smoothing eases off as the real picture arrives. It shrinks a little
-      // slower than the grain does (the power 0.35, where the grain goes by 0.5) and
-      // never below 0.08, because on a MacBook (M4) a flat wall still showed fine grain at 64
-      // passes when it followed the grain exactly. The picture is stored before
-      // exposure is applied, so the allowance is divided by the exposure.
-      const allowance = Math.max(0.3 / Math.pow(Math.max(made.samples, 4) / 4, 0.35), 0.08);
+      // How different a neighbour may be and still count as "like it". The grain halves
+      // each time the number of passes quadruples, and the allowance follows it (0.9
+      // divided by the square root of the passes), so the smoothing eases off as the
+      // real picture arrives. It never goes below 0.08, which keeps a flat wall smooth.
+      // The 0.9 was 0.6 at first. On a MacBook (M4) that left fine grain on the walls
+      // when the pill said Sharp. The picture is stored before exposure is applied, so
+      // the allowance is divided by it.
+      const allowance = Math.max(0.9 / Math.sqrt(Math.max(made.samples, 4)), 0.08);
       smooth.material.threshold = allowance / renderer.toneMappingExposure;
       smooth.render(renderer);
       renderer.autoClear = autoClear;
