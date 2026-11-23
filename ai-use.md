@@ -358,6 +358,13 @@ My direction: "fengshui should also be more comprehensive after you conduct deep
 
 My direction: "create a new design system version with liquid glass", with a flowing transition, no pressed state and a lighter shadow, and never to overwrite an earlier version. The assistant duplicated v4 and built the glass parts with the Figma plugin API from the numbers in `app.css`.
 
+### The logo in the middle of the top bar (23 Nov, 2:05 am), AI-generated
+
+- `src/pages/Workspace.jsx`: the `Logo` sits between the two halves of the top bar.
+- `src/styles/app.css`: the "logo in the middle of the top bar" block at the end.
+
+My direction: a comment on the logo in the hosted build, "move this to the center". The assistant made the change and measured it.
+
 ## Chat transcript
 
 TODO: paste the share link or exported transcript of the Claude conversation here.

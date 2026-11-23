@@ -3728,3 +3728,37 @@ a.btn {
 .advanced--inner[open] summary {
   margin-bottom: calc(var(--space-1) * -1);
 }
+
+/* ---------- the logo in the middle of the top bar ---------- */
+/* It is taken out of the row and pinned to the middle, so it stays centred however
+   wide the rooms on the left and the menus on the right are. Each side keeps to its
+   own half so nothing runs under the mark. */
+.top-bar {
+  position: relative;
+}
+
+.top-bar > .logo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.top-bar__left,
+.top-bar__right {
+  max-width: calc(50% - 32px);
+}
+
+/* On a phone the top bar wraps onto more rows, so the mark goes back to the start. */
+@media (max-width: 900px) {
+  .top-bar > .logo {
+    position: static;
+    transform: none;
+    order: -1;
+  }
+
+  .top-bar__left,
+  .top-bar__right {
+    max-width: none;
+  }
+}

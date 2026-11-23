@@ -685,6 +685,16 @@ project continues.
 - **Not redrawn.** The Screens frame inside v5 still shows the v4 layout. My own frame of the
   new workspace is the reference for the screens.
 
+### The logo in the middle of the top bar (23 Nov, 2:05 am)
+
+- **What changed.** The Apt Studio mark moved from the left end of the top bar to its middle.
+  The rooms stay on the left and the menus on the right.
+- **How.** The mark is pinned to the middle of the bar (`.top-bar > .logo` in `app.css`), so
+  it stays centred however wide the two sides are. Each side keeps to its own half. Under
+  900 px the bar wraps onto more rows, so the mark goes back to the start of the first row.
+- **Checked.** The middle of the mark and the middle of the bar are both at 720 px on a
+  1440 px wide window.
+
 ## Components
 
 | Component | What it does |

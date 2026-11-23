@@ -531,7 +531,6 @@ function Workspace({
     <div className={`app app--${tab}`}>
       <header className="top-bar">
         <div className="top-bar__left">
-          <Logo height={24} />
           <RoomTabs
             homeName={homeName}
             rooms={rooms}
@@ -542,6 +541,8 @@ function Workspace({
             onAdd={() => setIsAddingRoom(true)}
           />
         </div>
+        {/* The mark sits in the middle of the top bar, between the rooms and the menus. */}
+        <Logo height={24} />
         <div className="top-bar__right">
           {/* These two only show while their section is closed, to open it again. */}
           {layout === 'side' && tool === null && (
