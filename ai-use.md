@@ -269,6 +269,12 @@ My direction: "adjust the realistic version so it doesn't take as long to load" 
 
 My direction: "this should be an example room available for users to use" and "Keep working on it nonstop autonomously". The handoff's to-do list named the wall picture on one wall and the first camera position. Where to stand was the assistant's choice, read from the photo.
 
+### Panels stay on a phone's screen, and checks with a real pointer (22 Nov, 9:00 pm), AI-generated
+
+- `src/styles/app.css`: the "panels from the top bar, on a phone" block at the end.
+
+My direction: "Keep working on it nonstop autonomously". The assistant found the off-screen panels while checking the phone layout, and ran the pointer and contrast checks the handoff listed as not done.
+
 ## Chat transcript
 
 TODO: paste the share link or exported transcript of the Claude conversation here.

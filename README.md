@@ -449,6 +449,21 @@ project continues.
   usual corner. The checks used a stand-in wall picture, because `public/example` is not on GitHub.
 - **Still open from the handoff.** The sofa colour choice, the art and the shelves.
 
+### Panels stay on a phone's screen, and checks with a real pointer (22 Nov, 9:00 pm)
+
+- **Panels on a phone.** At phone width the Lighting, Floor and walls and Download panels opened
+  off the left edge of the screen, because each was placed against the right edge of its button
+  and the buttons wrap to the left on a phone. Under 900 px they now hang from the whole top bar:
+  as wide as the bar, just under it, and short enough to stay above the tab bar (they scroll
+  inside). A new block at the end of `src/styles/app.css`. Checked at 390 by 844.
+- **Dragging with a real pointer.** In a headless browser with real mouse presses and moves, the
+  bed on the plan followed the pointer, snapped flush to the back wall within 12 cm, stopped flush
+  at the front wall when dragged past it, turned Blocked over the door swing, and one undo put
+  the whole drag back. Nothing needed fixing.
+- **Choice rows, measured.** The contrast of the segmented rows was reasoned before. Measured
+  now over black and white backdrops: ink on the track 16.53 to 1 on both, white on the chosen
+  thumb 11.92 to 1.
+
 ## Components
 
 | Component | What it does |
