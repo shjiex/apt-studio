@@ -240,7 +240,7 @@ There are no unit tests and no linter set up.
 | GitHub `shjiex/apt-studio`, branch `main` | Public. Matched the working copy at 3:55 pm on 22 Nov except the two files left out on purpose. All commits are authored by the owner. One old commit, `156342a`, has a "Co-Authored-By: Claude" line. Removing it means rewriting history or recreating the repository, which he has to do or approve. He said earlier "Recreate the GitHub once we're done". |
 | The owner's Mac, `~/Downloads/apt-studio-app` | A plain copy of the project, **not a git repository**. Nothing has been run there by an agent. If you work from a clone, tell him which folder is now the real one. |
 | Live demo | https://claude.ai/artifact/DPj3EsDyGrpUp7ruxxXU8j ("Apt Studio test build"), built with the demo build on 22 Nov at 10:30 pm. Private to the owner until he shares it. Checked from inside its page on his MacBook (Apple M4): models, textures, the moodboard, the Realistic picture and the example room with its wall picture load, and dragging a piece on the plan showed no flicker in stills. The furniture choice card was not opened there. The first demo, `7gDCij3ZaSGudnoFy2FWi4`, could not be found any more. |
-| GitHub Pages | Prepared, **not turned on**. The workflow below is not in the repository. To turn it on, with his yes: add it as `.github/workflows/deploy.yml`, then set Settings > Pages > Source to "GitHub Actions". The site would be https://shjiex.github.io/apt-studio/. |
+| GitHub Pages | **On since 23 Nov, 12:25 pm.** The workflow below is `.github/workflows/deploy.yml`, and Settings > Pages > Source is "GitHub Actions". The site is https://shjiex.github.io/apt-studio/ and is rebuilt on every push to `main`. |
 
 ```yaml
 name: Deploy to GitHub Pages
@@ -378,6 +378,8 @@ The workspace was laid out again from the owner's Figma frame 216:4506. Where an
 **Room.** The orbit turns all the way round and `lowWalls` in `Room3D.jsx` drops the walls on the camera's side. Size arrows on the plan resize the room. Rooms are rectangles only.
 
 **Units.** `units` is `'metric'` or `'imperial'` (saved as `apt-studio-units`). Stored values stay in metres.
+
+**Pages, 12:25 pm on 23 Nov.** The owner said "yes to Pages". `.github/workflows/deploy.yml` is in the repository, `main` was moved forward to the branch (fast-forward), and Settings > Pages > Source is GitHub Actions. Every push to `main` builds and publishes https://shjiex.github.io/apt-studio/. The site runs in visitor mode because `src/firebaseConfig.js` is not in the repository. Rule 9 in section 3 now covers only `src/firebaseConfig.js` and `pipeline/models`.
 
 **5:25 am on 23 Nov.** `ShopList` lists every piece that is not marked Own as a row; a row with no link or price has a tag button that calls `onSelect(piece.id)` (wired to `setSelectedId` through `SidePanel`'s `onSelectPiece`). The score card on the stage has `max-height: calc(100cqh - 96px)`.
 
