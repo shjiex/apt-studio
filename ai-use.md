@@ -427,6 +427,12 @@ My direction: I asked for imperial units in my midnight list, and this was on th
 
 My direction: this was on the list of gaps left from the wall decor I asked for at midnight. The assistant closed it while working through the night. The choice that is its own: a covered window or doorway reads Blocked, not Tight.
 
+### The shop list is a list, and the score card stays on the stage (23 Nov, 5:25 am), AI-generated
+
+- Changed: `ShopList.jsx`, `SidePanel.jsx`, `pages/Workspace.jsx`, `styles/app.css`.
+
+My direction: from my 2 am list, "this UI should not read as a text wall; add icons where needed" and "shouldn't have the same name of furniture be shown more than once". The assistant found the Shop tab still read that way while looking at the test link on my Mac. The choice that is its own: one row per piece with a tag button, in place of the sentence.
+
 ## Chat transcript
 
 TODO: paste the share link or exported transcript of the Claude conversation here.

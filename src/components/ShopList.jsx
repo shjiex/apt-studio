@@ -25,22 +25,24 @@ export function formatPrice(price) {
   return `$${Number.isInteger(price) ? price : price.toFixed(2)}`;
 }
 
-// The Shop tab of the side panel. It lists every piece in the room that has a shop
-// link or a price, with a button that opens the product page and, at the foot, what
-// the priced pieces cost together. Pieces with neither are named underneath.
-function ShopList({ pieces }) {
+// The Shop tab of the side panel. It lists every piece you would buy for the room
+// (not the ones marked Own): first those with a shop link or a price, with a button
+// that opens the product page, then the rest, each with a small button that opens the
+// piece so a link or a price can be added. At the foot is what the priced pieces cost
+// together. `onSelect` is told the id of the piece whose button was pressed.
+function ShopList({ pieces, onSelect }) {
   const yours = pieces.filter((piece) => !piece.existing);
   const hasDetails = (piece) => piece.link || getItem(piece.type).link || piece.price > 0;
-  const linked = yours.filter(hasDetails);
-  const unlinked = yours.filter((piece) => !hasDetails(piece));
+  // the pieces with a link or a price come first
+  const inOrder = [...yours.filter(hasDetails), ...yours.filter((piece) => !hasDetails(piece))];
   const priced = yours.filter((piece) => piece.price > 0);
   const total = priced.reduce((sum, piece) => sum + piece.price, 0);
   return (
     <div className="shop">
-      {linked.length === 0 && <p className="dialog__body">Add a link or a price to a piece to start your list.</p>}
+      {yours.length === 0 && <p className="dialog__body">Furniture you add to the room is listed here.</p>}
 
       <ul className="shop-list">
-        {linked.map((piece) => {
+        {inOrder.map((piece) => {
           const item = getItem(piece.type);
           const link = piece.link || item.link;
           return (
@@ -62,6 +64,12 @@ function ShopList({ pieces }) {
                   <Icon name="open" size={16} />
                 </a>
               )}
+              {/* no link and no price yet: the tag opens the piece, where both are added */}
+              {!hasDetails(piece) && (
+                <button type="button" className="icon-action" aria-label={`Add a link or a price to the ${item.name}`} title="Add a link or a price" onClick={() => onSelect(piece.id)}>
+                  <Icon name="tag" size={16} />
+                </button>
+              )}
             </li>
           );
         })}
@@ -75,12 +83,6 @@ function ShopList({ pieces }) {
           </span>
           <strong>{formatPrice(total)}</strong>
         </div>
-      )}
-
-      {unlinked.length > 0 && (
-        <p className="dialog__body">
-          No link or price yet for {unlinked.map((piece) => getItem(piece.type).name).join(', ')}.
-        </p>
       )}
     </div>
   );

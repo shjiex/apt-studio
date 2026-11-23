@@ -4271,3 +4271,23 @@ a.btn {
     right: var(--space-4);
   }
 }
+
+/* ---------- the score card stays inside the stage ---------- */
+/* The card opens upward from the score. On a short stage it was taller than the room
+   above the score and its heading was cut off at the top. 100cqh is the height of the
+   stage (it measures itself, see container-type above), so the card is never taller
+   than the stage less the score and the space around it, and scrolls inside if it is. */
+.stage__score .feng__card {
+  max-height: calc(100cqh - 96px);
+  overflow-y: auto;
+}
+
+/* ---------- the shop list: every piece is a row ---------- */
+.shop-list {
+  gap: var(--space-3);
+}
+
+.shop-row__text strong {
+  font-size: 14px;
+  font-weight: 500;
+}

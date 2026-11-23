@@ -11,7 +11,7 @@ const TABS = [
 // Its two tabs are written as headings: the open one in ink, the other in grey.
 // The cross at the end closes the section, which gives the room the whole width.
 // A button in the top bar opens it again.
-function SidePanel({ tab, onTab, onClose, pieces, moodboard, pickedIds, pinModels, user, onTogglePick, onAddItem, onConnect }) {
+function SidePanel({ tab, onTab, onClose, pieces, moodboard, pickedIds, pinModels, user, onTogglePick, onAddItem, onConnect, onSelectPiece }) {
   return (
     <section className="panel side" aria-label={tab === 'shop' ? 'Shop list' : 'Moodboard'}>
       <header className="side__head">
@@ -35,7 +35,7 @@ function SidePanel({ tab, onTab, onClose, pieces, moodboard, pickedIds, pinModel
       </header>
 
       {tab === 'shop' ? (
-        <ShopList pieces={pieces} />
+        <ShopList pieces={pieces} onSelect={onSelectPiece} />
       ) : (
         <MoodboardPanel
           moodboard={moodboard}

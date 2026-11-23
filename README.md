@@ -895,6 +895,18 @@ project continues.
 - **Checked.** Five new checks in `tests/logic/check-logic.mjs`: over the window, beside it, on
   another wall, across a doorway, and where a new print lands.
 
+### The shop list is a list, and the score card stays on the stage (23 Nov, 5:25 am)
+
+- **Shop.** With no links yet, the Shop tab was two sentences, the second one naming every
+  piece in a row with repeats ("Floor lamp, Floor lamp"). Every piece to buy is now a row with
+  its picture and name. A row with a link or a price shows them as before. A row without has a
+  small tag button that opens the piece, where a link or a price is added.
+- **Score card.** On a short stage the card that opens from the score was taller than the space
+  above it, and its heading was cut off. It is now never taller than the stage and scrolls
+  inside if it has to.
+- **Seen on my Mac** in the test link, and checked after the change in the test browser: the
+  card's top is inside the stage, and the tag button opens the armchair's panel.
+
 ## Components
 
 | Component | What it does |

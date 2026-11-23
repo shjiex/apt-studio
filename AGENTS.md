@@ -379,6 +379,8 @@ The workspace was laid out again from the owner's Figma frame 216:4506. Where an
 
 **Units.** `units` is `'metric'` or `'imperial'` (saved as `apt-studio-units`). Stored values stay in metres.
 
+**5:25 am on 23 Nov.** `ShopList` lists every piece that is not marked Own as a row; a row with no link or price has a tag button that calls `onSelect(piece.id)` (wired to `setSelectedId` through `SidePanel`'s `onSelectPiece`). The score card on the stage has `max-height: calc(100cqh - 96px)`.
+
 **5:10 am on 23 Nov.** Imperial now reaches every dialog: `bigUnit`, `toBig`, `fromBig` in `lib/units.js` are used by `RoomSetup`, `PlanRooms` and `PhotoStraighten` (which take a `units` prop), and the Floor and walls sliders print with `formatLength`. `Welcome.jsx` still has its own copy of the feet conversion.
 
 **5 am on 23 Nov.** The denoise allowance in `PathTraced.jsx` is `max(0.9 / sqrt(samples), 0.08)` divided by the exposure (it was 0.6, and a flat wall was grainy at 64 passes on the M4). `WARM_PASSES` is 64, equal to `SHARP_AT`, so the traced picture appears when the pill says Sharp and a grainy one is never shown.

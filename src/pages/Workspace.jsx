@@ -712,6 +712,7 @@ function Workspace({
               onAddItem={handleAddItem}
               onTogglePick={onTogglePick}
               onConnect={() => setIsConnecting(true)}
+              onSelectPiece={setSelectedId}
             />
           )
         )}
