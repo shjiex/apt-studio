@@ -669,6 +669,22 @@ project continues.
   [Apartment Therapy on living room measurements](https://www.apartmenttherapy.com/living-room-layouts-the-ideal-measurements-for-everything-in-the-room-206734),
   [Apartment Therapy on furniture spacing](https://www.apartmenttherapy.com/dimensions-to-follow-proper-furniture-spacing-basics-149156).
 
+### Design system v5 in Figma, with liquid glass (23 Nov, 1:20 am)
+
+- **A new copy.** v5 is a duplicate of v4, placed to its right on the Design System page. v3
+  and v4 were not changed.
+- **Foundations.** A variable collection "Apt Studio DS v5" holds the four glass fills
+  (stage 30%, hover 45%, page 60%, chosen ink 82%) and the two motion durations, each with its
+  CSS name as code syntax. Three effect styles hold the rim, the 3 px shadow and the blur.
+- **A Liquid glass frame** shows the recipe, the old and new edge side by side, the flow of
+  the chosen pill in three steps, and the rules, including no pressed state.
+- **Components.** Button lost its 15 Pressed variants. The Slider is a glass slider. Stage
+  control is glass. New components: Glass button, View switch, Piece actions and Room tabs.
+- **One difference from the build.** The app also lowers the contrast of what is behind the
+  glass. Figma has no such effect, so glass over a busy photo looks busier in Figma.
+- **Not redrawn.** The Screens frame inside v5 still shows the v4 layout. My own frame of the
+  new workspace is the reference for the screens.
+
 ## Components
 
 | Component | What it does |

@@ -351,6 +351,13 @@ My direction: the start should ask questions before it assumes a room, with impo
 
 My direction: "fengshui should also be more comprehensive after you conduct deep research". The assistant searched the web, read the sources listed in the README, chose which guidelines can be measured from what the app knows, and wrote the checks. The thresholds (30 cm behind a sofa, 40% of the corner to corner length, 75 cm for a walkway) are its choices from the ranges in those sources, and I can change them at the top of each check.
 
+### Design system v5 in Figma, with liquid glass (23 Nov, 1:20 am), AI-generated
+
+- Figma only, no app code: the v5 frame, the "Apt Studio DS v5" variables, three effect styles, the Liquid glass frame, and the Glass button, View switch, Piece actions and Room tabs components.
+- `AGENTS.md`: the node ids of v5.
+
+My direction: "create a new design system version with liquid glass", with a flowing transition, no pressed state and a lighter shadow, and never to overwrite an earlier version. The assistant duplicated v4 and built the glass parts with the Figma plugin API from the numbers in `app.css`.
+
 ## Chat transcript
 
 TODO: paste the share link or exported transcript of the Claude conversation here.
