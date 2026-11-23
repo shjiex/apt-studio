@@ -18,5 +18,11 @@
   "/models/catalog/dresser.glb": "/_blob/71bdcfe7bb0601adbd7ecc2f68e7cbfa",
   "/models/catalog/bookcase.glb": "/_blob/097b12e1b14f856e3e44fc1c5c1d0056",
   "/models/catalog/coffee_table.glb": "/_blob/07b2e1ba11990eba38bd88004eb32fc2",
-  "/models/catalog/dining_table.glb": "/_blob/db1824885d339ba0d0ded0832a75ce1b"
+  "/models/catalog/dining_table.glb": "/_blob/db1824885d339ba0d0ded0832a75ce1b",
+  "/models/catalog/dining_chair.glb": "/_blob/d9b7ea86a70334781666b63b2f56af29",
+  "/models/catalog/tv_stand.glb": "/_blob/01f26615b64afbd82478b3624a6ce441",
+  "/models/catalog/wardrobe.glb": "/_blob/8ae05e1b915758b5e9bc4d89e0cd7540",
+  "/models/catalog/side_table.glb": "/_blob/3785d05d50ebf1112a1288eee8e1b063",
+  "/models/catalog/floor_mirror.glb": "/_blob/ae07b369f9911e60da0607d1aa583672",
+  "/models/catalog/pouf.glb": "/_blob/a1ecd20774f3f68859e2c846d090349a"
 }

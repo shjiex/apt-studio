@@ -8,6 +8,7 @@ const Router = import.meta.env.VITE_DEMO ? MemoryRouter : BrowserRouter;
 import { onAuthStateChanged, signOut } from 'firebase/auth';
 import AuthPage from './pages/AuthPage.jsx';
 import Workspace from './pages/Workspace.jsx';
+import { exampleRoom } from './data/exampleRoom.js';
 import { SAMPLE_MOODBOARD } from './data/moodboard.js';
 import { auth, isFirebaseReady } from './firebase.js';
 import { DEFAULT_LIGHTING } from './lib/light.js';
@@ -161,6 +162,14 @@ function App() {
     setActiveRoomId(added.id);
   }
 
+  // "Open the example room" in the add-room dialog: add the furnished example
+  // (data/exampleRoom.js) as one more room in this home and open it.
+  function handleAddExampleRoom() {
+    const added = exampleRoom();
+    setRooms([...rooms, added]);
+    setActiveRoomId(added.id);
+  }
+
   // Rename a room or change its kind.
   function handleRenameRoom(id, name, kind) {
     setRooms(rooms.map((entry) => (entry.id === id ? { ...entry, name, kind } : entry)));
@@ -199,6 +208,7 @@ function App() {
               activeRoomId={activeRoomId}
               onPickRoom={setActiveRoomId}
               onAddRoom={handleAddRoom}
+              onAddExampleRoom={handleAddExampleRoom}
               onRenameRoom={handleRenameRoom}
               onRemoveRoom={handleRemoveRoom}
               onStartOver={() => showHome(STARTER_HOME)}
