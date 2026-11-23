@@ -513,7 +513,7 @@ project continues.
 | `FurnitureModel`, `GlbModel` | Shows a piece's 3D model file at its real size. The simple version built from boxes stands in while the file loads or if it fails. |
 | `ViewSwitch` | The view switch: 2D, 3D and Inside. |
 | `Segmented` | A row of choices with one thumb that slides to the chosen one (which wall, hinge side, oak or your photo). |
-| `PathTraced` | The realistic picture of the inside view: follows light as it bounces, and clears up pass by pass. |
+| `PathTraced`, `TracedPicture` | The realistic picture of the inside view: follows light as it bounces, and clears up pass by pass. `PathTraced` is there the whole time you are inside and gets the tracer ready; `TracedPicture` draws while Realistic is on. |
 | `RoomEffects` | The extra pass over the 3D and inside pictures: soft shadow in corners and camera-like tone mapping. Fetched only when a view needs it. |
 | `SelectionBar` | Name, size, fit tag, Rotate and Remove for the selected piece. |
 | `FitTag` | The Fits / Tight / Blocked label. |
@@ -537,8 +537,10 @@ project continues.
 | `TabBar` | Switches panels on a phone. |
 | `Button`, `Icon` | Shared button and inline SVG icons. |
 
-Plain functions live in `src/lib/`: `room.js` (clamping, overlap, fit), `pinterest.js` (board link
-parsing and loading pins) and `storage.js` (Firestore load and save). `useSlidingThumb.js` is a
+Plain functions live in `src/lib/`: `room.js` (clamping, overlap, fit, where a new piece goes),
+`fengshui.js` (the room score), `pinterest.js` (board link parsing and loading pins) and
+`storage.js` (Firestore load and save). `tests/logic/check-logic.mjs` checks the fit and the room
+score. `useSlidingThumb.js` is a
 custom hook shared by `ViewSwitch` and `Segmented`. The furniture list is in
 `src/data/catalog.js` and the example room in `src/data/exampleRoom.js`.
 
