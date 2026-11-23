@@ -32,6 +32,7 @@ function PreviewPanel({
   onRealistic,
   onPasses,
   pinModels,
+  boardName,
   room,
   pieces,
   selectedId,
@@ -222,7 +223,7 @@ function PreviewPanel({
       {/* The catalog, then furniture made from moodboard images, in a card of its own. */}
       {showStrip && (
         <div className="panel strip-card">
-          <ElementStrip items={[...CATALOG, ...pinModels]} pieces={pieces} onAdd={onAddItem} />
+          <ElementStrip items={[...CATALOG, ...pinModels]} pieces={pieces} onAdd={onAddItem} boardName={boardName} />
         </div>
       )}
     </section>

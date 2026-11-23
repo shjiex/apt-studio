@@ -23,6 +23,30 @@ export async function saveMoodboard(userId, moodboard) {
   await setDoc(doc(db, 'users', userId), { moodboard }, { merge: true });
 }
 
+// A connected board is also kept in this browser, with the picks, so a reload
+// keeps it without an account. Returns { moodboard, pickedIds } or null.
+const BOARD_KEY = 'apt-studio-board';
+
+export function loadBoardFromBrowser() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(BOARD_KEY));
+    if (!saved || !saved.moodboard || !Array.isArray(saved.moodboard.images)) return null;
+    return { moodboard: saved.moodboard, pickedIds: saved.pickedIds || [] };
+  } catch {
+    return null;
+  }
+}
+
+// Pass null to forget the board (going back to the sample photos, or logging out).
+export function saveBoardToBrowser(moodboard, pickedIds) {
+  try {
+    if (moodboard) localStorage.setItem(BOARD_KEY, JSON.stringify({ moodboard, pickedIds }));
+    else localStorage.removeItem(BOARD_KEY);
+  } catch {
+    // Not saved this time (storage off or full). The app keeps working.
+  }
+}
+
 // ---------- the home: its name, its rooms, and which room is open ----------
 
 const BROWSER_KEY = 'apt-studio-home';

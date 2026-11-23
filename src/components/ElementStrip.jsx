@@ -27,7 +27,10 @@ const GROUPS = [
 // tools section at the side).
 // The dark pill behind the chosen chip is one element that flows from chip to chip
 // (lib/useSlidingThumb.js), as on the view switch.
-function ElementStrip({ items, pieces, onAdd, layout = 'row' }) {
+// boardName is what the group of furniture made from moodboard pictures is called.
+// Those pieces are made from the sample photos, so once a Pinterest board is
+// connected the group says so and does not claim to come from that board.
+function ElementStrip({ items, pieces, onAdd, layout = 'row', boardName = 'From your board' }) {
   const [groupId, setGroupId] = useState('all');
   const [search, setSearch] = useState('');
   const hasBoardItems = items.some((item) => item.pinId);
@@ -81,7 +84,7 @@ function ElementStrip({ items, pieces, onAdd, layout = 'row' }) {
               >
                 {/* a furniture group has a hand-drawn icon from the Figma file; All and From your board keep a plain one */}
                 {candidate.drawn ? <DrawnIcon name={candidate.drawn} size={20} /> : <Icon name={candidate.icon} size={14} />}
-                {candidate.name}
+                {candidate.id === 'board' ? boardName : candidate.name}
               </button>
             );
           })}

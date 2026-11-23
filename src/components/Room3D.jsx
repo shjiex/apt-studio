@@ -539,24 +539,27 @@ function Wall({ name, room, mode, inside, plan, daylight, wall, wallPhoto, onGra
               the doorway. It is only built for the inside view; from above it would stick
               out of the plan. */}
           {inside && (
-            <group position={[0, 0, -WALL]}>
+            // `recess` marks these for the Realistic picture, which gives them a faint glow
+            // of their own (PathTraced.jsx). No light reaches a closed box, so without it
+            // the doorway would be a pitch black hole.
+            <group position={[0, 0, -WALL]} userData={{ recess: true }}>
               <mesh position={[0, room.height / 2, -HALL_DEPTH]} castShadow receiveShadow>
                 <planeGeometry args={[door.half * 2 + 0.2, room.height]} />
-                <meshStandardMaterial color={RECESS} roughness={1} side={THREE.DoubleSide} />
+                <meshStandardMaterial color={RECESS} roughness={1} side={THREE.DoubleSide} emissive={RECESS} emissiveIntensity={0.6} />
               </mesh>
               {/* 1 cm above the ground outside, so the two never share a plane */}
               <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.01, -HALL_DEPTH / 2]} receiveShadow>
                 <planeGeometry args={[door.half * 2 + 0.2, HALL_DEPTH]} />
-                <meshStandardMaterial color={RECESS} roughness={1} side={THREE.DoubleSide} />
+                <meshStandardMaterial color={RECESS} roughness={1} side={THREE.DoubleSide} emissive={RECESS} emissiveIntensity={0.6} />
               </mesh>
               <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, room.height - 0.01, -HALL_DEPTH / 2]} castShadow receiveShadow>
                 <planeGeometry args={[door.half * 2 + 0.2, HALL_DEPTH]} />
-                <meshStandardMaterial color={RECESS} roughness={1} side={THREE.DoubleSide} />
+                <meshStandardMaterial color={RECESS} roughness={1} side={THREE.DoubleSide} emissive={RECESS} emissiveIntensity={0.6} />
               </mesh>
               {[-1, 1].map((side) => (
                 <mesh key={side} rotation={[0, Math.PI / 2, 0]} position={[side * (door.half + 0.1), room.height / 2, -HALL_DEPTH / 2]} castShadow receiveShadow>
                   <planeGeometry args={[HALL_DEPTH, room.height]} />
-                  <meshStandardMaterial color={RECESS} roughness={1} side={THREE.DoubleSide} />
+                  <meshStandardMaterial color={RECESS} roughness={1} side={THREE.DoubleSide} emissive={RECESS} emissiveIntensity={0.6} />
                 </mesh>
               ))}
             </group>

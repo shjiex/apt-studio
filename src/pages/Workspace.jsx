@@ -47,6 +47,7 @@ function Workspace({
   moodboard,
   pickedIds,
   onImportBoard,
+  onUseSamples,
   onTogglePick,
   onLogOut,
   onFirstRoom,
@@ -520,6 +521,9 @@ function Workspace({
     URL.revokeObjectURL(link.href);
   }
 
+  // The furniture made from moodboard pictures comes from the sample photos.
+  const boardGroupName = moodboard.source === 'pinterest' ? 'From the sample photos' : 'From your board';
+
   // The piece that is selected, if any. While there is one, its panel replaces the moodboard.
   const selectedPiece = pieces.find((piece) => piece.id === selectedId);
 
@@ -596,6 +600,7 @@ function Workspace({
             onTab={setTool}
             onClose={() => setTool(null)}
             items={[...CATALOG, ...pinModels]}
+            boardName={boardGroupName}
             pieces={pieces}
             onAddItem={handleAddItem}
             lighting={lighting}
@@ -608,6 +613,7 @@ function Workspace({
         )}
         <PreviewPanel
           pinModels={pinModels}
+          boardName={boardGroupName}
           room={room}
           pieces={pieces}
           selectedId={selectedId}
@@ -749,7 +755,17 @@ function Workspace({
       {/* The same dialog with no room handed in makes a new one. */}
       {isAddingRoom && <RoomSetup onSave={handleCreateRoom} onUseExample={handleUseExample} onCancel={() => setIsAddingRoom(false)} />}
 
-      {isConnecting && <PinterestImport onImport={handleImport} onCancel={() => setIsConnecting(false)} />}
+      {isConnecting && (
+        <PinterestImport
+          isConnected={moodboard.source === 'pinterest'}
+          onImport={handleImport}
+          onUseSamples={() => {
+            onUseSamples();
+            setIsConnecting(false);
+          }}
+          onCancel={() => setIsConnecting(false)}
+        />
+      )}
 
       {toast && (
         <UndoToast key={toast.key} message={toast.text} onUndo={handleUndo} onDismiss={() => setToast(null)} />

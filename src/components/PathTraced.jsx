@@ -38,12 +38,14 @@ const TEST_SCALE = Number(new URLSearchParams(window.location.search).get('trace
 // a laptop graphics card. The normal picture stays on screen until then.
 const WARM_PASSES = Number(new URLSearchParams(window.location.search).get('warm')) || 24; // ?warm=3 in the address shows it sooner, for testing on a slow machine
 
-// A clean-up step for the traced picture: remove single bright specks.
+// A clean-up step for the traced picture: take bright specks out.
 // A traced path now and then finds a very bright spot by luck, and that lands as one
 // pixel far brighter than everything round it. The smoothing step that follows keeps
 // such a pixel, because it only blends a pixel with neighbours that look like it. So
-// before it, each pixel is compared with the eight round it: if it is more than three
-// times as bright as their average, it is replaced by that average.
+// before it, each pixel is compared with the middle value (the median) of the nine
+// pixels it sits in. A speck is far above that middle value however many other specks
+// are near it, which an average would not tell you. A pixel more than 1.8 times the
+// middle value is replaced by the average of the neighbours that are not specks.
 const SPECK_SHADER = {
   uniforms: { map: { value: null }, texel: { value: new THREE.Vector2(1, 1) } },
   vertexShader: `
@@ -60,17 +62,43 @@ const SPECK_SHADER = {
       return dot(colour, vec3(0.2126, 0.7152, 0.0722));
     }
     void main() {
-      vec4 centre = texture2D(map, vUv);
-      vec3 sum = vec3(0.0);
-      for (int x = -1; x <= 1; x++) {
-        for (int y = -1; y <= 1; y++) {
-          if (x == 0 && y == 0) continue;
-          sum += texture2D(map, vUv + vec2(float(x), float(y)) * texel).rgb;
+      // the nine pixels: colour, and brightness twice (one copy gets sorted)
+      vec3 colours[9];
+      float lights[9];
+      float sorted[9];
+      float alpha = texture2D(map, vUv).a;
+      int count = 0;
+      for (int y = -1; y <= 1; y++) {
+        for (int x = -1; x <= 1; x++) {
+          colours[count] = texture2D(map, vUv + vec2(float(x), float(y)) * texel).rgb;
+          lights[count] = brightness(colours[count]);
+          sorted[count] = lights[count];
+          count++;
         }
       }
-      vec3 around = sum / 8.0;
-      bool isSpeck = brightness(centre.rgb) > 3.0 * brightness(around) + 0.02;
-      gl_FragColor = isSpeck ? vec4(around, centre.a) : centre;
+      // sort the nine brightnesses, smallest first (a bubble sort is plenty for nine)
+      for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 8 - i; j++) {
+          float low = min(sorted[j], sorted[j + 1]);
+          float high = max(sorted[j], sorted[j + 1]);
+          sorted[j] = low;
+          sorted[j + 1] = high;
+        }
+      }
+      float limit = 1.8 * sorted[4] + 0.02; // sorted[4] is the middle one of nine
+      if (lights[4] <= limit) {
+        gl_FragColor = vec4(colours[4], alpha); // lights[4] is the pixel itself: not a speck
+        return;
+      }
+      vec3 sum = vec3(0.0);
+      float used = 0.0;
+      for (int i = 0; i < 9; i++) {
+        if (lights[i] <= limit) {
+          sum += colours[i];
+          used += 1.0;
+        }
+      }
+      gl_FragColor = vec4(sum / max(used, 1.0), alpha);
     }`,
 };
 const TEST_PREPARE = new URLSearchParams(window.location.search).has('prepare');
@@ -125,6 +153,24 @@ function PathTraced({ isOn, room, signature, daylight, strength, brightness, onP
     // While the tracer is still getting ready it would draw the plain scene itself.
     // Room3D is already drawing the normal picture at that point, so it draws nothing.
     made.rasterizeSceneCallback = () => {};
+
+    // A limit on how bright one traced path may be. Now and then a path bounces off a
+    // shiny surface straight into a bulb and comes back thousands of times brighter than
+    // its neighbours. Averaged over 64 passes that one path is still a white dot, and a
+    // room with two lamps on had them all over. Two lines are added to the tracer's own
+    // program: a number called speckLimit, and a line that scales a path's colour down
+    // to that limit just before it is stored. The limit is set every frame further down,
+    // to six times the brightness that shows as white, so lamps and sun patches still
+    // look as bright as before and only the freak paths are held back.
+    const program = made._pathTracer.material;
+    program.uniforms.speckLimit = { value: 1000000 };
+    program.fragmentShader = program.fragmentShader
+      .replace('uniform float filterGlossyFactor;', 'uniform float filterGlossyFactor;\n\t\t\t\tuniform float speckLimit;')
+      .replace(
+        'gl_FragColor.a *= opacity;',
+        'float brightest = max(gl_FragColor.r, max(gl_FragColor.g, gl_FragColor.b));\n\t\t\t\t\tif (brightest > speckLimit) gl_FragColor.rgb *= speckLimit / brightest;\n\t\t\t\t\tgl_FragColor.a *= opacity;',
+      );
+    program.needsUpdate = true;
     sky.current = new GradientEquirectTexture();
 
     // The traced picture is grainy until many passes have been averaged. A denoiser
@@ -288,7 +334,14 @@ function PathTraced({ isOn, room, signature, daylight, strength, brightness, onP
       // A surface that glows (a lampshade) is found by traced paths only by luck, and
       // each lucky hit lands as one bright speck. The bulb already lights the room, so
       // for the traced picture the glow is turned down to a soft one.
-      if (part.isMesh && part.material.emissiveIntensity > 0.4 && !part.userData.helper) {
+      // What is behind an open doorway (marked `recess` in Room3D.jsx) is a closed box
+      // that no light reaches, so traced it would be pitch black. It gets a glow of its
+      // own, set so it shows as a dim grey: about a seventh of white at this exposure.
+      const inRecess = part.isMesh && part.parent && part.parent.userData.recess;
+      if (inRecess) {
+        dimmed.push([part.material, part.material.emissiveIntensity]);
+        part.material.emissiveIntensity = 2 / Math.max(exposure, 0.0001);
+      } else if (part.isMesh && part.material.emissiveIntensity > 0.4 && !part.userData.helper) {
         dimmed.push([part.material, part.material.emissiveIntensity]);
         part.material.emissiveIntensity = 0.4;
       }
@@ -450,6 +503,8 @@ function TracedPicture({ tracer, isBuilt, meshCount, build, exposure, onPasses, 
     const exposureBefore = gl.toneMappingExposure;
     gl.toneMapping = THREE.ACESFilmicToneMapping;
     gl.toneMappingExposure = exposure;
+    // white on screen is about 1 / exposure in the tracer's units; allow six times that
+    made._pathTracer.material.uniforms.speckLimit.value = 6 / Math.max(exposure, 0.0001);
     // The first few passes are grainy. Until WARM_PASSES of them have been averaged the
     // tracer works out of sight (renderToCanvas off) and the normal picture stays on
     // screen. So a picture that is still speckled never shows: not at the start, and

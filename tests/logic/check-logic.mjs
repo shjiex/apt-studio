@@ -141,5 +141,24 @@ for (const piece of e.pieces) {
   expect(`example room ${piece.type} fits`, room.getFit(piece, e.pieces, e.size), 'fits');
 }
 
+// Pinterest board links, in the shapes people paste them
+const pinterest = await server.ssrLoadModule('/src/lib/pinterest.js');
+const boardOf = (text) => {
+  const read = pinterest.readBoardLink(text);
+  return read.problem ? 'problem' : `${read.username}/${read.board}`;
+};
+expect('board link with https', boardOf('https://www.pinterest.com/someone/my-board/'), 'someone/my-board');
+expect('board link without https', boardOf('pinterest.com/someone/my-board'), 'someone/my-board');
+expect('board link from another country', boardOf('https://www.pinterest.co.uk/someone/my-board/'), 'someone/my-board');
+expect('board link with a country in front', boardOf('https://br.pinterest.com/someone/my-board/'), 'someone/my-board');
+expect('board link with a section', boardOf('https://www.pinterest.com/someone/my-board/chairs/'), 'someone/my-board');
+expect('board link inside a shared message', boardOf('Look at this board! https://www.pinterest.com/someone/my-board/?invite_code=abc'), 'someone/my-board');
+expect('a pin is not a board', boardOf('https://www.pinterest.com/pin/123456/'), 'problem');
+expect('a profile is not a board', boardOf('https://www.pinterest.com/someone/'), 'problem');
+expect('a profile tab is not a board', boardOf('https://www.pinterest.com/someone/_saved/'), 'problem');
+expect('a short link is not followed', boardOf('https://pin.it/4abcDEF'), 'problem');
+expect('another site is not a board', boardOf('https://example.com/someone/my-board'), 'problem');
+expect('plain words are not a board', boardOf('my living room ideas'), 'problem');
+
 console.log(failures ? `${failures} failed` : 'all passed');
 await server.close();

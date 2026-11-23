@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import Button from './Button.jsx';
 import Icon from './Icon.jsx';
 import { CATALOG } from '../data/catalog.js';
+import { isFirebaseReady } from '../firebase.js';
 import { asset } from '../lib/paths.js';
 import '../styles/moodboard-options.css';
 
@@ -189,8 +190,10 @@ function MoodboardPanel({ moodboard, pickedIds, pinModels, user, onTogglePick, o
           or change a Pinterest board. */}
       <div className="board-row">
         <span className="board-row__name">{isPinterest ? moodboard.boardName : 'Sample photos'}</span>
+        {/* Pinterest shares at most 50 pins of a board, so a bigger board shows "49 of 312 Pins" */}
         <span className="tag tag--grey">
-          {moodboard.images.length} {moodboard.images.length === 1 ? 'Pin' : 'Pins'}
+          {moodboard.pinCount > moodboard.images.length ? `${moodboard.images.length} of ${moodboard.pinCount}` : moodboard.images.length}{' '}
+          {moodboard.images.length === 1 ? 'Pin' : 'Pins'}
         </span>
         <button
           type="button"
@@ -203,9 +206,10 @@ function MoodboardPanel({ moodboard, pickedIds, pinModels, user, onTogglePick, o
         </button>
       </div>
 
-      {isPinterest && !user && (
+      {/* The board is kept in this browser. With an account it is on every device. */}
+      {isPinterest && !user && isFirebaseReady && (
         <p className="board-notice">
-          <Link to="/login">Log in</Link> to keep this board and your picks.
+          <Link to="/login">Log in</Link> to see this board and your picks on your other devices.
         </p>
       )}
 
@@ -233,7 +237,20 @@ function MoodboardPanel({ moodboard, pickedIds, pinModels, user, onTogglePick, o
                       onClick={() => onTogglePick(image.id)}
                     >
                       <span className="pin__image" style={{ background: image.color }}>
-                        <img src={asset(image.src)} alt={image.description} width={image.width} height={image.height} loading="lazy" />
+                        <img
+                          src={asset(image.src)}
+                          alt={image.description}
+                          width={image.width}
+                          height={image.height}
+                          loading="lazy"
+                          // If Pinterest does not have the wide picture, ask for the narrow one (once).
+                          onError={(event) => {
+                            const picture = event.currentTarget;
+                            if (picture.src.includes('/564x/')) picture.src = picture.src.replace('/564x/', '/236x/');
+                            // no picture at all: hide the broken-image mark, the pin's colour stays
+                            else picture.style.visibility = 'hidden';
+                          }}
+                        />
                         {/* On hover: everything but the target object fades, and the object is outlined.
                       The path is the whole image with the object's shape cut out of it. */}
                         {/* Only for a picture without a list of elements: the one target, as before. */}

@@ -372,6 +372,18 @@ My direction: a comment on the logo in the hosted build, "move this to the cente
 
 My direction: a list of seventeen points I scheduled for 2:51 am, in my own words in the chat. The assistant read my Figma comments first, reproduced the Pinterest error in the test link and found its cause, read Apple's and other write-ups on Liquid Glass before changing the glass, and made the changes. The choices that are its own: 24 passes before Realistic shows, the colour names for the couches, and the door opening outward as its reading of "open behind it".
 
+### Realistic without specks, a doorway that is not a black hole, more room for the room (23 Nov, 4:00 am), AI-generated
+
+- Changed: `PathTraced.jsx`, `Room3D.jsx`, `styles/app.css`.
+
+My direction: "realistic mode really doesn't work, i see spots everywhere", and at 3:23 am "Keep working on it until 7:50 am. Mostly the Pinterest access, 3D environment, Firebase and login". The assistant looked at the test link in the browser on my Mac, saw that specks were still there at Sharp, and tried the brightness limit and the median pass until both rooms were clean there. It also saw the black doorway and the hidden plus button on my Mac and fixed them. The choices that are its own: the limit of six times white, the 1.8 times median threshold, the glow of the recess (two divided by the exposure), 42% for the right section and 470 px as the height where the zoom buttons move.
+
+### A Pinterest importer checked against the real feed (23 Nov, 4:30 am), AI-generated
+
+- Changed: `lib/pinterest.js`, `lib/storage.js`, `App.jsx`, `pages/Workspace.jsx`, `PinterestImport.jsx`, `MoodboardPanel.jsx`, `ElementStrip.jsx`, `ToolsPanel.jsx`, `PreviewPanel.jsx`, `tests/logic/check-logic.mjs`.
+
+My direction: "Keep working on it until 7:50 am. Mostly the Pinterest access, 3D environment, Firebase and login". The assistant ran the importer's code against Pinterest's feed from a page in my browser, read which fields and picture widths come back, and changed the importer to match. The choices that are its own: the 564 px picture, the 15 second wait, the wording of each message, keeping the board in the browser, and renaming the furniture group while a Pinterest board is connected.
+
 ## Chat transcript
 
 TODO: paste the share link or exported transcript of the Claude conversation here.

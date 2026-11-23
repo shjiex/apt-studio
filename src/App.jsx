@@ -15,7 +15,7 @@ import { DEFAULT_LIGHTING } from './lib/light.js';
 import { DEFAULT_ROOM } from './lib/room.js';
 import { newRoom } from './lib/rooms.js';
 import { DEFAULT_SURFACES } from './lib/surface.js';
-import { loadHome, loadHomeFromBrowser, loadMoodboard, saveHome, saveHomeToBrowser, saveMoodboard } from './lib/storage.js';
+import { loadBoardFromBrowser, loadHome, loadHomeFromBrowser, loadMoodboard, saveBoardToBrowser, saveHome, saveHomeToBrowser, saveMoodboard } from './lib/storage.js';
 
 // The bed is here from the start, marked as already being in the room.
 const STARTER_PIECES = [{ id: 'bed-1', type: 'bed', x: -1.0, z: -0.45, rotation: 0, existing: true }];
@@ -42,8 +42,11 @@ function App() {
   const [accountHomeOf, setAccountHomeOf] = useState(null);
   // Each room exactly as it was last written to the account, by id, to tell which rooms changed.
   const roomsInAccount = useRef({});
-  const [moodboard, setMoodboard] = useState(SAMPLE_MOODBOARD);
-  const [pickedIds, setPickedIds] = useState([]);
+  // A board connected earlier in this browser comes back on a reload. The function
+  // form of useState runs once, when the app starts.
+  const [boardInBrowser] = useState(loadBoardFromBrowser);
+  const [moodboard, setMoodboard] = useState(boardInBrowser ? boardInBrowser.moodboard : SAMPLE_MOODBOARD);
+  const [pickedIds, setPickedIds] = useState(boardInBrowser ? boardInBrowser.pickedIds : []);
 
   // Ask Firebase to tell us whenever someone signs in or out.
   useEffect(() => {
@@ -68,6 +71,7 @@ function App() {
             const { pickedIds: savedPicks, ...savedBoard } = saved;
             setMoodboard(savedBoard);
             setPickedIds(savedPicks || []);
+            saveBoardToBrowser(savedBoard, savedPicks || []);
           }
         }
       } catch (error) {
@@ -132,7 +136,21 @@ function App() {
   function handleImportBoard(board) {
     setMoodboard(board);
     setPickedIds([]);
+    saveBoardToBrowser(board, []);
     saveIfSignedIn(board, []);
+  }
+
+  // Leave the connected board and show the sample photos again.
+  async function handleUseSamples() {
+    setMoodboard(SAMPLE_MOODBOARD);
+    setPickedIds([]);
+    saveBoardToBrowser(null);
+    if (!user) return;
+    try {
+      await saveMoodboard(user.uid, null); // the account forgets the board too
+    } catch (error) {
+      console.error('Could not clear the moodboard: ', error);
+    }
   }
 
   function handleTogglePick(id) {
@@ -140,6 +158,7 @@ function App() {
       ? pickedIds.filter((pickedId) => pickedId !== id)
       : [...pickedIds, id];
     setPickedIds(nextPicks);
+    if (moodboard.source === 'pinterest') saveBoardToBrowser(moodboard, nextPicks);
     saveIfSignedIn(moodboard, nextPicks);
   }
 
@@ -211,6 +230,7 @@ function App() {
     // Do not leave one person's board or home on screen for the next person.
     setMoodboard(SAMPLE_MOODBOARD);
     setPickedIds([]);
+    saveBoardToBrowser(null);
     setAccountHomeOf(null);
     roomsInAccount.current = {};
     showHome(STARTER_HOME);
@@ -244,6 +264,7 @@ function App() {
               moodboard={moodboard}
               pickedIds={pickedIds}
               onImportBoard={handleImportBoard}
+              onUseSamples={handleUseSamples}
               onTogglePick={handleTogglePick}
               onLogOut={handleLogOut}
             />

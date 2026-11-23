@@ -735,6 +735,48 @@ project continues.
 - **Checked in headless Chromium only.** The specks and the door flicker need a look on a
   real graphics card.
 
+### Realistic without specks, a doorway that is not a black hole, more room for the room (23 Nov, 4:00 am)
+
+- **Specks in Realistic.** The white spots were still there on my Mac after the 3 am round, even
+  when the picture said Sharp. Two changes in `PathTraced.jsx` removed them. First, no traced
+  path may be brighter than a limit (`speckLimit`, six times white at the current exposure), so a
+  path that stumbles on a very bright spot cannot leave a white dot. The limit is added to the
+  tracer's own shader with two text replacements. Second, the pass that takes specks out before
+  the smoothing now compares each pixel with the middle value of its nine neighbours (the
+  median), which a lone bright pixel cannot pull up the way it pulls up an average.
+- **The doorway.** In Realistic the space behind an open door was pitch black, because it is a
+  closed box that no light reaches. Its five sides are marked `recess` in `Room3D.jsx`, and the
+  traced picture gives them a faint glow of their own so the doorway reads as a dim grey with
+  the open door in it.
+- **Small windows.** The section on the right took 560 px whatever the window, which left the
+  room about 400 px on a 1024 px laptop. It may take up to 42% of the window now. On a short
+  stage the zoom buttons were hidden behind the view switch, so there they move to the left
+  edge, above undo and redo (the stage measures its own height with a container query).
+- **Checked.** On my Mac in the test link: the example room and the bedroom at Sharp show no
+  specks, the doorway is grey with the door in it, and the plus button is visible at 1024 px.
+  `tests/headless/shoot7.py`, `shoot43.py` and `tests/logic/check-logic.mjs` pass.
+
+### A Pinterest importer checked against the real feed (23 Nov, 4:30 am)
+
+- **Checked against Pinterest itself.** From an ordinary page in my browser the feed answered
+  with 49 pins for a public board, and the app's own importer code read them. The shared test
+  link still cannot connect a board, because the page it runs on blocks other sites.
+- **Sharper pictures.** The feed gives each pin in three widths. The importer took the 237 px
+  one, which looked soft on the wider cards. It takes the 564 px one now, and falls back to the
+  narrow one if the wide one fails to load.
+- **More links understood.** `readBoardLink` in `lib/pinterest.js` accepts a board link with or
+  without https, from any country's Pinterest, with a section after the board, and inside a
+  longer message. A pin, a profile and a pin.it short link each get their own sentence saying
+  what to paste instead. `tests/logic/check-logic.mjs` checks twelve shapes.
+- **Clearer errors.** Waiting stops after 15 seconds. A missing board, too many requests and an
+  answer that cannot be read each have their own message.
+- **The board stays.** A connected board and its picks are kept in this browser, so a reload
+  keeps them without an account (`loadBoardFromBrowser` and `saveBoardToBrowser` in
+  `lib/storage.js`). The dialog has Back to the sample photos while a board is connected.
+- **Honest labels.** The count reads "49 of 312 Pins" when Pinterest shares only part of a
+  board. The furniture made from pictures comes from the sample photos, so with a Pinterest
+  board connected its group is called From the sample photos.
+
 ## Components
 
 | Component | What it does |

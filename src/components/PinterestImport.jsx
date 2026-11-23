@@ -1,18 +1,19 @@
 import { useState } from 'react';
 import Button from './Button.jsx';
-import { fetchBoard, parseBoardUrl } from '../lib/pinterest.js';
+import { fetchBoard, readBoardLink } from '../lib/pinterest.js';
 
 // A dialog that asks for a public Pinterest board link and loads its pins.
-function PinterestImport({ onImport, onCancel }) {
+// While a board is connected it also offers the way back to the sample photos.
+function PinterestImport({ isConnected, onImport, onUseSamples, onCancel }) {
   const [link, setLink] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   async function handleSubmit(event) {
     event.preventDefault();
-    const parsed = parseBoardUrl(link);
-    if (!parsed) {
-      setError('Paste a board link, like pinterest.com/yourname/your-board');
+    const parsed = readBoardLink(link);
+    if (parsed.problem) {
+      setError(parsed.problem);
       return;
     }
     setError('');
@@ -50,11 +51,19 @@ function PinterestImport({ onImport, onCancel }) {
               className="field__text"
               type="text"
               placeholder="pinterest.com/yourname/your-board"
+              autoFocus
+              autoComplete="off"
+              spellCheck="false"
               value={link}
               onChange={(event) => setLink(event.target.value)}
             />
           </div>
-          {error && <p className="field__error">{error}</p>}
+          {/* role="alert" has a screen reader say the message as soon as it appears */}
+          {error && (
+            <p className="field__error" role="alert">
+              {error}
+            </p>
+          )}
         </div>
         <div className="dialog__actions">
           <Button variant="secondary" fill onClick={onCancel}>
@@ -64,6 +73,13 @@ function PinterestImport({ onImport, onCancel }) {
             {isLoading ? 'Loading pins' : 'Connect board'}
           </Button>
         </div>
+        {isConnected && (
+          <div className="dialog__actions">
+            <Button variant="secondary" fill icon="image" onClick={onUseSamples}>
+              Back to the sample photos
+            </Button>
+          </div>
+        )}
       </form>
     </div>
   );

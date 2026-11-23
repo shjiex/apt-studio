@@ -4063,3 +4063,38 @@ a.btn {
   align-items: center;
   gap: 6px;
 }
+
+/* ---------- round of 23 Nov, 4 am: room for the room on a small window ---------- */
+
+/* The section on the right may take up to 42% of the window, so on a 1024 px laptop
+   the room still gets the larger share. On a wide screen the divider's width holds. */
+.side,
+.piece-panel {
+  width: min(var(--moodboard-width, 560px), 42vw);
+}
+
+.workspace.has-tools .side,
+.workspace.has-tools .piece-panel {
+  width: min(var(--moodboard-width, 560px), 400px, 30vw);
+}
+
+/* With the tools open on a small window they are a little narrower too. */
+@media (max-width: 1180px) {
+  .tools {
+    width: 280px;
+  }
+}
+
+/* The stage also measures its own height. On a short stage the right edge cannot
+   hold the download button, the view switch, the zoom buttons and the score in one
+   column, so the zoom buttons move to the left edge, above undo and redo. */
+.stage {
+  container-type: size;
+}
+
+@container (max-height: 470px) {
+  .stage__zoom {
+    right: auto;
+    left: var(--space-4);
+  }
+}
