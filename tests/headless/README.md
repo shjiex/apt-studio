@@ -20,6 +20,14 @@ Chromium is started with software graphics, so the 3D scene works on a machine w
 --use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader --ignore-gpu-blocklist
 ```
 
+## Which scripts match the app today
+
+The workspace was laid out again on 23 Nov. `shoot7.py` and `shoot43.py` were written or rewritten for that layout and pass. The scripts numbered 16 to 42 were written for the layout before it. Several of them look for controls that have moved or changed name (the selection bar, the Lighting and Floor and walls menu buttons, the furniture search field), and none of them skips the welcome questions, so expect them to stop early until their selectors are updated. To skip the welcome in a script, add this before `goto`:
+
+```
+await pg.add_init_script("localStorage.setItem('apt-studio-welcomed','yes'); localStorage.setItem('apt-studio-toured','yes');")
+```
+
 ## What each script covers
 
 | Script | Covers |
@@ -41,6 +49,7 @@ Chromium is started with software graphics, so the 3D scene works on a machine w
 | `shoot38.py` | Contrast of text on glass, measured over black and over white backdrops, including the lighting panel (must stay at or above 4.5 to 1) |
 | `shoot39.py` | Room score button size, the score card, the view switch thumb, the pressed state |
 | `shoot40.py` | Contrast on the dark glass toast and on the phone tab bar |
+| `shoot43.py` | The welcome questions, the tour of tips, wall decor on a wall, feet and inches, and contrast on the new glass |
 
 ## Things that will trip you up
 

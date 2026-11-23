@@ -70,17 +70,21 @@ Without `src/firebaseConfig.js` the app runs in visitor mode: everything works, 
 | `pages/AuthPage.jsx` | Log in and sign up with email and password |
 | `components/Room3D.jsx` | The whole three.js scene: camera for the three views, walls with window and door openings, floor, measure grid, pieces, drag, lights (about 1,000 lines) |
 | `components/PathTraced.jsx` | The Realistic picture: `WebGLPathTracer` from three-gpu-pathtracer inside the same canvas, with a denoise pass |
-| `components/PreviewPanel.jsx` | The stage: `Room3D`, the floating controls (zoom, undo, brightness, passes, room score), the furniture strip, the selection bar |
+| `components/PreviewPanel.jsx` | The stage: `Room3D`, the glass controls on it (view switch, download, grid, lighting, floor and walls, zoom, undo, room score, Sharpening pill), Rotate and Remove over the selected piece, the drop target for tiles, the furniture strip |
 | `components/FurnitureModel.jsx`, `GlbModel.jsx` | A piece's 3D model, with a box as stand-in while the `.glb` loads or if it fails |
-| `components/ElementStrip.jsx`, `ElementTile.jsx` | Furniture groups, search and the tiles you add pieces from |
-| `components/SelectionBar.jsx`, `PiecePanel.jsx` | Actions and fields for the selected piece (size, shop link, price) |
+| `components/ElementStrip.jsx`, `ElementTile.jsx` | Furniture groups (a track with a flowing thumb) and the tiles you click or drag to add pieces |
+| `components/PiecePanel.jsx` | Fields for the selected piece: typed size and position, colour and finish, Own, bulb, shop link and price |
 | `components/FitTag.jsx` | The Fits, Tight, Blocked tag |
 | `components/FengShuiCard.jsx` | The room score button (number only, 48 by 48) and its card: one thing to do first, then two folds |
-| `components/LightingMenu.jsx` | Lighting panel: place, month, hour, which way the back wall faces, lamp bulbs and dimmers, fixed lights |
-| `components/SurfacesMenu.jsx` | Floor and walls panel: oak or your photo, paint or your photo, windows, doors (wall, size, hinge, open or shut) |
+| `components/LightingPanel.jsx` | Lighting panel body: daylight, time, month and lamp bulbs in view; place, facing, fixed lights and dimmers under Advanced |
+| `components/SurfacesPanel.jsx` | Floor and walls panel body: oak or your photo, paint or your photo, windows, doors (wall, size, hinge, open or shut) |
 | `components/PhotoStraighten.jsx` | Four-corner straightening of an angled floor or wall photo |
 | `components/Segmented.jsx` | A row of choices on one track with a dark thumb that slides between them |
-| `components/ViewSwitch.jsx` | The 2D, 3D, Inside switch (same sliding thumb) |
+| `components/ViewSwitch.jsx` | The 2D, 3D, Inside switch, a column of three icons on the stage (same sliding thumb) |
+| `components/SidePanel.jsx`, `ToolsPanel.jsx` | The right section (Moodboard and Shop) and the left section (furniture, lighting, floor and walls when Tools is set to At the side) |
+| `components/TopMenus.jsx` | Preferences (Metric or Imperial, where the tools sit) and Settings (your furniture, show the tips again, start over) |
+| `components/Welcome.jsx`, `Tips.jsx` | The first-visit questions, and the six tips that sit beside the controls they explain |
+| `components/Slider.jsx`, `Logo.jsx` | The glass slider every range input uses, and the logo mark |
 | `components/MoodboardPanel.jsx` | The moodboard column: pins, the frame round the one target object, "Add this … in 3D", search |
 | `components/PinterestImport.jsx` | Dialog to connect a public Pinterest board by its link |
 | `components/FoundFurniture.jsx` | "Your furniture": pieces found in a photo of your own room, with outlines and a keep box per piece |
@@ -91,7 +95,7 @@ Without `src/firebaseConfig.js` the app runs in visitor mode: everything works, 
 | `components/TabBar.jsx` | The tab bar on phones (under 900 px) |
 | `components/UndoToast.jsx` | The toast |
 | `components/AccountButton.jsx`, `Button.jsx`, `Icon.jsx`, `NumberField.jsx` | Small shared parts. `Icon.jsx` draws inline SVG icons by name |
-| `data/catalog.js` | `CATALOG` (14 pieces with size in metres, tile picture and model), `CATEGORY_COLORS`, `TYPE_CATEGORY`, `setPinItems(manifest)`, `getItem(type)` |
+| `data/catalog.js` | `CATALOG` (about 55 pieces: models, sizes of a model through `baseType`, shape pieces with no model, wall decor with `wall: true` and `hang`), `sizeOf(piece)`, `hangsOnWall(type)`, `kindOfType(type)`, `CATEGORY_COLORS`, `TYPE_CATEGORY`, `setPinItems(manifest)`, `getItem(type)` |
 | `data/moodboard.js` | `SAMPLE_MOODBOARD`: six sample photos |
 | `lib/room.js` | Room maths, no React: `DEFAULT_ROOM`, walls (`WALL_NAMES`: back is the top of the plan, left, right, front), windows and doors (`newWindow`, `newDoor`, `openingOf`, `doorOpening`, `doorZone`, `keepClear`, `wallBlocks`), fit (`getFit`, `coversDoor`), placing (`clampToRoom`, `snapToRoom`, `findOpenSpot`, `getWallDistances`) |
 | `lib/rooms.js` | `ROOM_KINDS` and `newRoom(details)` |
@@ -103,7 +107,8 @@ Without `src/firebaseConfig.js` the app runs in visitor mode: everything works, 
 | `lib/pinterest.js` | `parseBoardUrl`, `fetchBoard` (public board feed, no key) |
 | `lib/models.js` | `loadModel(url)`: loads a `.glb` once and remembers it |
 | `lib/paths.js` | `asset(path)` for anything in `public/` |
-| `lib/useSlidingThumb.js` | The hook behind the sliding thumb in `ViewSwitch` and `Segmented` |
+| `lib/useSlidingThumb.js` | The hook behind the sliding thumb in `ViewSwitch`, `Segmented`, `RoomTabs` and the furniture groups |
+| `lib/units.js` | Metres to feet and inches for every length and area shown (`formatLength`, `formatArea`, `toSmall`, `fromSmall`) |
 | `styles/tokens.css` | Design tokens: colours and their ramps, type, spacing, radii |
 | `styles/app.css` | Every component style. The newest blocks are appended at the end, in order |
 
@@ -221,7 +226,7 @@ Image to 3D of the actual object is the missing piece. One model (`mood-1`, the 
 
 ## 10. Testing
 
-`tests/headless/` has 17 Playwright scripts and a README that says what each covers and what trips them up. Run the ones that touch what you changed, and always `shoot7.py` (smoke), `shoot38.py` and `shoot40.py` (glass contrast) after CSS changes. They prove the app does not break. They do not prove it looks right on a real graphics card.
+`tests/headless/` has 18 Playwright scripts and a README that says what each covers and what trips them up. Since the layout change of 23 Nov only `shoot7.py` (smoke) and `shoot43.py` (welcome, tips, wall decor, feet, glass contrast) match the app. Run both after every change. The scripts numbered 16 to 42 need their selectors updated and an init script that skips the welcome (the README shows the line). `node tests/logic/check-logic.mjs` checks the fit tags and the room score with no browser. They prove the app does not break. They do not prove it looks right on a real graphics card.
 
 There are no unit tests and no linter set up.
 
@@ -354,6 +359,26 @@ Each stream owns its files. Three files are shared and collide easily: `src/styl
 | H. Docs and delivery | `AGENTS.md`, `README.md`, `ai-use.md`, `tests/headless/`, `.github/` |
 
 The owner is working on the interface in Figma at the same time. Before changing how a screen looks, read his newest comments on the file.
+
+## What changed on 23 Nov (read this before the older sections)
+
+The workspace was laid out again from the owner's Figma frame 216:4506. Where an older section disagrees with this one, this one is right.
+
+**Layout.** Top bar: logo, home chip, room tabs, Settings, Preferences, account. The stage has the controls on it as glass. Moodboard and Shop are one closable section on the right. `layout` in `Workspace.jsx` is `'stage'` or `'side'` (saved as `apt-studio-layout`); with `'side'` the furniture, lighting and floor and walls panels sit in `ToolsPanel` on the left.
+
+**Glass.** No pressed state anywhere. `--glass-edge` is the small shadow, `--flow` the easing for the flowing thumb, `--glass-fill-page` and `--glass-filter-page` are for glass over the light page (top bar).
+
+**Pieces.** A piece can have `size` (its own size), `tint`, `finish` (`'matte'`, `'gloss'`, `'metal'`), `hang` (height on the wall) and `wall`. Always read a size through `sizeOf(piece)`. A click selects, a drag of the selected piece moves it. Duplicate was removed on the owner's request.
+
+**Wall decor.** `hangsOnWall(type)` pieces go through `snapToWall` in `lib/room.js`, are left out of the floor checks, and collide only with each other. A wall piece can still cover a window.
+
+**Room.** The orbit turns all the way round and `lowWalls` in `Room3D.jsx` drops the walls on the camera's side. Size arrows on the plan resize the room. Rooms are rectangles only.
+
+**Units.** `units` is `'metric'` or `'imperial'` (saved as `apt-studio-units`). Stored values stay in metres. The room dialog and the Floor and walls sliders still show metres only.
+
+**First visit.** `apt-studio-welcomed` and `apt-studio-toured` in `localStorage` say whether the welcome and the tips have been seen. Scan your room is shown as Soon and does nothing.
+
+**Realistic.** On by default in the Inside view. `WARM_PASSES` in `PathTraced.jsx` hides the first four passes. `SHARP_AT` in `PreviewPanel.jsx` (64 passes) is where the pill reads Sharp.
 
 ## What landed on 22 Nov at about 4 pm PT
 

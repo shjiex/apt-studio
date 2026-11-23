@@ -3571,3 +3571,127 @@ a.btn {
 .measures:has(> :nth-child(4)) {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
+
+/* ---------- the welcome questions ---------- */
+.welcome {
+  width: min(520px, 100%);
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+}
+
+.welcome__choices {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.welcome__choice {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border-radius: var(--radius-sm);
+  background: var(--grey);
+  text-align: left;
+  transition:
+    transform 320ms var(--flow),
+    background-color var(--quick);
+}
+
+.welcome__choice:hover:not(.is-off) {
+  background: var(--grey-strong);
+  transform: scale(1.01);
+}
+
+.welcome__choice > span {
+  display: grid;
+  gap: 2px;
+  font-size: 14px;
+  color: var(--ink-muted);
+}
+
+.welcome__choice strong {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* grey text on the grey card still reads 4.6 to 1; the whole card is not faded, so it stays readable */
+.welcome__choice.is-off {
+  cursor: default;
+}
+
+.welcome__skip {
+  justify-self: center;
+  align-self: center;
+}
+
+.welcome__count {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-muted);
+}
+
+.welcome__sizes {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.welcome .light__row strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ---------- the tour: small cards beside the controls ---------- */
+.tip {
+  position: fixed;
+  z-index: 70;
+  display: grid;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+  background: rgba(255, 255, 255, 0.92);
+  -webkit-backdrop-filter: var(--glass-filter-page);
+  backdrop-filter: var(--glass-filter-page);
+  box-shadow:
+    var(--glass-edge),
+    0 12px 32px rgba(15, 15, 13, 0.14);
+  font-size: 14px;
+  line-height: 1.45;
+  animation: rise-in var(--calm) var(--ease-out);
+}
+
+.tip strong {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.tip__count {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink-muted);
+}
+
+.tip__actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: var(--space-1);
+}
+
+.tip__ring {
+  position: fixed;
+  z-index: 69;
+  border-radius: var(--radius-md);
+  box-shadow:
+    0 0 0 2px var(--ink),
+    0 0 0 6px rgba(255, 255, 255, 0.7);
+  pointer-events: none;
+  transition:
+    left 420ms var(--flow),
+    top 420ms var(--flow),
+    width 420ms var(--flow),
+    height 420ms var(--flow);
+}

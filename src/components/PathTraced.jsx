@@ -32,6 +32,8 @@ const TEST_SCALE = Number(new URLSearchParams(window.location.search).get('trace
 
 // For testing where the browser cannot prepare a program in the background (software
 // graphics in a test browser): ?prepare in the address gets the tracer ready anyway.
+// How many passes are averaged before the traced picture is put on screen.
+const WARM_PASSES = 4;
 const TEST_PREPARE = new URLSearchParams(window.location.search).has('prepare');
 
 // How bright the sky is, in the picture's units, for a sun strength from 0 to 1.
@@ -393,16 +395,22 @@ function TracedPicture({ tracer, isBuilt, meshCount, build, exposure, onPasses, 
     const exposureBefore = gl.toneMappingExposure;
     gl.toneMapping = THREE.ACESFilmicToneMapping;
     gl.toneMappingExposure = exposure;
+    // The first few passes are grainy. Until WARM_PASSES of them have been averaged the
+    // tracer works out of sight (renderToCanvas off) and the normal picture stays on
+    // screen. So a picture that is still speckled never shows: not at the start, and
+    // not each time you turn your head or move, which starts the averaging again.
+    const isWarm = !made.isCompiling && made.samples >= WARM_PASSES;
+    made.renderToCanvas = isWarm;
     made.renderSample();
     gl.toneMapping = mappingBefore;
     gl.toneMappingExposure = exposureBefore;
 
     // The tracer first has the graphics card prepare its program, and draws nothing
     // until that is done. The first frame after it is the first traced picture.
-    if (!hasShown.current && !made.isCompiling) {
-      hasShown.current = true;
-      onShown(true);
-      performance.mark('apt-realistic-first-frame');
+    if (isWarm !== hasShown.current) {
+      hasShown.current = isWarm;
+      onShown(isWarm); // Room3D draws the normal picture whenever this is false
+      if (isWarm) performance.mark('apt-realistic-first-frame');
     }
 
     const passes = Math.floor(made.samples);

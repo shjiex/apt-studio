@@ -11,6 +11,9 @@ import { getArea } from '../lib/room.js';
 import { formatArea } from '../lib/units.js';
 import Slider from './Slider.jsx';
 
+// After this many passes the realistic picture has no grain left that you can see.
+const SHARP_AT = 64;
+
 // The middle of the screen: the room on its stage with glass controls floating over
 // it, and under it a card with the furniture to add.
 // Where each control sits follows the Figma frame 216:4506. Top right: download, then
@@ -131,7 +134,13 @@ function PreviewPanel({
             <Button variant={realistic ? 'primary' : 'white'} size="sm" icon="eye" aria-pressed={realistic} onClick={() => onRealistic(!realistic)}>
               Realistic
             </Button>
-            {realistic && <span className="stage__passes">{passes < 1 ? 'Starting' : `${passes} ${passes === 1 ? 'pass' : 'passes'}`}</span>}
+            {/* How far the realistic picture has come. It counts up to SHARP_AT passes, so you
+                can see it is working and when it is done. */}
+            {realistic && (
+              <span className="stage__passes" role="status">
+                {passes >= SHARP_AT ? 'Sharp' : `Sharpening ${Math.round((passes / SHARP_AT) * 100)}%`}
+              </span>
+            )}
             {/* While the realistic picture is on: make it lighter or darker, and save it as it is now. */}
             {realistic && (
               <label className="stage__bright">
@@ -151,7 +160,6 @@ function PreviewPanel({
                 Save picture
               </Button>
             )}
-            {!realistic && <span className="stage__passes">Drag to look around, or click the floor to stand there.</span>}
           </div>
         )}
 

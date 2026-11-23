@@ -11,7 +11,9 @@ import PreviewPanel from '../components/PreviewPanel.jsx';
 import RoomSetup from '../components/RoomSetup.jsx';
 import RoomTabs from '../components/RoomTabs.jsx';
 import SidePanel from '../components/SidePanel.jsx';
+import Tips from '../components/Tips.jsx';
 import ToolsPanel from '../components/ToolsPanel.jsx';
+import Welcome from '../components/Welcome.jsx';
 import { PreferencesMenu, SettingsMenu } from '../components/TopMenus.jsx';
 import TabBar from '../components/TabBar.jsx';
 import UndoToast from '../components/UndoToast.jsx';
@@ -47,7 +49,8 @@ function Workspace({
   onImportBoard,
   onTogglePick,
   onLogOut,
-  onShowTips = () => {},
+  onFirstRoom,
+  onStartWithExample,
 }) {
   // The room that is open. Everything below works on its size, pieces and lighting.
   const activeRoom = rooms.find((entry) => entry.id === activeRoomId);
@@ -63,7 +66,9 @@ function Workspace({
   const [pinModels, setPinModels] = useState([]); // furniture made from moodboard images
   const [isReady, setIsReady] = useState(false); // has the list of those models been read?
   const [view, setView] = useState('2d');
-  const [realistic, setRealistic] = useState(false); // is the realistic picture on (inside view)?
+  // Is the realistic picture on? It only draws in the inside view, and it is on from
+  // the start, so stepping inside sharpens into the realistic picture by itself.
+  const [realistic, setRealistic] = useState(true);
   const [passes, setPasses] = useState(0); // how many passes the realistic picture has averaged
   const [brightness, setBrightness] = useState(1); // the person's lighter / darker setting for the realistic picture
   const [isEditingRoom, setIsEditingRoom] = useState(false);
@@ -75,6 +80,11 @@ function Workspace({
   // 'score', or null for none. Keeping it here means only one is open at a time.
   const [openPanel, setOpenPanel] = useState(null);
   const [tab, setTab] = useState('preview'); // which panel a phone shows
+  // The welcome questions show on a first visit, and again after "Start over".
+  // 'apt-studio-welcomed' in the browser's storage remembers that they were seen.
+  const [isWelcoming, setIsWelcoming] = useState(() => !localStorage.getItem('apt-studio-welcomed'));
+  // The tour of small tips beside the controls. It follows the welcome the first time.
+  const [isTouring, setIsTouring] = useState(false);
   // The section to the right of the room: is it open, and is it showing the moodboard or the shop list?
   const [isSideOpen, setIsSideOpen] = useState(true);
   const [sideTab, setSideTab] = useState('moodboard');
@@ -264,6 +274,22 @@ function Workspace({
   function handleUnits(next) {
     setUnits(next);
     localStorage.setItem('apt-studio-units', next);
+  }
+
+  // The welcome is done, one way or another. Remember that, and start the tour of tips
+  // if this browser has not seen it yet.
+  function finishWelcome() {
+    localStorage.setItem('apt-studio-welcomed', 'yes');
+    setIsWelcoming(false);
+    setSelectedId(null);
+    setPast([]);
+    setFuture([]);
+    if (!localStorage.getItem('apt-studio-toured')) setIsTouring(true);
+  }
+
+  function finishTour() {
+    localStorage.setItem('apt-studio-toured', 'yes');
+    setIsTouring(false);
   }
 
   // A double click in the room: on the floor, a wall, a window or a door. Each opens
@@ -530,7 +556,7 @@ function Workspace({
             }}
             onShowTips={() => {
               setOpenPanel(null);
-              onShowTips();
+              setIsTouring(true);
             }}
             onStartOver={() => {
               setOpenPanel(null);
@@ -539,6 +565,7 @@ function Workspace({
               setPast([]);
               setFuture([]);
               setToast(null);
+              setIsWelcoming(true); // back to "How would you like to start?"
             }}
           />
           <PreferencesMenu
@@ -678,6 +705,26 @@ function Workspace({
       </main>
 
       <TabBar tab={tab} onChange={setTab} />
+
+      {isWelcoming && (
+        <Welcome
+          units={units}
+          onPlan={() => {
+            finishWelcome();
+            setIsPickingPlan(true);
+          }}
+          onReady={finishWelcome}
+          onExample={() => {
+            onStartWithExample();
+            finishWelcome();
+          }}
+          onAnswers={(details) => {
+            onFirstRoom(details);
+            finishWelcome();
+          }}
+        />
+      )}
+      {isTouring && !isWelcoming && !isPickingPlan && <Tips onDone={finishTour} />}
 
       {isFinding && <FoundFurniture onAdd={handleAddExisting} onClose={() => setIsFinding(false)} />}
       {isPickingPlan && <PlanRooms room={room} onSave={handleSaveSize} onClose={() => setIsPickingPlan(false)} />}

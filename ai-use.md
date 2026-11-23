@@ -319,6 +319,29 @@ My direction: "complete what was left off". The assistant opened the hosted buil
 
 My direction: finish the handoff list (the card's contrast and its phone layout were open items). The assistant found the shrinking filter row in a screenshot and fixed it.
 
+### The layout from my Figma frame, lighter glass, and furniture you select first (23 Nov, 12:15 am), AI-generated
+
+- New: `Logo.jsx`, `SidePanel.jsx`, `ToolsPanel.jsx`, `TopMenus.jsx`, `Slider.jsx`, `lib/units.js`.
+- Rewritten: `RoomTabs.jsx`, `PiecePanel.jsx`, `ViewSwitch.jsx`, `LightingPanel.jsx` (was LightingMenu), `SurfacesPanel.jsx` (was SurfacesMenu), `ShopList.jsx`.
+- Changed: `Room3D.jsx` (select before drag, buttons over the piece, full turn, size arrows, double click), `PreviewPanel.jsx`, `Workspace.jsx`, `MoodboardPanel.jsx`, `ElementStrip.jsx`, `ElementTile.jsx`, `useSlidingThumb.js`, `Icon.jsx`, `app.css`.
+- Removed: `SelectionBar.jsx` and the duplicate action.
+
+My direction: I redrew the workspace in Figma and listed the changes in one long message. I asked for no pressed state, a flowing transition, a lighter glass shadow, glass sliders, select before drag, rotate and a red remove above the piece, imperial units, typed sizes and positions, Own as the tag, a full turn in 3D, and a second layout with the tools on the left. The assistant read the Figma frame and my two annotations and wrote the code.
+
+### More furniture, and wall decor (23 Nov, 12:30 am), AI-generated
+
+- `src/data/catalog.js`, `src/lib/room.js`, `src/lib/fengshui.js`, `src/components/FurnitureModel.jsx`, `src/components/GlbModel.jsx`.
+- New: `pipeline/tiles.html`, `pipeline/tiles.jsx`, `pipeline/render_tiles.py` and 15 pictures in `public/furniture/`.
+
+My direction: look through the IKEA and Planner 5D categories I had open, and add wall decor first. My dad's test asked for more plant sizes, nightstands and bed colours. The assistant read both sites in my browser, chose the pieces and built the shape pieces. Houzz's Generic Products list sits behind Houzz Pro and was not reached.
+
+### A welcome that asks first, tips beside the controls, and Realistic from the start (23 Nov, 12:50 am), AI-generated
+
+- New: `src/components/Welcome.jsx`, `src/components/Tips.jsx`, `tests/headless/shoot43.py`.
+- Changed: `src/App.jsx`, `src/pages/Workspace.jsx`, `src/components/PathTraced.jsx`, `src/components/PreviewPanel.jsx`, `src/styles/app.css`, `tests/headless/shoot7.py`.
+
+My direction: the start should ask questions before it assumes a room, with import first and a skip to a generic room. Tips should be small popups next to the features. My Figma note said the Inside view should already try to be realistic and should tell me how long to wait. The assistant wrote the welcome, the tips and the Sharpening pill.
+
 ## Chat transcript
 
 TODO: paste the share link or exported transcript of the Claude conversation here.

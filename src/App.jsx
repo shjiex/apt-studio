@@ -162,6 +162,29 @@ function App() {
     setActiveRoomId(added.id);
   }
 
+  // The welcome questions were answered: `details` is { name, kind, size, doorWall, windowWall }.
+  // The home starts again with that one room. Its door and window go to the middle of
+  // the walls that were named, and a room said to have no window gets none.
+  function handleFirstRoom(details) {
+    const added = newRoom(details);
+    added.size.doors = [{ ...added.size.doors[0], wall: details.doorWall, along: 0.5 }];
+    added.size.windows = details.windowWall === 'none' ? [] : [{ ...added.size.windows[0], wall: details.windowWall, along: 0.5 }];
+    // a door and a window on the same wall share it: door towards one end, window towards the other
+    if (details.doorWall === details.windowWall) {
+      added.size.doors[0].along = 0.2;
+      added.size.windows[0].along = 0.68;
+    }
+    setRooms([added]);
+    setActiveRoomId(added.id);
+  }
+
+  // The welcome's "Open the example room": the home starts again with just the example.
+  function handleStartWithExample() {
+    const added = exampleRoom();
+    setRooms([added]);
+    setActiveRoomId(added.id);
+  }
+
   // "Open the example room" in the add-room dialog: add the furnished example
   // (data/exampleRoom.js) as one more room in this home and open it.
   function handleAddExampleRoom() {
@@ -212,6 +235,8 @@ function App() {
               onRenameRoom={handleRenameRoom}
               onRemoveRoom={handleRemoveRoom}
               onStartOver={() => showHome(STARTER_HOME)}
+              onFirstRoom={handleFirstRoom}
+              onStartWithExample={handleStartWithExample}
               setRoom={(change) => updateActiveRoom('size', change)}
               setPieces={(change) => updateActiveRoom('pieces', change)}
               setLighting={(change) => updateActiveRoom('lighting', change)}

@@ -560,6 +560,68 @@ project continues.
 - **Measured.** Ink text on the card reads 4.86 to 1 over black and 12.94 to 1 over white. Text
   inside a choice row reads 11.11 to 1 over black. AA needs 4.5.
 
+### The layout from my Figma frame, lighter glass, and furniture you select first (23 Nov, 12:15 am)
+
+- **Layout.** The top bar holds the logo, the home, the room tabs, Settings, Preferences and
+  the account. The view switch, download, grid, lighting and floor and walls buttons stand on
+  the room itself as glass. Moodboard and Shop share one section on the right that closes.
+  Preferences has a choice called Tools that moves furniture, lighting and floor and walls into
+  their own section on the left of the room (`ToolsPanel.jsx`, `SidePanel.jsx`, `TopMenus.jsx`).
+- **Glass.** The pressed state is gone. The chosen pill flows from the old option to the new
+  one in the view switch, the room tabs, the choice rows and the furniture groups
+  (`useSlidingThumb.js`). The glass shadow went from a wide dark one to a 3 px one
+  (`--glass-edge` in `app.css`), so it stays off the rest of the page. Sliders are glass
+  (`Slider.jsx`).
+- **Furniture on the stage.** A click selects a piece and a second drag moves it, so turning
+  the room cannot drag a sofa by accident. Rotate and a red Remove float above the selected
+  piece. Duplicate is removed. A tile can be dragged from the list and dropped on the floor.
+- **The piece panel.** Width, depth, height and the distance from the left and back walls can
+  be typed. Colour and finish (as made, matte, gloss, metal) can be changed. Each field has an
+  icon. The tag reads Own in place of Already yours (`PiecePanel.jsx`).
+- **Feet and inches.** Preferences switches every length between metres and feet
+  (`lib/units.js`).
+- **The room.** The 3D view turns all the way round, and the walls nearest the camera drop to
+  a rim so the room stays visible. A double click on the floor, a wall, a window or a door
+  opens its settings. Four arrows outside the plan drag a wall in or out. A window or a door
+  dragged past a corner moves to the next wall (`Room3D.jsx`).
+- **Moodboard.** The cards hug their photo and grow only on hover, in two wider columns.
+  Furniture tiles tilt a few degrees on hover, each in its own direction.
+- **Not supported.** Rooms are rectangles. L shaped rooms are not drawn yet.
+
+### More furniture, and wall decor (23 Nov, 12:30 am)
+
+- **Why.** I looked through the categories of IKEA and Planner 5D. The biggest gap was that
+  nothing could hang on a wall. My dad asked for plants in more sizes, nightstands and a bed
+  in other colours during a quick test.
+- **Catalog.** About 55 pieces in ten groups (`data/catalog.js`). Sizes of an existing model
+  reuse its file through `baseType` and are stretched. Fifteen pieces are built from simple
+  shapes in `FurnitureModel.jsx`, such as a round table, a bench and a round rug.
+- **Wall decor.** Art, a canvas, a gallery of frames, two mirrors, a shelf, a clock, a TV, a
+  wall lamp and curtains. A wall piece snaps to the nearest wall (`snapToWall` in
+  `lib/room.js`), has a height above the floor, and only collides with other wall pieces.
+- **Tile pictures.** The pictures for the shape pieces are rendered from the app's own shapes
+  by `pipeline/tiles.html`, `pipeline/tiles.jsx` and `pipeline/render_tiles.py`.
+- **Known gap.** A wall piece can still be placed over a window.
+
+### A welcome that asks first, tips beside the controls, and Realistic from the start (23 Nov, 12:50 am)
+
+- **Welcome.** A first visit asks how to start: import a floor plan, answer three questions
+  (kind of room, size, where the door and window are), open the example room, or skip to a
+  ready bedroom. Scanning a room is listed as Soon because the app cannot do it yet
+  (`Welcome.jsx`).
+- **Tips.** Six small cards, each next to the control it explains, with a ring around that
+  control. Settings can show them again (`Tips.jsx`).
+- **Realistic.** The Inside view starts in Realistic. The first four passes are hidden so the
+  grainy start is not shown, and a pill reads Sharpening with a percentage, then Sharp
+  (`PathTraced.jsx`, `PreviewPanel.jsx`). This answers my own note in Figma that I could not
+  tell how long to wait.
+- **Lighting panel.** Daylight, time, month and lamp bulbs stay in view. Everything else is
+  folded under Advanced.
+- **Checks.** `tests/headless/shoot7.py` (smoke) and `tests/headless/shoot43.py` (welcome,
+  tips, wall decor, feet, contrast) were run in headless Chromium with software graphics.
+  Icons on the stage glass read 4.86 to 1 over black and 12.94 to 1 over white. Words on the
+  tip card read 16.09 and 19.18. Words in the top bar read 18.68 or more.
+
 ## Components
 
 | Component | What it does |
