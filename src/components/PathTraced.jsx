@@ -21,6 +21,15 @@ import { windowInRoom } from '../lib/room.js';
 // bulbs, and the exposure is set like a camera's: low by day, high at night.
 const DAYLIGHT = 180;
 
+// The most pixels the picture is traced at. A big window on a sharp screen has
+// several million, and every pass has to follow light for each of them. Past
+// about 1.2 million the eye gains little, so a bigger stage is traced at this
+// many pixels and stretched to fit.
+const MOST_PIXELS = 1200000;
+
+// For testing on a slow machine: ?trace=0.2 in the address traces a picture a fifth the size.
+const TEST_SCALE = Number(new URLSearchParams(window.location.search).get('trace')) || 0;
+
 // How bright the sky is, in the picture's units, for a sun strength from 0 to 1.
 function skyBrightness(daylight, strength) {
   return daylight ? (1.2 + 1.6 * strength) * DAYLIGHT : 0.03;
@@ -30,10 +39,18 @@ function skyBrightness(daylight, strength) {
 // `signature` is a text that changes whenever the room's contents change.
 // `onPasses` is told how many passes have been averaged so far.
 // `brightness` is the person's own adjustment on top of the exposure: 1 leaves it as it is.
-function PathTraced({ room, signature, daylight, strength, brightness, onPasses }) {
+// `onShown` is told true once the first traced frame is on screen (and false when this
+// is switched off), so Room3D knows how long to keep the normal picture going.
+function PathTraced({ room, signature, daylight, strength, brightness, onPasses, onShown }) {
   const { gl, scene, camera } = useThree();
   const tracer = useRef(null);
+  const sky = useRef(null); // the simple blue sky the traced room is lit by
   const isBuilt = useRef(false);
+  const isFirstBuild = useRef(true);
+  const hasShown = useRef(false); // has a traced frame been drawn yet
+  const frameTime = useRef(0.03); // seconds one frame takes, smoothed
+  const tileCount = useRef(2); // each pass is drawn in tileCount x tileCount pieces
+  const bufferSize = useRef(new THREE.Vector2());
   const meshCount = useRef(0);
   const lastView = useRef(new THREE.Matrix4());
   const lastFov = useRef(0);
@@ -51,9 +68,16 @@ function PathTraced({ room, signature, daylight, strength, brightness, onPasses 
     made.dynamicLowRes = true; // show a small rough picture at once, then the sharp one
     made.lowResScale = 0.2;
     made.renderScale = Math.min(1, 1 / gl.getPixelRatio()); // one traced pixel per screen point is enough
-    // For testing on a slow machine: ?trace=0.2 in the address traces a picture a fifth the size.
-    const testScale = Number(new URLSearchParams(window.location.search).get('trace'));
-    if (testScale > 0) made.renderScale = testScale;
+    if (TEST_SCALE > 0) made.renderScale = TEST_SCALE;
+    made.textureSize.set(1024, 1024); // wood, fabric and photos are handed over at most this size
+    // A pass is drawn in pieces (tiles), one piece per frame, so the page keeps
+    // answering clicks while it works. It starts at 2 x 2; the drawing loop below
+    // uses fewer, bigger pieces on a fast graphics card and more on a slow one.
+    made.tiles.set(2, 2);
+    // While the tracer is still getting ready it would draw the plain scene itself.
+    // Room3D is already drawing the normal picture at that point, so it draws nothing.
+    made.rasterizeSceneCallback = () => {};
+    sky.current = new GradientEquirectTexture();
 
     // The traced picture is grainy until many passes have been averaged. A denoiser
     // smooths the grain away before the picture is shown: each pixel is blended with
@@ -83,28 +107,48 @@ function PathTraced({ room, signature, daylight, strength, brightness, onPasses 
     };
 
     tracer.current = made;
+    performance.mark('apt-realistic-switched-on');
     return () => {
+      onShown(false); // the normal picture takes over again
+      sky.current.dispose();
       made.dispose();
       smooth.material.dispose();
       smooth.dispose();
     };
   }, [gl]);
 
-  // While this is on, the sky seen through the window, and the light it sends in,
-  // come from a simple blue sky. The normal view's surroundings are put back after.
-  useEffect(() => {
-    const sky = new GradientEquirectTexture();
-    sky.topColor.set(daylight ? '#8DB8EC' : '#05070D');
-    sky.bottomColor.set(daylight ? '#EAF2F9' : '#0B0F18');
-    sky.update();
+  // Exposure: how bright the finished picture is shown. A room lit only through its
+  // window is much darker than the sky outside; a photographer exposes for the room
+  // and lets the window go bright, and so do we. It is applied when the picture is
+  // shown, not while it is traced, so changing it (the Brightness slider) neither
+  // rebuilds the room nor restarts the picture.
+  const exposure = (daylight ? 0.035 : 1.5) * brightness;
+
+  // Hand the room to the tracer. Helper shapes (floor patches, the unseen sheet
+  // that hears clicks, the selection mark) are hidden while it reads the scene.
+  function build() {
+    const made = tracer.current;
+    if (!made) return;
+    isFirstBuild.current = false;
+    // performance.mark leaves a named time stamp that the browser's Performance
+    // panel shows, so the start-up can be timed: switched on, room read, first frame.
+    performance.mark('apt-realistic-reading-room');
+
+    // For the traced picture, the sky seen through the window, and the light it
+    // sends in, come from a simple blue sky. The room is switched over to it only
+    // while the tracer reads the scene, and put back at the end of this function,
+    // so the normal picture never shows the tracer's lighting.
+    sky.current.topColor.set(daylight ? '#8DB8EC' : '#05070D');
+    sky.current.bottomColor.set(daylight ? '#EAF2F9' : '#0B0F18');
+    sky.current.update();
     const before = {
       environment: scene.environment,
       background: scene.background,
       intensity: scene.environmentIntensity,
       backgroundIntensity: scene.backgroundIntensity,
     };
-    scene.environment = sky;
-    scene.background = sky; // what is seen through the window
+    scene.environment = sky.current;
+    scene.background = sky.current; // what is seen through the window
     scene.backgroundIntensity = skyBrightness(daylight, strength); // as bright as the light it sends in
     scene.environmentIntensity = 0.02;
 
@@ -124,33 +168,7 @@ function PathTraced({ room, signature, daylight, strength, brightness, onPasses 
       skylights.add(skylight);
     });
     scene.add(skylights);
-    isBuilt.current = false; // the light changed, so start again
-    return () => {
-      scene.environment = before.environment;
-      scene.background = before.background;
-      scene.environmentIntensity = before.intensity;
-      scene.backgroundIntensity = before.backgroundIntensity;
-      scene.remove(skylights);
-      skylights.children.forEach((light) => light.dispose());
-      sky.dispose();
-    };
-  }, [gl, scene, daylight, strength, room]);
 
-  // Exposure: how bright the finished picture is shown. A room lit only through its
-  // window is much darker than the sky outside; a photographer exposes for the room
-  // and lets the window go bright, and so do we. Changing it does not restart the
-  // picture, because it is applied when the picture is shown, not while it is traced.
-  useEffect(() => {
-    const before = gl.toneMappingExposure;
-    gl.toneMappingExposure = (daylight ? 0.035 : 1.5) * brightness;
-    return () => {
-      gl.toneMappingExposure = before;
-    };
-  }, [gl, daylight, brightness]);
-
-  // Hand the room to the tracer. Helper shapes (floor patches, the unseen sheet
-  // that hears clicks, the selection mark) are hidden while it reads the scene.
-  function build() {
     const hidden = [];
     const dimmed = [];
     const suns = [];
@@ -216,30 +234,45 @@ function PathTraced({ room, signature, daylight, strength, brightness, onPasses 
     });
     scene.add(panels);
     scene.updateMatrixWorld(true);
-    tracer.current.setScene(scene, camera);
+    made.setScene(scene, camera);
     scene.remove(panels);
     panels.children.forEach((light) => light.dispose());
+    // put the normal picture's surroundings back
+    scene.remove(skylights);
+    skylights.children.forEach((light) => light.dispose());
+    scene.environment = before.environment;
+    scene.background = before.background;
+    scene.environmentIntensity = before.intensity;
+    scene.backgroundIntensity = before.backgroundIntensity;
     hidden.forEach((part) => (part.visible = true));
     dimmed.forEach(([material, glow]) => (material.emissiveIntensity = glow));
     suns.forEach(([light, intensity]) => (light.intensity = intensity));
     meshCount.current = count;
     isBuilt.current = true;
+    performance.mark('apt-realistic-room-read');
   }
 
   // Anything in the room changed: wait a moment (a drag changes it many times a
-  // second), then start the picture again.
+  // second), then start the picture again. The very first time nothing is moving,
+  // so there is nothing to wait for.
   useEffect(() => {
     isBuilt.current = false;
-    const timer = setTimeout(build, 500); // longer than a new piece takes to settle into place
+    const timer = setTimeout(build, isFirstBuild.current ? 0 : 500); // 500: longer than a new piece takes to settle into place
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [signature]);
 
-  // The number 1 makes this the function that draws each frame, in place of the normal view.
-  useFrame(() => {
-    if (!tracer.current) return;
+  // This runs every frame. A number above 0 tells React Three Fiber that the
+  // drawing is done by hand; 2 puts it after Room3D's own extra pass (which is 1),
+  // so while both are on, the traced picture is the one drawn last, on top.
+  useFrame((state, delta) => {
+    const made = tracer.current;
+    if (!made) return;
     if (!isBuilt.current) {
-      gl.render(scene, camera); // the normal view, until the tracer has the room
+      // The tracer does not have the room yet. Before the first traced frame Room3D
+      // is still drawing the normal picture, so there is nothing to do. After it
+      // (a piece was moved while Realistic is on) the normal view is drawn here.
+      if (hasShown.current) gl.render(scene, camera);
       return;
     }
     // A furniture model that finished loading adds meshes: read the room again.
@@ -255,15 +288,49 @@ function PathTraced({ room, signature, daylight, strength, brightness, onPasses 
     if (moved > 0.0005) {
       lastView.current.copy(camera.matrixWorld);
       lastFov.current = camera.fov;
-      tracer.current.updateCamera();
+      made.updateCamera();
     }
-    tracer.current.renderSample();
-    const passes = Math.floor(tracer.current.samples);
+
+    // How many pixels to trace: one per screen point, but never more than MOST_PIXELS.
+    if (!TEST_SCALE) {
+      const buffer = gl.getDrawingBufferSize(bufferSize.current);
+      const scale = Math.min(1 / gl.getPixelRatio(), Math.sqrt(MOST_PIXELS / Math.max(buffer.x * buffer.y, 1)), 1);
+      if (Math.abs(made.renderScale - scale) > 0.001) made.renderScale = scale;
+    }
+    // The picture is shown with a camera-like roll-off (tone mapping) at the exposure
+    // above. Those are set just for this drawing and put back, so the normal picture,
+    // while it is still on screen, keeps its own.
+    const mappingBefore = gl.toneMapping;
+    const exposureBefore = gl.toneMappingExposure;
+    gl.toneMapping = THREE.ACESFilmicToneMapping;
+    gl.toneMappingExposure = exposure;
+    made.renderSample();
+    gl.toneMapping = mappingBefore;
+    gl.toneMappingExposure = exposureBefore;
+
+    // The tracer first has the graphics card prepare its program, and draws nothing
+    // until that is done. The first frame after it is the first traced picture.
+    if (!hasShown.current && !made.isCompiling) {
+      hasShown.current = true;
+      onShown(true);
+      performance.mark('apt-realistic-first-frame');
+    }
+
+    const passes = Math.floor(made.samples);
     if (passes !== lastPasses.current) {
       lastPasses.current = passes;
       onPasses(passes);
+      // Once per pass, fit the number of tiles to the speed of this graphics card.
+      // Frames arriving faster than 50 a second: it has time to spare, so use fewer,
+      // bigger tiles and the picture clears up sooner. Slower than about 22 a second:
+      // use more, smaller tiles so the page stays quick to answer.
+      if (frameTime.current < 0.02 && tileCount.current > 1) tileCount.current -= 1;
+      else if (frameTime.current > 0.045 && tileCount.current < 3) tileCount.current += 1;
+      made.tiles.set(tileCount.current, tileCount.current);
     }
-  }, 1);
+    // a running average of the time per frame (a long pause, such as a hidden tab, counts as 0.2 s)
+    frameTime.current = frameTime.current * 0.8 + Math.min(delta, 0.2) * 0.2;
+  }, 2);
 
   return null;
 }

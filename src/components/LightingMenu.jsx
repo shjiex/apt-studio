@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Button from './Button.jsx';
+import Segmented from './Segmented.jsx';
 import { MONTH_NAMES, PLACES, formatHour, getSun, kelvinToColor, nameOfKelvin, newFixedLight, sunOnWindows } from '../lib/light.js';
 
 const KIND_NAMES = { ceiling: 'Ceiling light', wall: 'Wall light', strip: 'LED strip' };
@@ -96,19 +97,13 @@ function LightingMenu({ lighting, onChange, windows }) {
             <>
               <div className="light__row">
                 <span title="The back wall is the one at the top of the plan">Back wall faces</span>
-                <div className="light__choices">
-                  {['north', 'east', 'south', 'west'].map((side) => (
-                    <button
-                      key={side}
-                      type="button"
-                      className={side === lighting.windowFaces ? 'light__choice is-current' : 'light__choice'}
-                      aria-pressed={side === lighting.windowFaces}
-                      onClick={() => onChange({ ...lighting, windowFaces: side })}
-                    >
-                      {side[0].toUpperCase()}
-                    </button>
-                  ))}
-                </div>
+                <Segmented
+                  label="Back wall faces"
+                  // the row shows one letter for each side: N, E, S, W
+                  options={['north', 'east', 'south', 'west'].map((side) => [side, side[0].toUpperCase()])}
+                  value={lighting.windowFaces}
+                  onChange={(side) => onChange({ ...lighting, windowFaces: side })}
+                />
               </div>
               {/* Where the home is: pick a city, or set the latitude yourself with the slider. */}
               <div className="light__row">
@@ -234,19 +229,13 @@ function LightingMenu({ lighting, onChange, windows }) {
                 <>
                   <div className="light__row">
                     <span>On which wall</span>
-                    <div className="light__choices">
-                      {['back', 'left', 'right', 'front'].map((wall) => (
-                        <button
-                          key={wall}
-                          type="button"
-                          className={wall === light.wall ? 'light__choice light__choice--word is-current' : 'light__choice light__choice--word'}
-                          aria-pressed={wall === light.wall}
-                          onClick={() => changeLight({ ...light, wall })}
-                        >
-                          {wall}
-                        </button>
-                      ))}
-                    </div>
+                    <Segmented
+                      label="On which wall"
+                      options={['back', 'left', 'right', 'front'].map((wall) => [wall, wall])}
+                      value={light.wall}
+                      onChange={(wall) => changeLight({ ...light, wall })}
+                      optionClass="light__choice--word"
+                    />
                   </div>
                   {light.kind === 'wall' && (
                     <label className="light__row">

@@ -2,7 +2,11 @@ import { useState } from 'react';
 import Button from './Button.jsx';
 import Icon from './Icon.jsx';
 import NumberField from './NumberField.jsx';
+import { EXAMPLE_ROOM } from '../data/exampleRoom.js';
+import { asset } from '../lib/paths.js';
+import { formatRoom } from '../lib/room.js';
 import { ROOM_KINDS, kindOf } from '../lib/rooms.js';
+import '../styles/example-room.css';
 
 const LIMITS = {
   width: { min: 1.5, max: 12 },
@@ -18,7 +22,9 @@ function sizeToText(size) {
 // The room dialog: what kind of room it is, its name and its size.
 // With `entry` it edits that room. Without it, it makes a new one.
 // The link under the fields opens the floor plan picker instead.
-function RoomSetup({ entry, onSave, onCancel, onUsePlan, onRemove }) {
+// A new room can also start from the example (data/exampleRoom.js): `onUseExample`
+// is called when the person presses "Open the example room".
+function RoomSetup({ entry, onSave, onCancel, onUsePlan, onRemove, onUseExample }) {
   const isNew = !entry;
   const start = entry || { name: 'Living room', kind: 'living', size: kindOf('living').size };
   const [kind, setKind] = useState(start.kind);
@@ -128,6 +134,25 @@ function RoomSetup({ entry, onSave, onCancel, onUsePlan, onRemove }) {
             {isNew ? 'Add room' : 'Save room'}
           </Button>
         </div>
+
+        {/* Only when making a new room: a furnished example to open instead of typing a size. */}
+        {isNew && onUseExample && (
+          <section className="example-room" aria-labelledby="example-room-title">
+            <p className="example-room__lead">Or start from an example</p>
+            <div className="example-room__card">
+              {/* alt is empty because the name beside the picture already says what it is */}
+              <img className="example-room__picture" src={asset(EXAMPLE_ROOM.picture)} alt="" />
+              <div className="example-room__words">
+                <h3 id="example-room-title">{EXAMPLE_ROOM.name}</h3>
+                <p className="example-room__size">{formatRoom(EXAMPLE_ROOM.size)}</p>
+                <p>We’ve furnished this room based on a photo from the sample moodboard. You can always change it later.</p>
+              </div>
+            </div>
+            <Button variant="secondary" fill onClick={onUseExample}>
+              Open the example room
+            </Button>
+          </section>
+        )}
       </form>
     </div>
   );

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Button from './Button.jsx';
 import PhotoStraighten from './PhotoStraighten.jsx';
+import Segmented from './Segmented.jsx';
 import { WALL_NAMES, keepClear, newDoor, newWindow } from '../lib/room.js';
 import { WALL_PAINTS, loadPhoto } from '../lib/surface.js';
 
@@ -144,22 +145,16 @@ function SurfacesMenu({ surfaces, onChange, room, onRoomChange }) {
           <div className="light__fixed">
           <div className="light__row">
             <strong>Floor</strong>
-            <div className="light__choices">
-              {[
+            <Segmented
+              label="Floor"
+              options={[
                 ['oak', 'Oak boards'],
                 ['photo', 'Your photo'],
-              ].map(([kind, label]) => (
-                <button
-                  key={kind}
-                  type="button"
-                  className={kind === floor.kind ? 'light__choice surface__choice is-current' : 'light__choice surface__choice'}
-                  aria-pressed={kind === floor.kind}
-                  onClick={() => onChange({ ...surfaces, floor: { ...floor, kind } })}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
+              ]}
+              value={floor.kind}
+              onChange={(kind) => onChange({ ...surfaces, floor: { ...floor, kind } })}
+              optionClass="surface__choice"
+            />
           </div>
           {floor.kind === 'photo' && (
             <PhotoControls
@@ -175,22 +170,16 @@ function SurfacesMenu({ surfaces, onChange, room, onRoomChange }) {
           <div className="light__fixed">
             <div className="light__row">
               <strong>Walls</strong>
-              <div className="light__choices">
-                {[
+              <Segmented
+                label="Walls"
+                options={[
                   ['paint', 'Paint'],
                   ['photo', 'Your photo'],
-                ].map(([kind, label]) => (
-                  <button
-                    key={kind}
-                    type="button"
-                    className={kind === wall.kind ? 'light__choice surface__choice is-current' : 'light__choice surface__choice'}
-                    aria-pressed={kind === wall.kind}
-                    onClick={() => onChange({ ...surfaces, wall: { ...wall, kind } })}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
+                ]}
+                value={wall.kind}
+                onChange={(kind) => onChange({ ...surfaces, wall: { ...wall, kind } })}
+                optionClass="surface__choice"
+              />
             </div>
             {wall.kind === 'paint' ? (
               <div className="surface__paints">
@@ -244,19 +233,13 @@ function SurfacesMenu({ surfaces, onChange, room, onRoomChange }) {
               </div>
               <div className="light__row">
                 <span>Wall</span>
-                <div className="light__choices">
-                  {Object.entries(WALL_NAMES).map(([id, name]) => (
-                    <button
-                      key={id}
-                      type="button"
-                      className={id === win.wall ? 'light__choice surface__choice is-current' : 'light__choice surface__choice'}
-                      aria-pressed={id === win.wall}
-                      onClick={() => changeWindow({ ...win, wall: id })}
-                    >
-                      {name}
-                    </button>
-                  ))}
-                </div>
+                <Segmented
+                  label="Wall"
+                  options={Object.entries(WALL_NAMES)}
+                  value={win.wall}
+                  onChange={(id) => changeWindow({ ...win, wall: id })}
+                  optionClass="surface__choice"
+                />
               </div>
               <label className="light__row">
                 <span>Along the wall</span>
@@ -298,19 +281,13 @@ function SurfacesMenu({ surfaces, onChange, room, onRoomChange }) {
               </div>
               <div className="light__row">
                 <span>Wall</span>
-                <div className="light__choices">
-                  {Object.entries(WALL_NAMES).map(([id, name]) => (
-                    <button
-                      key={id}
-                      type="button"
-                      className={id === door.wall ? 'light__choice surface__choice is-current' : 'light__choice surface__choice'}
-                      aria-pressed={id === door.wall}
-                      onClick={() => changeDoor({ ...door, wall: id })}
-                    >
-                      {name}
-                    </button>
-                  ))}
-                </div>
+                <Segmented
+                  label="Wall"
+                  options={Object.entries(WALL_NAMES)}
+                  value={door.wall}
+                  onChange={(id) => changeDoor({ ...door, wall: id })}
+                  optionClass="surface__choice"
+                />
               </div>
               <label className="light__row">
                 <span>Along the wall</span>
@@ -328,41 +305,29 @@ function SurfacesMenu({ surfaces, onChange, room, onRoomChange }) {
               {/* which edge the hinge is on, as you face the door from inside the room */}
               <div className="light__row">
                 <span>Hinge</span>
-                <div className="light__choices">
-                  {[
+                <Segmented
+                  label="Hinge"
+                  options={[
                     ['left', 'Left'],
                     ['right', 'Right'],
-                  ].map(([id, name]) => (
-                    <button
-                      key={id}
-                      type="button"
-                      className={id === (door.hinge || 'left') ? 'light__choice surface__choice is-current' : 'light__choice surface__choice'}
-                      aria-pressed={id === (door.hinge || 'left')}
-                      onClick={() => changeDoor({ ...door, hinge: id })}
-                    >
-                      {name}
-                    </button>
-                  ))}
-                </div>
+                  ]}
+                  value={door.hinge || 'left'}
+                  onChange={(hinge) => changeDoor({ ...door, hinge })}
+                  optionClass="surface__choice"
+                />
               </div>
               <div className="light__row">
                 <span>Door</span>
-                <div className="light__choices">
-                  {[
+                <Segmented
+                  label="Door"
+                  options={[
                     [false, 'Open'],
                     [true, 'Shut'],
-                  ].map(([shut, name]) => (
-                    <button
-                      key={name}
-                      type="button"
-                      className={shut === Boolean(door.shut) ? 'light__choice surface__choice is-current' : 'light__choice surface__choice'}
-                      aria-pressed={shut === Boolean(door.shut)}
-                      onClick={() => changeDoor({ ...door, shut })}
-                    >
-                      {name}
-                    </button>
-                  ))}
-                </div>
+                  ]}
+                  value={Boolean(door.shut)}
+                  onChange={(shut) => changeDoor({ ...door, shut })}
+                  optionClass="surface__choice"
+                />
               </div>
             </div>
           ))}

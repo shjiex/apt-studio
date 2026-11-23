@@ -2,10 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import { EffectComposer, N8AO, ToneMapping } from '@react-three/postprocessing';
-import { ToneMappingMode } from 'postprocessing';
 import FurnitureModel from './FurnitureModel.jsx';
-import PathTraced from './PathTraced.jsx';
 import { CATEGORY_COLORS, getItem } from '../data/catalog.js';
 import { doorOpening, getFit, getFootprint, getWallDistances, openingOf, wallBlocks, wallFrame, keepClear } from '../lib/room.js';
 import { bulbIntensity, bulbOf, fixedLightPoints, getSun, kelvinToColor, lightOutput } from '../lib/light.js';
@@ -15,6 +12,24 @@ import { asset } from '../lib/paths.js';
 // "3D" is the same scene seen from a lower angle. Nothing is drawn twice.
 
 const WALL = 0.1; // wall thickness in metres
+// Two parts of this view are big pieces of code that the plan never uses: the
+// extra pass that shades corners (RoomEffects.jsx, for 3D and inside) and the
+// realistic picture (PathTraced.jsx, inside only). import() fetches a file only
+// when it is asked for, so the plan opens without them. Each is fetched once,
+// ahead of the moment it is needed, and its component is kept in `extras`, so
+// switching it on afterwards is instant. If a file cannot be fetched (no
+// connection), loadExtra gives back null and that part is left out.
+const extras = { effects: null, tracer: null };
+function loadExtra(name) {
+  const file = name === 'effects' ? import('./RoomEffects.jsx') : import('./PathTraced.jsx');
+  return file
+    .then((module) => {
+      extras[name] = module.default; // the component the file exports
+      return module.default;
+    })
+    .catch(() => null);
+}
+
 const HALL_DEPTH = 1.2; // how far the hall behind a doorway goes back, in metres
 const DOOR_OPEN = THREE.MathUtils.degToRad(75); // how far a door stands open
 const TRIM_COLOR = '#E3E2DE';
@@ -95,6 +110,7 @@ function CameraRig({ view, room, zoom, orbit, look, stand }) {
       pitchNow.current = THREE.MathUtils.damp(pitchNow.current, look.pitch, 12, delta);
       const yaw = THREE.MathUtils.degToRad(yawNow.current);
       const pitch = THREE.MathUtils.degToRad(pitchNow.current);
+      camera.near = 0.1; // standing in the room, things can be right in front of the camera
       // yaw 0 looks at the window wall (-z); a positive yaw turns to the right
       camera.lookAt(
         camera.position.x + Math.sin(yaw) * Math.cos(pitch),
@@ -124,6 +140,19 @@ function CameraRig({ view, room, zoom, orbit, look, stand }) {
     const radius = 0.5 * Math.hypot(room.width, room.length, room.height);
     const angledDistance = (radius / Math.sin(Math.min(verticalFov, horizontalFov) / 2)) * 0.9;
     const distance = THREE.MathUtils.lerp(topDistance, angledDistance, t) / zoomNow.current;
+
+    // The nearest thing the camera still draws ("near"). A graphics card can tell
+    // two surfaces apart only if their distances differ by enough, and how much is
+    // enough grows fast when near is tiny compared with how far away things are.
+    // The plan's camera is about 80 m up (a narrow lens from far away is what makes
+    // it flat). With near at 0.1 m, the card could only tell heights about 5 mm
+    // apart, and the flat marks on the floor sit closer together than that (door
+    // swing 4 mm, selection mark 6 mm, daylight 8 mm, floor shadow 12 mm, rug top
+    // 16 and 18 mm), so they flickered against each other. Starting the drawing
+    // just above the room brings that down to a few thousandths of a millimetre.
+    // In 3D the camera is close and this works out to the same 0.1 m as before.
+    const reach = THREE.MathUtils.lerp(room.height + 2, GROUND_SIZE, t);
+    camera.near = Math.max(0.1, distance - reach);
 
     camera.position.set(
       distance * Math.sin(tilt) * Math.sin(turn),
@@ -522,7 +551,7 @@ function Wall({ name, room, mode, inside, plan, daylight, wall, wallPhoto, onGra
           {/* the quarter circle starts at the hinge: it opens to the right of a left hinge and to the left of a right one */}
           <mesh userData={{ helper: true }} visible={!inside} rotation={[-Math.PI / 2, 0, 0]} position={[door.side * door.half, 0.004, 0]}>
             <circleGeometry args={[door.half * 2, 32, door.side === -1 ? -Math.PI / 2 : Math.PI, Math.PI / 2]} />
-            <meshBasicMaterial color="#D9D8D3" transparent opacity={0.55} />
+            <meshBasicMaterial color="#D9D8D3" transparent opacity={0.55} depthWrite={false} />
           </mesh>
         </group>
       ))}
@@ -680,7 +709,8 @@ function Piece({ piece, fit, isSelected, plan, onPointerDown }) {
       {isSelected && (
         <mesh userData={{ helper: true }} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.006, 0]}>
           <planeGeometry args={[footprint.w + 0.3, footprint.d + 0.3]} />
-          <meshBasicMaterial color={FIT_COLORS[fit]} transparent opacity={0.3} />
+          {/* depthWrite off: a see-through mark must not hide what is drawn after it */}
+          <meshBasicMaterial color={FIT_COLORS[fit]} transparent opacity={0.3} depthWrite={false} />
         </mesh>
       )}
       {/* the dark patch on the floor under the piece; a rug lies flat and needs none */}
@@ -817,6 +847,27 @@ function Scene({ room, pieces, selectedId, view, showGrid, zoom, lighting, surfa
 
   // The realistic picture is only offered inside the room, where the room is closed.
   const isTracing = realistic && view === 'inside';
+  // True once the realistic picture has drawn its first frame. Until then the
+  // normal picture stays on screen, so switching Realistic on never shows an
+  // empty or dark stage while the tracer gets ready.
+  const [tracedShown, setTracedShown] = useState(false);
+
+  // The two big extras, as components, once their files have arrived (null until then).
+  // A component is a function, and React would call a function handed to a state
+  // setter, so it is wrapped: setRoomEffects(() => part).
+  const [RoomEffects, setRoomEffects] = useState(() => extras.effects);
+  const [PathTraced, setPathTraced] = useState(() => extras.tracer);
+  // Fetch them ahead of time, while nobody is waiting: the corner shading a moment
+  // after the room opens (at once if a view that uses it is already open), and the
+  // realistic picture as soon as you step inside, the only place its switch is offered.
+  useEffect(() => {
+    if (RoomEffects) return undefined;
+    const timer = setTimeout(() => loadExtra('effects').then((part) => part && setRoomEffects(() => part)), view === '2d' ? 1500 : 0);
+    return () => clearTimeout(timer);
+  }, [view, RoomEffects]);
+  useEffect(() => {
+    if (view === 'inside' && !PathTraced) loadExtra('tracer').then((part) => part && setPathTraced(() => part));
+  }, [view, PathTraced]);
   // A text that changes whenever the room's contents change, so the realistic picture
   // knows to start again. A photo is long, so only its length goes in.
   const signature = JSON.stringify([
@@ -855,7 +906,17 @@ function Scene({ room, pieces, selectedId, view, showGrid, zoom, lighting, surfa
     <>
       <CameraRig view={view} room={room} zoom={zoom} orbit={orbit} look={look} stand={stand} />
       {/* The realistic picture takes over the drawing while it is on (inside view only). */}
-      {isTracing && <PathTraced room={room} signature={signature} daylight={sun.up} strength={sun.strength} brightness={brightness} onPasses={onPasses} />}
+      {isTracing && PathTraced && (
+        <PathTraced
+          room={room}
+          signature={signature}
+          daylight={sun.up}
+          strength={sun.strength}
+          brightness={brightness}
+          onPasses={onPasses}
+          onShown={setTracedShown}
+        />
+      )}
       {/* the same grey as the stage behind the canvas, so the picture has no see-through parts */}
       <color attach="background" args={['#EFEEEB']} />
 
@@ -864,12 +925,8 @@ function Scene({ room, pieces, selectedId, view, showGrid, zoom, lighting, surfa
           furniture, where a wall meets the floor), which is what makes things look like
           they sit in the room. Then tone mapping rolls bright areas off the way a
           camera does. The plan view skips it: from that far away it adds nothing. */}
-      {view !== '2d' && !isTracing && (
-        <EffectComposer multisampling={4}>
-          <N8AO aoRadius={0.55} distanceFalloff={1} intensity={2.4} quality="medium" />
-          <ToneMapping mode={ToneMappingMode.ACES_FILMIC} />
-        </EffectComposer>
-      )}
+      {/* It stays on until the realistic picture has something to show, then steps aside. */}
+      {view !== '2d' && RoomEffects && !(isTracing && tracedShown) && <RoomEffects />}
       <SoftLight daylight={sun.up} strength={sun.strength} />
       <ambientLight intensity={sun.up ? 0.22 : 0.04} />
 
