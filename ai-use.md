@@ -281,6 +281,12 @@ My direction: "Keep working on it nonstop autonomously". The assistant found the
 
 My direction: "Keep working on it nonstop autonomously". The handoff noted there were no unit tests. Which cases to check was the assistant's choice.
 
+### Escape closes dialogs, and the demo path checked end to end (22 Nov, 9:05 pm), AI-generated
+
+- `src/pages/Workspace.jsx`: `closeDialog` and the Escape line at the top of the keyboard shortcuts.
+
+My direction: "Keep working on it nonstop autonomously". The assistant noticed the shop list did not close with Escape while checking the demo path.
+
 ## Chat transcript
 
 TODO: paste the share link or exported transcript of the Claude conversation here.

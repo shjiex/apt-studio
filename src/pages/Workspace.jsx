@@ -231,10 +231,28 @@ function Workspace({
     setZoom(Math.min(Math.max(nextZoom, 0.5), 3));
   }
 
+  // Close whichever dialog is open, the same as its Cancel or Close button.
+  // Gives back true if one was open.
+  function closeDialog() {
+    const wasOpen = isEditingRoom || isAddingRoom || isConnecting || isShopping || isFinding || isPickingPlan;
+    setIsEditingRoom(false);
+    setIsAddingRoom(false);
+    setIsConnecting(false);
+    setIsShopping(false);
+    setIsFinding(false);
+    setIsPickingPlan(false);
+    return wasOpen;
+  }
+
   // Keyboard shortcuts. The effect runs again whenever something it reads changes,
   // so the handler always sees the current pieces and selection.
   useEffect(() => {
     function handleKeyDown(event) {
+      // Escape closes an open dialog first, even while you are typing in it.
+      if (event.key === 'Escape' && closeDialog()) {
+        event.preventDefault();
+        return;
+      }
       const isTyping = ['INPUT', 'TEXTAREA'].includes(event.target.tagName);
       if (isTyping || isEditingRoom || isAddingRoom || isPickingPlan || isConnecting) return;
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'z') {

@@ -479,6 +479,16 @@ project continues.
   desk, and six for every room (the rug one only when there is a rug). Each applies only when its
   pieces are in the room.
 
+### Escape closes dialogs, and the demo path checked end to end (22 Nov, 9:05 pm)
+
+- **Escape closes dialogs.** The shop list, the room dialogs, the floor plan picker, Pinterest and
+  Your furniture now close with Escape, the same as their Cancel or Close button, even while the
+  cursor is in one of their fields. `closeDialog` in `Workspace.jsx`. Tested on the shop list,
+  Your furniture and Add a room.
+- **Demo path, checked.** In a headless browser: a moodboard couch given a link and a price
+  shows in the shop list with its total ($249.99 for one piece), Download gives a 229 kB PNG of the
+  stage and a room file with the room, pieces, lighting, surfaces and camera. Nothing needed fixing.
+
 ## Components
 
 | Component | What it does |
