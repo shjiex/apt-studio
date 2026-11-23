@@ -342,7 +342,7 @@ My direction: look through the IKEA and Planner 5D categories I had open, and ad
 
 My direction: the start should ask questions before it assumes a room, with import first and a skip to a generic room. Tips should be small popups next to the features. My Figma note said the Inside view should already try to be realistic and should tell me how long to wait. The assistant wrote the welcome, the tips and the Sharpening pill.
 
-### A wider room score (23 Nov, 1:30 am), AI-generated
+### A wider room score (23 Nov, 1:00 am), AI-generated
 
 - `src/lib/fengshui.js`: the helpers `backOf`, `doorBehind`, `doorDistance`, `inFrontOf` and `walkableTo`, the new checks in `checkBed`, `checkSofa`, `checkDesk`, `checkDining` and `checkRoom`, and `from` on every check.
 - `src/components/FengShuiCard.jsx`: the source line under a tip, and `useMemo` around the score.

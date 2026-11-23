@@ -625,7 +625,7 @@ project continues.
   Icons on the stage glass read 4.86 to 1 over black and 12.94 to 1 over white. Words on the
   tip card read 16.09 and 19.18. Words in the top bar read 18.68 or more.
 
-### A wider room score (23 Nov, 1:30 am)
+### A wider room score (23 Nov, 1:00 am)
 
 - **Why.** The score had nine checks, almost all about the bed. I asked for it to be more
   comprehensive after research, so it now reads a living room and a desk as carefully as a
