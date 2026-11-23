@@ -2803,3 +2803,12 @@ a.btn {
   flex: none;
   gap: inherit;
 }
+
+/* ---------- moodboard filter row keeps its height ----------
+   The moodboard is a column that scrolls when its pins do not fit. A row that can
+   scroll sideways (the All, Picked, In 3D chips) is allowed to shrink in such a
+   column, and it shrank to a sliver once the note above the pins made the column
+   longer than the screen. flex: none tells it to keep its own height. */
+.moodboard .strip-groups {
+  flex: none;
+}
