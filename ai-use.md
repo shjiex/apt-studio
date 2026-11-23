@@ -439,6 +439,12 @@ My direction: from my 2 am list, "this UI should not read as a text wall; add ic
 
 My direction: "Keep working on it until 7:50 am". The assistant found this while looking at the welcome screen in its test browser. Its session stopped at about 5:30 am before the fix was committed, and it shipped the fix when I asked about GitHub at noon.
 
+### GitHub Pages (23 Nov, 12:25 pm), AI-generated
+
+- New: `.github/workflows/deploy.yml`.
+
+My direction: "yes to Pages". The assistant added the workflow it had prepared earlier.
+
 ## Chat transcript
 
 TODO: paste the share link or exported transcript of the Claude conversation here.

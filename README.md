@@ -915,6 +915,15 @@ project continues.
   dialog that stacks its parts.
 - **Fixed in `styles/app.css`.** Such a button keeps its own height (48 px, measured).
 
+### GitHub Pages (23 Nov, 12:25 pm)
+
+- **My yes.** I said "yes to Pages" at 12:20 pm. `.github/workflows/deploy.yml` builds the app
+  and publishes it each time `main` changes.
+- **Where.** https://shjiex.github.io/apt-studio/
+- **What works there.** Pinterest can be reached, because this is an ordinary web address.
+  Accounts are off, because `src/firebaseConfig.js` stays out of the repository, so the site
+  runs in visitor mode and keeps the home in the browser.
+
 ## Components
 
 | Component | What it does |
