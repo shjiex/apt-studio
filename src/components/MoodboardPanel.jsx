@@ -1,7 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
-import AccountButton from './AccountButton.jsx';
 import Button from './Button.jsx';
 import Icon from './Icon.jsx';
 import { CATALOG } from '../data/catalog.js';
@@ -26,11 +25,10 @@ function sizeWords(size) {
 // Every piece of furniture found in a picture (its "elements") is outlined on the
 // picture. Each outline is a button: pressing it opens a small card with furniture
 // of that kind to choose from, and each choice has its own Add button.
-// Above the pins: a search field, three filters, and a link out to Pinterest to find more.
-function MoodboardPanel({ moodboard, pickedIds, pinModels, user, onTogglePick, onAddItem, onConnect, onLogOut }) {
+// Above the pins: the board's name, how many pins it has, and a button to connect a board.
+// The Moodboard and Shop tabs above it belong to SidePanel.jsx.
+function MoodboardPanel({ moodboard, pickedIds, pinModels, user, onTogglePick, onAddItem, onConnect }) {
   const isPinterest = moodboard.source === 'pinterest';
-  const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('all'); // 'all', 'picked' or '3d'
   // The furniture found in each sample picture, by picture id: { 'mood-1': [element, ...] }.
   const [elementsByPin, setElementsByPin] = useState({});
   // The open card of options, or null: { imageId, elementId, left, top } (left and top in pixels on the screen).
@@ -171,53 +169,36 @@ function MoodboardPanel({ moodboard, pickedIds, pinModels, user, onTogglePick, o
     return pinModels.find((candidate) => candidate.pinId === image.id);
   }
 
-  // A pin matches the search if every typed word is in its description, its tags
-  // or the name of the furniture made from it ("blue sofa" finds a pin tagged both).
-  const words = search.toLowerCase().split(' ').filter(Boolean);
-  const shownImages = moodboard.images.filter((image) => {
-    if (filter === 'picked' && !pickedIds.includes(image.id)) return false;
-    if (filter === '3d' && !modelOf(image)) return false;
-    const model = modelOf(image);
-    const found = (elementsByPin[image.id] || []).map((element) => element.label).join(' ');
-    const text = `${image.description} ${image.tags || ''} ${model ? model.name : ''} ${found}`.toLowerCase();
-    return words.every((word) => text.includes(word));
+  // Share the pictures between two columns. `heights` adds up how tall each column is
+  // so far, counting each picture's height for a width of 1 (height divided by width).
+  const columns = [[], []];
+  const heights = [0, 0];
+  moodboard.images.forEach((image) => {
+    const shorter = heights[0] <= heights[1] ? 0 : 1;
+    columns[shorter].push(image);
+    // a picture whose size is not known counts as a square
+    heights[shorter] += image.width ? image.height / image.width : 1;
   });
 
-  const filters = [
-    { id: 'all', name: 'All', count: moodboard.images.length },
-    { id: 'picked', name: 'Picked', count: pickedIds.length },
-    { id: '3d', name: 'In 3D', count: moodboard.images.filter(modelOf).length },
-  ];
-  // "Explore" opens a Pinterest search for the typed words (or a general one) in a new tab.
-  const exploreUrl = `https://www.pinterest.com/search/pins/?q=${encodeURIComponent(search.trim() || 'small apartment interior')}`;
-
   return (
-    <section className="panel moodboard" aria-label="Moodboard">
-      <header className="board-header">
-        <div>
-          <h1>{isPinterest ? moodboard.boardName : 'Moodboard'}</h1>
-          {/* Where the pins come from. How many there are, and how many are picked, is on the filters below. */}
-          <p className="board-header__meta">
-            {isPinterest ? (
-              <a href={moodboard.boardUrl} target="_blank" rel="noreferrer">
-                {moodboard.owner} on Pinterest
-              </a>
-            ) : (
-              'Sample photos'
-            )}
-          </p>
-        </div>
-        <div className="board-header__actions">
-          <Button
-            variant="secondary"
-            icon="pin"
-            aria-label={isPinterest ? 'Change Pinterest board' : 'Connect a Pinterest board'}
-            title={isPinterest ? 'Change Pinterest board' : 'Connect a Pinterest board'}
-            onClick={onConnect}
-          />
-          <AccountButton user={user} onLogOut={onLogOut} />
-        </div>
-      </header>
+    <div className="moodboard">
+      {/* The board the pins come from, with how many pins it has, and a button to connect
+          or change a Pinterest board. */}
+      <div className="board-row">
+        <span className="board-row__name">{isPinterest ? moodboard.boardName : 'Sample photos'}</span>
+        <span className="tag tag--grey">
+          {moodboard.images.length} {moodboard.images.length === 1 ? 'Pin' : 'Pins'}
+        </span>
+        <button
+          type="button"
+          className="board-row__connect"
+          title={isPinterest ? 'Change Pinterest board' : 'Connect a Pinterest board'}
+          onClick={onConnect}
+        >
+          <Icon name="pin" size={16} />
+          {isPinterest ? 'Change board' : 'Connect a board'}
+        </button>
+      </div>
 
       {isPinterest && !user && (
         <p className="board-notice">
@@ -225,149 +206,103 @@ function MoodboardPanel({ moodboard, pickedIds, pinModels, user, onTogglePick, o
         </p>
       )}
 
-      <div className="board-tools">
-        <label className="strip-search board-tools__search">
-          <Icon name="search" size={16} />
-          <input
-            type="search"
-            placeholder="Search this board"
-            aria-label="Search this board"
-            value={search}
-            onChange={(event) => setSearch(event.target.value)}
-          />
-        </label>
-        <a className="board-tools__explore" href={exploreUrl} target="_blank" rel="noreferrer" title="Find more on Pinterest">
-          Explore
-          <Icon name="open" size={16} />
-        </a>
-      </div>
-      <div className="strip-groups" role="tablist" aria-label="Which pins to show">
-        {filters.map((candidate) => (
-          <button
-            type="button"
-            key={candidate.id}
-            role="tab"
-            aria-selected={candidate.id === filter}
-            className={candidate.id === filter ? 'strip-group is-current' : 'strip-group'}
-            onClick={() => setFilter(candidate.id)}
-          >
-            {candidate.name} <span className="board-tools__count">{candidate.count}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* Shown once above the board, only when some picture has furniture to choose from. */}
-      {Object.keys(elementsByPin).length > 0 && (
-        <p className="board-note">
-          Simpler pictures work best. A picture with one piece of furniture, seen from the front, gives the closest match.
-        </p>
-      )}
-
-      {shownImages.length === 0 && (
-        <p className="board-empty">
-          {filter === 'picked' && words.length === 0
-            ? "You haven’t picked any pins yet. Press a pin you like and it will show up here."
-            : "We couldn’t find a pin that matches. You can try another word, or press Explore to look for more on Pinterest."}
-        </p>
-      )}
-
+      {/* Two columns. Each picture goes into whichever column is shorter so far, so the
+          two stay about the same length. */}
       <div className="pin-grid">
-        {shownImages.map((image) => {
-          const isPicked = pickedIds.includes(image.id);
-          const model = modelOf(image);
-          // Biggest first, so a small piece (a lamp) is drawn last and sits on top of a big one (a rug).
-          const elements = [...(elementsByPin[image.id] || [])].sort((a, b) => {
-            const area = (element) => (element.box[2] - element.box[0]) * (element.box[3] - element.box[1]);
-            return area(b) - area(a);
-          });
-          return (
-            <div className="pin-card" key={image.id}>
-              {/* the frame holds the picture (a button that picks the pin) and, over it, the outlines */}
-              <div className="pin-frame">
-              <button
-                type="button"
-                className={isPicked ? 'pin is-picked' : 'pin'}
-                aria-pressed={isPicked}
-                onClick={() => onTogglePick(image.id)}
-              >
-                <span className="pin__image" style={{ background: image.color }}>
-                  <img
-                    src={asset(image.src)}
-                    alt={image.description}
-                    width={image.width}
-                    height={image.height}
-                    loading="lazy"
-                  />
-                  {/* On hover: everything but the target object fades, and the object is outlined.
+        {columns.map((column, index) => (
+          <div className="pin-column" key={index}>
+            {column.map((image) => {
+              const isPicked = pickedIds.includes(image.id);
+              const model = modelOf(image);
+              // Biggest first, so a small piece (a lamp) is drawn last and sits on top of a big one (a rug).
+              const elements = [...(elementsByPin[image.id] || [])].sort((a, b) => {
+                const area = (element) => (element.box[2] - element.box[0]) * (element.box[3] - element.box[1]);
+                return area(b) - area(a);
+              });
+              return (
+                <div className="pin-card" key={image.id}>
+                  {/* the frame holds the picture (a button that picks the pin) and, over it, the outlines */}
+                  <div className="pin-frame">
+                    <button
+                      type="button"
+                      className={isPicked ? 'pin is-picked' : 'pin'}
+                      aria-pressed={isPicked}
+                      onClick={() => onTogglePick(image.id)}
+                    >
+                      <span className="pin__image" style={{ background: image.color }}>
+                        <img src={asset(image.src)} alt={image.description} width={image.width} height={image.height} loading="lazy" />
+                        {/* On hover: everything but the target object fades, and the object is outlined.
                       The path is the whole image with the object's shape cut out of it. */}
-                  {/* Only for a picture without a list of elements: the one target, as before. */}
-                  {elements.length === 0 && model && model.outline && (
-                    <svg className="pin__focus" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
-                      <path
-                        className="pin__veil"
-                        fillRule="evenodd"
-                        d={`M0 0H100V100H0Z M${model.outline.map(([x, y]) => `${x * 100} ${y * 100}`).join(' L')} Z`}
-                      />
-                      <polygon
-                        className="pin__outline"
-                        points={model.outline.map(([x, y]) => `${x * 100},${y * 100}`).join(' ')}
-                      />
-                    </svg>
-                  )}
-                </span>
-              </button>
-              {/* One outline for each piece of furniture found. An outline is a button: it takes
+                        {/* Only for a picture without a list of elements: the one target, as before. */}
+                        {elements.length === 0 && model && model.outline && (
+                          <svg className="pin__focus" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">
+                            <path
+                              className="pin__veil"
+                              fillRule="evenodd"
+                              d={`M0 0H100V100H0Z M${model.outline.map(([x, y]) => `${x * 100} ${y * 100}`).join(' L')} Z`}
+                            />
+                            <polygon className="pin__outline" points={model.outline.map(([x, y]) => `${x * 100},${y * 100}`).join(' ')} />
+                          </svg>
+                        )}
+                      </span>
+                    </button>
+                    {/* One outline for each piece of furniture found. An outline is a button: it takes
                   the keyboard (tabIndex), says what it is (aria-label) and opens the card of options.
                   The viewBox is 100 by 100, so a point at 0.5 of the picture is drawn at 50. */}
-              {elements.length > 0 && (
-                <svg className="pin-elements" viewBox="0 0 100 100" preserveAspectRatio="none">
-                  {elements.map((element) => {
-                    const isOpen = open !== null && open.elementId === element.id;
-                    return (
-                      <polygon
-                        key={element.id}
-                        className={isOpen ? 'pin-element is-open' : 'pin-element'}
-                        points={element.outline.map(([x, y]) => `${x * 100},${y * 100}`).join(' ')}
-                        role="button"
-                        tabIndex={0}
-                        aria-label={`${element.label} in this picture`}
-                        aria-haspopup="dialog"
-                        aria-expanded={isOpen}
-                        onClick={(event) => (isOpen ? setOpen(null) : openOptions(image, element, event.currentTarget))}
-                        onKeyDown={(event) => {
-                          // a real button answers Enter and Space, so this one does too
-                          if (event.key === 'Enter' || event.key === ' ') {
-                            event.preventDefault();
-                            openOptions(image, element, event.currentTarget);
-                          }
-                        }}
-                      >
-                        {/* the browser shows this as a tooltip */}
-                        <title>{`${element.label}. Choose furniture like it.`}</title>
-                      </polygon>
-                    );
-                  })}
-                </svg>
-              )}
-              </div>
-              {/* Shown under the image on hover: what the photo is, and a button that adds its object in 3D. */}
-              <div className="pin__under">
-                <span className="pin__title">{image.description}</span>
-                {model && (
-                  <button
-                    type="button"
-                    className="pin__add"
-                    title={`Add this ${model.name.toLowerCase()} in 3D`}
-                    aria-label={`Add this ${model.name.toLowerCase()} in 3D`}
-                    onClick={() => onAddItem(model.type)}
-                  >
-                    <img src={asset(model.image)} alt="" />
-                  </button>
-                )}
-              </div>
-            </div>
-          );
-        })}
+                    {elements.length > 0 && (
+                      <svg className="pin-elements" viewBox="0 0 100 100" preserveAspectRatio="none">
+                        {elements.map((element) => {
+                          const isOpen = open !== null && open.elementId === element.id;
+                          return (
+                            <polygon
+                              key={element.id}
+                              className={isOpen ? 'pin-element is-open' : 'pin-element'}
+                              points={element.outline.map(([x, y]) => `${x * 100},${y * 100}`).join(' ')}
+                              role="button"
+                              tabIndex={0}
+                              aria-label={`${element.label} in this picture`}
+                              aria-haspopup="dialog"
+                              aria-expanded={isOpen}
+                              onClick={(event) => (isOpen ? setOpen(null) : openOptions(image, element, event.currentTarget))}
+                              onKeyDown={(event) => {
+                                // a real button answers Enter and Space, so this one does too
+                                if (event.key === 'Enter' || event.key === ' ') {
+                                  event.preventDefault();
+                                  openOptions(image, element, event.currentTarget);
+                                }
+                              }}
+                            >
+                              {/* the browser shows this as a tooltip */}
+                              <title>{`${element.label}. Choose furniture like it.`}</title>
+                            </polygon>
+                          );
+                        })}
+                      </svg>
+                    )}
+                  </div>
+                  {/* Under a picture that has a 3D model: a glass button with the model's name.
+                  Pressing it puts that furniture in the room. */}
+                  {model && (
+                    <div className="pin__more">
+                      <div>
+                        <button
+                          type="button"
+                          className="pin__add"
+                          title={`Add this ${model.name.toLowerCase()} in 3D`}
+                          aria-label={`Add this ${model.name.toLowerCase()} in 3D`}
+                          onClick={() => onAddItem(model.type)}
+                        >
+                          <span>{model.name}</span>
+                          <Icon name="plus" size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ))}
       </div>
 
       {/* The card of furniture options. createPortal draws it at the end of the page instead
@@ -413,15 +348,15 @@ function MoodboardPanel({ moodboard, pickedIds, pinModels, user, onTogglePick, o
                 </>
               ) : (
                 <p className="pin-options__lead">
-                  We don’t have a {element.label.toLowerCase()} like this one yet. You can pick the closest piece from the
-                  furniture under your room.
+                  We don’t have a {element.label.toLowerCase()} like this one yet. You can pick the closest piece from the furniture under
+                  your room.
                 </p>
               )}
             </div>,
-            document.body
+            document.body,
           );
         })()}
-    </section>
+    </div>
   );
 }
 

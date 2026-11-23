@@ -1,13 +1,22 @@
+import { useRef } from 'react';
 import Button from './Button.jsx';
+import DownloadMenu from './DownloadMenu.jsx';
 import ElementStrip from './ElementStrip.jsx';
 import FengShuiCard from './FengShuiCard.jsx';
+import Icon from './Icon.jsx';
 import Room3D from './Room3D.jsx';
-import SelectionBar from './SelectionBar.jsx';
+import ViewSwitch from './ViewSwitch.jsx';
 import { CATALOG } from '../data/catalog.js';
-import { getArea, getFit } from '../lib/room.js';
+import { getArea } from '../lib/room.js';
+import { formatArea } from '../lib/units.js';
+import Slider from './Slider.jsx';
 
-// The left panel: the room on its stage, the controls floating over it, and
-// the furniture strip underneath.
+// The middle of the screen: the room on its stage with glass controls floating over
+// it, and under it a card with the furniture to add.
+// Where each control sits follows the Figma frame 216:4506. Top right: download, then
+// the view switch. Right: zoom, then the room score. Bottom left: undo, redo and the
+// floor area. Bottom middle: the measurement grid, lighting, and floor and walls.
+// showStrip is false when the furniture is in the tools section at the side.
 function PreviewPanel({
   lighting,
   surfaces,
@@ -32,9 +41,7 @@ function PreviewPanel({
   onMove,
   onDragStart,
   onRotate,
-  onDuplicate,
   onRemove,
-  onSetLink,
   onAddItem,
   onUndo,
   onRedo,
@@ -44,12 +51,38 @@ function PreviewPanel({
   onToggleScore,
   roomId,
   startView,
+  onView,
+  onGrid,
+  openTool,
+  onTool,
+  isDownloadOpen,
+  onToggleDownload,
+  onCloseDownload,
+  onRoomFile,
+  showStrip,
+  units,
+  onEdit,
+  onDropItem,
 }) {
   const selectedPiece = pieces.find((piece) => piece.id === selectedId);
+  // The element that holds the Rotate and Remove buttons. Room3D moves it every
+  // frame so it stays over the selected piece (see ActionsAnchor in Room3D.jsx).
+  const actionsRef = useRef(null);
+
+  // A furniture tile was dropped on the stage. ElementTile put the piece's type in
+  // the drag (dataTransfer), and Workspace turns the drop's place into a spot on the floor.
+  function handleDrop(event) {
+    const type = event.dataTransfer.getData('text/apt-studio-piece');
+    if (!type) return;
+    event.preventDefault();
+    onDropItem(type, event.clientX, event.clientY);
+  }
+
 
   return (
-    <section className="panel preview" aria-label="Room preview">
-      <div className="stage">
+    <section className="preview" aria-label="Room preview">
+      {/* onDragOver has to say "yes, you may drop here" (preventDefault), or the browser refuses the drop. */}
+      <div className="stage" onDragOver={(event) => event.preventDefault()} onDrop={handleDrop}>
         <Room3D
           room={room}
           roomId={roomId}
@@ -70,22 +103,28 @@ function PreviewPanel({
           onDragStart={onDragStart}
           onZoom={onZoom}
           onCanvasReady={onCanvasReady}
+          units={units}
+          actionsRef={actionsRef}
+          onEdit={onEdit}
         />
 
+        {/* Rotate and Remove float over the selected piece. Remove is red so it is easy to spot. */}
         {selectedPiece && (
-          <div className="stage__overlay">
-            <SelectionBar
-              piece={selectedPiece}
-              room={room}
-              fit={getFit(selectedPiece, pieces, room)}
-              onRotate={onRotate}
-              onDuplicate={onDuplicate}
-              onRemove={onRemove}
-              onSetLink={onSetLink}
-            />
+          <div className="stage__actions" ref={actionsRef}>
+            <button type="button" className="stage__action" aria-label="Rotate" title="Rotate (R)" onClick={() => onRotate(selectedPiece.id)}>
+              <Icon name="rotate" size={18} />
+            </button>
+            <button
+              type="button"
+              className="stage__action stage__action--remove"
+              aria-label="Remove"
+              title="Remove (Delete)"
+              onClick={() => onRemove(selectedPiece.id)}
+            >
+              <Icon name="trash" size={18} />
+            </button>
           </div>
         )}
-
         {/* Inside the room: switch on the realistic picture, and see how far it has cleared up. */}
         {view === 'inside' && (
           <div className="stage__real">
@@ -97,8 +136,7 @@ function PreviewPanel({
             {realistic && (
               <label className="stage__bright">
                 Brightness
-                <input
-                  type="range"
+                <Slider
                   aria-label="Brightness of the realistic picture"
                   min="0.4"
                   max="2.5"
@@ -117,10 +155,46 @@ function PreviewPanel({
           </div>
         )}
 
+        <div className="stage__corner">
+          <DownloadMenu
+            onPicture={onSavePicture}
+            onRoomFile={onRoomFile}
+            isOpen={isDownloadOpen}
+            onToggle={onToggleDownload}
+            onClose={onCloseDownload}
+          />
+          <ViewSwitch view={view} onChange={onView} />
+        </div>
+        <div className="stage__tools">
+          <Button
+            variant={showGrid ? 'primary' : 'glass'}
+            icon="measure"
+            aria-label="Measurement grid"
+            aria-pressed={showGrid}
+            title="Measurement grid"
+            onClick={onGrid}
+          />
+          <Button
+            variant={openTool === 'lighting' ? 'primary' : 'glass'}
+            icon="bulb"
+            aria-label="Lighting"
+            aria-expanded={openTool === 'lighting'}
+            title="Lighting"
+            onClick={() => onTool('lighting')}
+          />
+          <Button
+            variant={openTool === 'surfaces' ? 'primary' : 'glass'}
+            icon="layers"
+            aria-label="Floor, walls, windows and doors"
+            aria-expanded={openTool === 'surfaces'}
+            title="Floor, walls, windows and doors"
+            onClick={() => onTool('surfaces')}
+          />
+        </div>
         <div className="stage__history">
           <Button variant="white" size="sm" icon="undo" aria-label="Undo" title="Undo" disabled={!canUndo} onClick={onUndo} />
           <Button variant="white" size="sm" icon="redo" aria-label="Redo" title="Redo" disabled={!canRedo} onClick={onRedo} />
-          <span className="stage__area">{getArea(room)} m²</span>
+          <span className="stage__area">{formatArea(getArea(room), units)}</span>
         </div>
 
         <div className="stage__score">
@@ -134,8 +208,12 @@ function PreviewPanel({
         </div>
       </div>
 
-      {/* The catalog, then furniture made from moodboard images. */}
-      <ElementStrip items={[...CATALOG, ...pinModels]} pieces={pieces} onAdd={onAddItem} />
+      {/* The catalog, then furniture made from moodboard images, in a card of its own. */}
+      {showStrip && (
+        <div className="panel strip-card">
+          <ElementStrip items={[...CATALOG, ...pinModels]} pieces={pieces} onAdd={onAddItem} />
+        </div>
+      )}
     </section>
   );
 }

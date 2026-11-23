@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import Button from './Button.jsx';
 import Icon from './Icon.jsx';
 
-// A round icon at the top right of the moodboard.
+// A round glass button at the right end of the top bar.
 // Visitors get a link to the login page. Signed-in people get their initial,
 // which opens a small menu with their email and "Log out".
 function AccountButton({ user, onLogOut }) {
@@ -11,7 +11,7 @@ function AccountButton({ user, onLogOut }) {
 
   if (!user) {
     return (
-      <Link to="/login" className="btn btn--secondary btn--md btn--icon-only" aria-label="Log in" title="Log in">
+      <Link to="/login" className="btn btn--glass btn--md btn--icon-only" aria-label="Log in" title="Log in">
         <Icon name="user" />
       </Link>
     );
@@ -21,7 +21,7 @@ function AccountButton({ user, onLogOut }) {
     <span className="account">
       <button
         type="button"
-        className="btn btn--primary btn--md btn--icon-only"
+        className="btn btn--glass btn--md btn--icon-only"
         aria-label="Account"
         aria-expanded={isOpen}
         onClick={() => setIsOpen(!isOpen)}

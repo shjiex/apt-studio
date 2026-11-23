@@ -72,6 +72,12 @@ export function setPinItems(manifest) {
   return [...pinItems];
 }
 
+// The size of one piece in the room, in metres: its own size if the person changed
+// it in the piece panel, or else the size its catalog entry gives.
+export function sizeOf(piece) {
+  return piece.size || getItem(piece.type).size;
+}
+
 // Look up one catalog entry by its type, e.g. getItem('desk').
 export function getItem(type) {
   return CATALOG.find((item) => item.type === type) || pinItems.find((item) => item.type === type);

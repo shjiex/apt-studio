@@ -72,12 +72,6 @@
   filter: drop-shadow(0 0 2px var(--white)) drop-shadow(0 0 2px var(--white));
 }
 
-/* pressed: the shape darkens for a moment, like a button going in */
-.pin-element:active {
-  fill: rgba(15, 15, 14, 0.22);
-  transition-duration: 90ms;
-}
-
 /* a touch screen has no pointer to hover with, so the outlines always show */
 @media (hover: none) {
   .pin-element {
@@ -183,14 +177,6 @@
 .pin-options__text strong {
   font-size: 13px;
   font-weight: 600;
-}
-
-/* The Add and Close buttons are the app's own .btn, so they already have its hover
-   and focus looks. Pressed, they sink in like the other buttons on glass. */
-.pin-options .btn:active:not(:disabled) {
-  transform: translateY(1px) scale(0.97);
-  box-shadow: inset 0 2px 5px rgba(15, 15, 14, 0.28);
-  transition-duration: 90ms;
 }
 
 /* No blur available, or the person asked for less see-through or more contrast: a solid white card. */

@@ -1,27 +1,26 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import Button from '../components/Button.jsx';
-import DownloadMenu from '../components/DownloadMenu.jsx';
 import FoundFurniture from '../components/FoundFurniture.jsx';
-import LightingMenu from '../components/LightingMenu.jsx';
-import MoodboardPanel from '../components/MoodboardPanel.jsx';
+import Logo from '../components/Logo.jsx';
+import Button from '../components/Button.jsx';
+import AccountButton from '../components/AccountButton.jsx';
 import PiecePanel from '../components/PiecePanel.jsx';
 import PinterestImport from '../components/PinterestImport.jsx';
 import PlanRooms from '../components/PlanRooms.jsx';
 import PreviewPanel from '../components/PreviewPanel.jsx';
 import RoomSetup from '../components/RoomSetup.jsx';
 import RoomTabs from '../components/RoomTabs.jsx';
-import ShopList from '../components/ShopList.jsx';
-import SurfacesMenu from '../components/SurfacesMenu.jsx';
+import SidePanel from '../components/SidePanel.jsx';
+import ToolsPanel from '../components/ToolsPanel.jsx';
+import { PreferencesMenu, SettingsMenu } from '../components/TopMenus.jsx';
 import TabBar from '../components/TabBar.jsx';
 import UndoToast from '../components/UndoToast.jsx';
-import ViewSwitch from '../components/ViewSwitch.jsx';
-import { getItem, setPinItems } from '../data/catalog.js';
+import { CATALOG, getItem, setPinItems, sizeOf } from '../data/catalog.js';
 import { clampToRoom, findOpenSpot, getFit, snapToRoom } from '../lib/room.js';
 import { asset } from '../lib/paths.js';
 import { bulbOf, fixedLightPoints, getSun, lightOutput } from '../lib/light.js';
 
-const MIN_MOODBOARD_WIDTH = 280;
+const MIN_MOODBOARD_WIDTH = 360;
 const MAX_MOODBOARD_WIDTH = 760;
 
 // The main screen: the room preview and the moodboard.
@@ -48,6 +47,7 @@ function Workspace({
   onImportBoard,
   onTogglePick,
   onLogOut,
+  onShowTips = () => {},
 }) {
   // The room that is open. Everything below works on its size, pieces and lighting.
   const activeRoom = rooms.find((entry) => entry.id === activeRoomId);
@@ -69,16 +69,26 @@ function Workspace({
   const [isEditingRoom, setIsEditingRoom] = useState(false);
   const [isAddingRoom, setIsAddingRoom] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
-  const [isShopping, setIsShopping] = useState(false); // is the shop list open?
   const [isFinding, setIsFinding] = useState(false); // is the "already in your room" dialog open?
   const [isPickingPlan, setIsPickingPlan] = useState(false); // is the floor plan picker open?
   // Which small panel is open over the room: 'lighting', 'surfaces', 'download',
   // 'score', or null for none. Keeping it here means only one is open at a time.
   const [openPanel, setOpenPanel] = useState(null);
   const [tab, setTab] = useState('preview'); // which panel a phone shows
+  // The section to the right of the room: is it open, and is it showing the moodboard or the shop list?
+  const [isSideOpen, setIsSideOpen] = useState(true);
+  const [sideTab, setSideTab] = useState('moodboard');
+  // Where the tools sit: 'stage' (furniture under the room, lighting and floor and walls
+  // opened from buttons on it) or 'side' (all three in a section to the left of the room).
+  // The choice is kept in the browser, so it is the same next time.
+  const [layout, setLayout] = useState(() => localStorage.getItem('apt-studio-layout') || 'stage');
+  // The tools section to the left of the room: null when closed, or 'furniture', 'lighting' or 'surfaces'.
+  const [tool, setTool] = useState(() => (localStorage.getItem('apt-studio-layout') === 'side' ? 'furniture' : null));
+  // Metric (metres and centimetres) or imperial (feet and inches), also kept in the browser.
+  const [units, setUnits] = useState(() => localStorage.getItem('apt-studio-units') || 'metric');
   const [showGrid, setShowGrid] = useState(true);
   const [zoom, setZoom] = useState(1); // 1 fits the room; bigger is closer
-  const [moodboardWidth, setMoodboardWidth] = useState(400); // pixels, set by the divider
+  const [moodboardWidth, setMoodboardWidth] = useState(560); // pixels, set by the divider
   // History for undo and redo: earlier lists of pieces, and ones that were undone.
   const [past, setPast] = useState([]);
   const [future, setFuture] = useState([]);
@@ -115,6 +125,8 @@ function Workspace({
     if (now - lastRoomChange.current > 800) rememberPieces();
     lastRoomChange.current = now;
     setRoom(nextRoom);
+    // A room made smaller (by its size handles on the plan) may leave pieces outside the walls, so pull them back in.
+    if (nextRoom.width < room.width || nextRoom.length < room.length) setPieces(pieces.map((piece) => clampToRoom(piece, nextRoom)));
     if (text) setToast({ key: now, text });
   }
 
@@ -147,10 +159,12 @@ function Workspace({
   }
 
   // Pressing a tile adds one more of that piece in the first open spot.
-  function handleAddItem(type) {
+  // Dragging a tile onto the room adds it where it is dropped: `at` is that place on
+  // the floor ({ x, z } in metres). Without `at` it goes to the first open spot.
+  function handleAddItem(type, at) {
     const item = getItem(type);
-    const spot = findOpenSpot(type, pieces, room);
-    const newPiece = { id: `${type}-${Date.now()}`, type, x: spot.x, z: spot.z, rotation: spot.rotation, existing: false };
+    const spot = at ? { ...at, rotation: 0 } : findOpenSpot(type, pieces, room);
+    const newPiece = snapToRoom({ id: `${type}-${Date.now()}`, type, x: spot.x, z: spot.z, rotation: spot.rotation, existing: false }, room);
     changePieces([...pieces, newPiece], `${item.name} added`);
     setSelectedId(newPiece.id);
   }
@@ -194,14 +208,19 @@ function Workspace({
     changePieces(nextPieces, link || price ? 'Shop details saved' : 'Shop details removed');
   }
 
-  function handleDuplicate(id) {
-    const piece = pieces.find((candidate) => candidate.id === id);
-    const copy = clampToRoom(
-      { ...piece, id: `${piece.type}-${Date.now()}`, x: piece.x + 0.3, z: piece.z + 0.3, existing: false },
-      room
-    );
-    changePieces([...pieces, copy], `${getItem(piece.type).name} duplicated`);
-    setSelectedId(copy.id);
+  // Save changed fields of one piece from the piece panel: its size, where it
+  // stands, how it is turned, its colour, its finish or whether you own it.
+  // A size of null means "back to the catalog's size", so that field is taken off.
+  // After a change of size or place the piece is kept inside the walls.
+  function handleChangePiece(id, changes) {
+    const nextPieces = pieces.map((piece) => {
+      if (piece.id !== id) return piece;
+      const changed = { ...piece, ...changes };
+      if (changes.size === null) delete changed.size;
+      return clampToRoom(changed, room);
+    });
+    const name = getItem(pieces.find((piece) => piece.id === id).type).name;
+    changePieces(nextPieces, `${name} changed`);
   }
 
   function handleRemove(id) {
@@ -227,6 +246,47 @@ function Workspace({
     else setOpenPanel(name);
   }
 
+  // The lighting and the floor and walls buttons on the stage. Pressing the one whose
+  // panel is open closes the tools section; in the side layout it goes back to the furniture.
+  function handleTool(name) {
+    if (tool === name) setTool(layout === 'side' ? 'furniture' : null);
+    else setTool(name);
+  }
+
+  // Change where the tools sit, and remember the choice.
+  function handleLayout(next) {
+    setLayout(next);
+    localStorage.setItem('apt-studio-layout', next);
+    if (next === 'side') setTool(tool || 'furniture');
+    if (next === 'stage' && tool === 'furniture') setTool(null);
+  }
+
+  function handleUnits(next) {
+    setUnits(next);
+    localStorage.setItem('apt-studio-units', next);
+  }
+
+  // A double click in the room: on the floor, a wall, a window or a door. Each opens
+  // the floor and walls panel, where that part is changed.
+  function handleEditPart() {
+    setTool('surfaces');
+  }
+
+  // A furniture tile was dropped on the stage at (clientX, clientY), in pixels on
+  // the screen. A ray is shot from the camera through that point, and where it
+  // meets the floor (the flat plane at height 0) is where the piece goes.
+  function handleDropItem(type, clientX, clientY) {
+    const box = canvasRef.current.getBoundingClientRect();
+    // the same point counted from -1 to 1 across the canvas, which is what three.js asks for
+    const pointer = new THREE.Vector2(((clientX - box.left) / box.width) * 2 - 1, -((clientY - box.top) / box.height) * 2 + 1);
+    const ray = new THREE.Raycaster();
+    ray.setFromCamera(pointer, cameraRef.current);
+    const floor = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+    const point = ray.ray.intersectPlane(floor, new THREE.Vector3());
+    if (point) handleAddItem(type, { x: point.x, z: point.z });
+    else handleAddItem(type);
+  }
+
   function handleZoom(nextZoom) {
     setZoom(Math.min(Math.max(nextZoom, 0.5), 3));
   }
@@ -234,11 +294,10 @@ function Workspace({
   // Close whichever dialog is open, the same as its Cancel or Close button.
   // Gives back true if one was open.
   function closeDialog() {
-    const wasOpen = isEditingRoom || isAddingRoom || isConnecting || isShopping || isFinding || isPickingPlan;
+    const wasOpen = isEditingRoom || isAddingRoom || isConnecting || isFinding || isPickingPlan;
     setIsEditingRoom(false);
     setIsAddingRoom(false);
     setIsConnecting(false);
-    setIsShopping(false);
     setIsFinding(false);
     setIsPickingPlan(false);
     return wasOpen;
@@ -273,7 +332,6 @@ function Workspace({
       else if (event.key === 'ArrowUp') handleNudge(0, -step);
       else if (event.key === 'ArrowDown') handleNudge(0, step);
       else if (event.key.toLowerCase() === 'r') handleRotate(selectedId);
-      else if (event.key.toLowerCase() === 'd') handleDuplicate(selectedId);
       else if (event.key === 'Delete' || event.key === 'Backspace') handleRemove(selectedId);
       else if (event.key === 'Escape') setSelectedId(null);
       else return;
@@ -420,7 +478,7 @@ function Workspace({
           z: piece.z,
           rotation: piece.rotation,
           existing: Boolean(piece.existing),
-          size: item.size,
+          size: sizeOf(piece),
           model: item.model,
         };
       }),
@@ -444,67 +502,79 @@ function Workspace({
     <div className={`app app--${tab}`}>
       <header className="top-bar">
         <div className="top-bar__left">
-          <span className="wordmark">Apt Studio</span>
-          <Button variant="secondary" icon="image" onClick={() => setIsFinding(true)}>
-            Your furniture
-          </Button>
+          <Logo height={24} />
+          <RoomTabs
+            homeName={homeName}
+            rooms={rooms}
+            activeRoomId={activeRoomId}
+            onRenameHome={onRenameHome}
+            onPick={handlePickRoom}
+            onEdit={() => setIsEditingRoom(true)}
+            onAdd={() => setIsAddingRoom(true)}
+          />
         </div>
-        <ViewSwitch view={view} onChange={setView} />
         <div className="top-bar__right">
-          <Button
-            variant={showGrid ? 'primary' : 'secondary'}
-            icon="measure"
-            aria-label="Measurement grid"
-            aria-pressed={showGrid}
-            title="Measurement grid"
-            onClick={() => setShowGrid(!showGrid)}
+          {/* These two only show while their section is closed, to open it again. */}
+          {layout === 'side' && tool === null && (
+            <Button variant="glass" icon="sidebar" aria-label="Open the tools" title="Open the tools" onClick={() => setTool('furniture')} />
+          )}
+          {!isSideOpen && (
+            <Button variant="glass" icon="image" aria-label="Open the moodboard" title="Open the moodboard" onClick={() => setIsSideOpen(true)} />
+          )}
+          <SettingsMenu
+            isOpen={openPanel === 'settings'}
+            onToggle={() => togglePanel('settings')}
+            onYourFurniture={() => {
+              setOpenPanel(null);
+              setIsFinding(true);
+            }}
+            onShowTips={() => {
+              setOpenPanel(null);
+              onShowTips();
+            }}
+            onStartOver={() => {
+              setOpenPanel(null);
+              onStartOver();
+              setSelectedId(null);
+              setPast([]);
+              setFuture([]);
+              setToast(null);
+            }}
           />
-          <LightingMenu
-            lighting={lighting}
-            onChange={setLighting}
-            windows={room.windows}
-            isOpen={openPanel === 'lighting'}
-            onToggle={() => togglePanel('lighting')}
+          <PreferencesMenu
+            isOpen={openPanel === 'preferences'}
+            onToggle={() => togglePanel('preferences')}
+            units={units}
+            onUnits={handleUnits}
+            layout={layout}
+            onLayout={handleLayout}
           />
-          <SurfacesMenu
-            surfaces={surfaces}
-            onChange={setSurfaces}
-            room={room}
-            onRoomChange={changeRoom}
-            isOpen={openPanel === 'surfaces'}
-            onToggle={() => togglePanel('surfaces')}
-          />
-          <Button variant="secondary" icon="link" onClick={() => setIsShopping(true)}>
-            Shop list
-          </Button>
-          <DownloadMenu
-            onPicture={handleDownload}
-            onRoomFile={handleDownloadRoom}
-            isOpen={openPanel === 'download'}
-            onToggle={() => togglePanel('download')}
-            onClose={() => setOpenPanel(null)}
-          />
+          <AccountButton user={user} onLogOut={onLogOut} />
         </div>
       </header>
 
-      <RoomTabs
-        homeName={homeName}
-        rooms={rooms}
-        activeRoomId={activeRoomId}
-        onRenameHome={onRenameHome}
-        onPick={handlePickRoom}
-        onEdit={() => setIsEditingRoom(true)}
-        onAdd={() => setIsAddingRoom(true)}
-        onStartOver={() => {
-          onStartOver();
-          setSelectedId(null);
-          setPast([]);
-          setFuture([]);
-          setToast(null);
-        }}
-      />
-
-      <main className="workspace" style={{ '--moodboard-width': `${moodboardWidth}px` }}>
+      {/* The classes say which sections are open, so the CSS can lay out the columns. */}
+      <main
+        className={`workspace${tool ? ' has-tools' : ''}${isSideOpen || selectedPiece ? '' : ' no-side'}`}
+        style={{ '--moodboard-width': `${moodboardWidth}px` }}
+      >
+        {tool && (
+          <ToolsPanel
+            tab={tool}
+            tabs={layout === 'side' ? ['furniture', 'lighting', 'surfaces'] : [tool]}
+            onTab={setTool}
+            onClose={() => setTool(null)}
+            items={[...CATALOG, ...pinModels]}
+            pieces={pieces}
+            onAddItem={handleAddItem}
+            lighting={lighting}
+            onLighting={setLighting}
+            surfaces={surfaces}
+            onSurfaces={setSurfaces}
+            room={room}
+            onRoomChange={changeRoom}
+          />
+        )}
         <PreviewPanel
           pinModels={pinModels}
           room={room}
@@ -512,6 +582,18 @@ function Workspace({
           selectedId={selectedId}
           isScoreOpen={openPanel === 'score'}
           onToggleScore={() => togglePanel('score')}
+          onView={setView}
+          onGrid={() => setShowGrid(!showGrid)}
+          openTool={tool}
+          onTool={handleTool}
+          isDownloadOpen={openPanel === 'download'}
+          onToggleDownload={() => togglePanel('download')}
+          onCloseDownload={() => setOpenPanel(null)}
+          onRoomFile={handleDownloadRoom}
+          showStrip={layout === 'stage'}
+          units={units}
+          onEdit={handleEditPart}
+          onDropItem={handleDropItem}
           roomId={activeRoom.id}
           startView={activeRoom.insideView}
           view={view}
@@ -536,7 +618,6 @@ function Workspace({
           onMove={handleMove}
           onDragStart={rememberPieces}
           onRotate={handleRotate}
-          onDuplicate={handleDuplicate}
           onRemove={handleRemove}
           onSetLink={handleSetLink}
           onAddItem={handleAddItem}
@@ -548,50 +629,57 @@ function Workspace({
             cameraRef.current = camera;
           }}
         />
-        <div
-          className="divider"
-          role="separator"
-          aria-orientation="vertical"
-          aria-label="Resize the moodboard"
-          // A separator you can move tells screen readers where it is now and how far it goes.
-          aria-valuenow={moodboardWidth}
-          aria-valuemin={MIN_MOODBOARD_WIDTH}
-          aria-valuemax={MAX_MOODBOARD_WIDTH}
-          tabIndex={0}
-          onPointerDown={handleDividerDown}
-          onKeyDown={handleDividerKey}
-        />
+        {(isSideOpen || selectedPiece) && (
+          <div
+            className="divider"
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="Resize the moodboard"
+            // A separator you can move tells screen readers where it is now and how far it goes.
+            aria-valuenow={moodboardWidth}
+            aria-valuemin={MIN_MOODBOARD_WIDTH}
+            aria-valuemax={MAX_MOODBOARD_WIDTH}
+            tabIndex={0}
+            onPointerDown={handleDividerDown}
+            onKeyDown={handleDividerKey}
+          />
+        )}
         {selectedPiece ? (
           <PiecePanel
             piece={selectedPiece}
             room={room}
             fit={getFit(selectedPiece, pieces, room)}
+            units={units}
             onRotate={handleRotate}
-            onDuplicate={handleDuplicate}
             onRemove={handleRemove}
+            onChange={handleChangePiece}
             onSetLink={handleSetLink}
             lighting={lighting}
             onLightingChange={setLighting}
             onClose={() => setSelectedId(null)}
           />
         ) : (
-        <MoodboardPanel
-          moodboard={moodboard}
-          pickedIds={pickedIds}
-          user={user}
-          pinModels={pinModels}
-          onAddItem={handleAddItem}
-          onTogglePick={onTogglePick}
-          onConnect={() => setIsConnecting(true)}
-          onLogOut={onLogOut}
-        />
+          isSideOpen && (
+            <SidePanel
+              tab={sideTab}
+              onTab={setSideTab}
+              onClose={() => setIsSideOpen(false)}
+              pieces={pieces}
+              moodboard={moodboard}
+              pickedIds={pickedIds}
+              user={user}
+              pinModels={pinModels}
+              onAddItem={handleAddItem}
+              onTogglePick={onTogglePick}
+              onConnect={() => setIsConnecting(true)}
+            />
+          )
         )}
       </main>
 
       <TabBar tab={tab} onChange={setTab} />
 
       {isFinding && <FoundFurniture onAdd={handleAddExisting} onClose={() => setIsFinding(false)} />}
-      {isShopping && <ShopList pieces={pieces} onClose={() => setIsShopping(false)} />}
       {isPickingPlan && <PlanRooms room={room} onSave={handleSaveSize} onClose={() => setIsPickingPlan(false)} />}
 
       {isEditingRoom && (

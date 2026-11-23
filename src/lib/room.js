@@ -2,7 +2,7 @@
 // The room is measured in metres with its centre at (0, 0).
 // x runs across the room (width) and z runs front to back (length).
 
-import { getItem } from '../data/catalog.js';
+import { getItem, sizeOf } from '../data/catalog.js';
 
 export const DEFAULT_ROOM = {
   width: 3.6,
@@ -164,7 +164,7 @@ export function wallBlocks(length, height, openings, extra) {
 
 // A piece turned 90 or 270 degrees swaps its width and depth.
 export function getFootprint(piece) {
-  const { w, d } = getItem(piece.type).size;
+  const { w, d } = sizeOf(piece);
   const turned = piece.rotation === 90 || piece.rotation === 270;
   return turned ? { w: d, d: w } : { w, d };
 }

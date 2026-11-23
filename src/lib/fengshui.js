@@ -4,7 +4,7 @@
 // They are a guide, not a rule, and they only look at what this app knows:
 // the walls, the door, the window and the furniture.
 
-import { getItem } from '../data/catalog.js';
+import { getItem, sizeOf } from '../data/catalog.js';
 import { coversDoor, doorInRoom, getFootprint, getWallDistances, windowInRoom } from './room.js';
 
 // 'bed', 'desk' and so on, also for furniture made from a moodboard image.
@@ -151,7 +151,7 @@ function checkRoom(pieces, room) {
     });
   // Tall furniture right in front of a window blocks the daylight.
   const windowBlocked = solid.some((piece) => {
-    const tall = getItem(piece.type).size.h > 1.1;
+    const tall = sizeOf(piece).h > 1.1;
     const gaps = getWallDistances(piece, room);
     return tall && ['back', 'front', 'left', 'right'].some((wall) => gaps[wall] < 0.6 && facesWindow(piece, wall, room, 0));
   });

@@ -46,12 +46,12 @@ function Legs({ w, d, height, inset = 0.05, color }) {
 }
 
 // muted is true for furniture that was already in the room: it is drawn grey.
-function FurnitureModel({ type, size, color, muted, model }) {
+function FurnitureModel({ type, size, color, muted, model, tint, finish }) {
   const [isReady, setIsReady] = useState(false);
   const [hasFailed, setHasFailed] = useState(false);
 
   if (!model || hasFailed) {
-    return <SimpleModel type={type} size={size} color={color} muted={muted} />;
+    return <SimpleModel type={type} size={size} color={tint || color} muted={muted} />;
   }
 
   return (
@@ -61,6 +61,8 @@ function FurnitureModel({ type, size, color, muted, model }) {
         url={model}
         size={size}
         muted={muted}
+        tint={tint}
+        finish={finish}
         onReady={() => setIsReady(true)}
         onFail={() => setHasFailed(true)}
       />

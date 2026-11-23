@@ -3,10 +3,11 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import FurnitureModel from './FurnitureModel.jsx';
-import { CATEGORY_COLORS, getItem } from '../data/catalog.js';
+import { CATEGORY_COLORS, getItem, sizeOf } from '../data/catalog.js';
 import { doorOpening, getFit, getFootprint, getWallDistances, openingOf, wallBlocks, wallFrame, keepClear } from '../lib/room.js';
 import { bulbIntensity, bulbOf, fixedLightPoints, getSun, kelvinToColor, lightOutput } from '../lib/light.js';
 import { asset } from '../lib/paths.js';
+import { formatLength } from '../lib/units.js';
 
 // The room is ONE 3D scene. "2D" is that scene seen from straight above and
 // "3D" is the same scene seen from a lower angle. Nothing is drawn twice.
@@ -85,6 +86,8 @@ function CameraRig({ view, room, zoom, orbit, look, stand }) {
   // The same for where you look in the inside view.
   const yawNow = useRef(look.yaw);
   const pitchNow = useRef(look.pitch);
+  // How far back the camera is. null until the first frame, which sets it without easing.
+  const distanceNow = useRef(null);
 
   useFrame((state, delta) => {
     const target = view === '3d' ? 1 : 0;
@@ -133,13 +136,16 @@ function CameraRig({ view, room, zoom, orbit, look, stand }) {
     // From above the room is a rectangle: fit its length and its width.
     const margin = 0.9;
     const topDistance = Math.max(
-      (room.length / 2 + margin) / Math.tan(verticalFov / 2),
+      (room.length / 2 + margin + 0.3) / Math.tan(verticalFov / 2),
       (room.width / 2 + margin) / Math.tan(horizontalFov / 2)
     );
     // From an angle, fit a ball that wraps the whole room.
     const radius = 0.5 * Math.hypot(room.width, room.length, room.height);
     const angledDistance = (radius / Math.sin(Math.min(verticalFov, horizontalFov) / 2)) * 0.9;
-    const distance = THREE.MathUtils.lerp(topDistance, angledDistance, t) / zoomNow.current;
+    const wanted = THREE.MathUtils.lerp(topDistance, angledDistance, t) / zoomNow.current;
+    // Ease towards it, so the picture glides when the room changes size.
+    distanceNow.current = distanceNow.current === null ? wanted : THREE.MathUtils.damp(distanceNow.current, wanted, 10, delta);
+    const distance = distanceNow.current;
 
     // The nearest thing the camera still draws ("near"). A graphics card can tell
     // two surfaces apart only if their distances differ by enough, and how much is
@@ -154,12 +160,16 @@ function CameraRig({ view, room, zoom, orbit, look, stand }) {
     const reach = THREE.MathUtils.lerp(room.height + 2, GROUND_SIZE, t);
     camera.near = Math.max(0.1, distance - reach);
 
+    // In the plan the camera aims a little in front of the middle of the room. That
+    // moves the room up on screen and leaves space at the bottom for the row of
+    // buttons on the stage, so they do not cover the width written under the room.
+    const forward = 0.3 * (1 - t);
     camera.position.set(
       distance * Math.sin(tilt) * Math.sin(turn),
       distance * Math.cos(tilt),
-      distance * Math.sin(tilt) * Math.cos(turn)
+      distance * Math.sin(tilt) * Math.cos(turn) + forward
     );
-    camera.lookAt(0, room.height * 0.3 * t, 0);
+    camera.lookAt(0, room.height * 0.3 * t, forward);
     camera.updateProjectionMatrix();
   });
 
@@ -221,7 +231,7 @@ function useOakTextures(room) {
 const GROUND_SIZE = 40; // metres
 const PIXELS_PER_METRE = 160;
 
-function MeasureGrid({ room }) {
+function MeasureGrid({ room, units }) {
   const { width, length } = room;
 
   // One square metre of grid, repeated across the ground.
@@ -266,8 +276,8 @@ function MeasureGrid({ room }) {
     texture.colorSpace = THREE.SRGBColorSpace;
     return texture;
   }
-  const widthLabel = useMemo(() => makeLabel(`${width} m`), [width]);
-  const lengthLabel = useMemo(() => makeLabel(`${length} m`), [length]);
+  const widthLabel = useMemo(() => makeLabel(formatLength(width, units)), [width, units]);
+  const lengthLabel = useMemo(() => makeLabel(formatLength(length, units)), [length, units]);
 
   return (
     <group>
@@ -287,9 +297,8 @@ function MeasureGrid({ room }) {
   );
 }
 
-// Floor, two full-height far walls, two low near walls, a window and a door.
-// tallSide is 'left' or 'right': the side wall away from the camera stands
-// tall and the one nearest the camera is lowered so it never blocks the view.
+// Floor, four walls, windows and doors. In 3D the walls on the camera's side are
+// lowered to rims so they never block the view (see lowWalls in Scene).
 // The material of one wall block: paint, or your photo. Each block gets its own
 // copy of the photo, placed by where the block starts (left, bottom, in metres)
 // so the pattern runs on from one block to the next.
@@ -316,7 +325,7 @@ function WallSkin({ wall, photo, size, start }) {
 // On the plan (`plan` is true) every window and door also has an unseen grip on
 // the wall line: press it and drag to slide the window or door along its wall.
 // `onGrab` is told which list it is in ('windows' or 'doors') and its id.
-function Wall({ name, room, mode, inside, plan, daylight, wall, wallPhoto, onGrab }) {
+function Wall({ name, room, mode, inside, plan, daylight, wall, wallPhoto, onGrab, onEdit }) {
   const frame = wallFrame(name, room);
   const extra = name === 'back' || name === 'front' ? WALL : 0; // these two also cover the corners
   const openings = room.windows.filter((win) => win.wall === name).map((win) => openingOf(win, room));
@@ -341,6 +350,11 @@ function Wall({ name, room, mode, inside, plan, daylight, wall, wallPhoto, onGra
           onPointerDown={(event) => {
             event.stopPropagation();
             onGrab(list, opening.id);
+          }}
+          // a double click opens the floor and walls panel, where its sizes are
+          onDoubleClick={(event) => {
+            event.stopPropagation();
+            onEdit(list);
           }}
           onPointerOver={() => (document.body.style.cursor = 'grab')}
           onPointerOut={() => (document.body.style.cursor = '')}
@@ -373,7 +387,16 @@ function Wall({ name, room, mode, inside, plan, daylight, wall, wallPhoto, onGra
       {blocks.map(([from, to, bottom, top]) =>
         mode === 'real' ? (
           <group key={`${from}-${bottom}`}>
-            <mesh position={[(from + to) / 2, (bottom + top) / 2, -WALL / 2]} castShadow receiveShadow>
+            <mesh
+              position={[(from + to) / 2, (bottom + top) / 2, -WALL / 2]}
+              castShadow
+              receiveShadow
+              // a double click on a wall opens the floor and walls panel
+              onDoubleClick={(event) => {
+                event.stopPropagation();
+                onEdit('walls');
+              }}
+            >
               <boxGeometry args={[to - from, top - bottom, WALL]} />
               <WallSkin wall={wall} photo={wallPhoto} size={[to - from, top - bottom]} start={[from, bottom]} />
             </mesh>
@@ -400,7 +423,7 @@ function Wall({ name, room, mode, inside, plan, daylight, wall, wallPhoto, onGra
         const middle = (opening.top + opening.bottom) / 2;
         return (
           <group key={opening.id} position={[opening.u, 0, 0]}>
-            {plan && grip('windows', opening)}
+            {!inside && grip('windows', opening)}
             {/* the sill, which also shows in the plan */}
             <mesh position={[0, opening.bottom - 0.02, 0.05]}>
               <boxGeometry args={[width + 0.1, 0.04, 0.1]} />
@@ -463,7 +486,7 @@ function Wall({ name, room, mode, inside, plan, daylight, wall, wallPhoto, onGra
           door swings over as a pale quarter circle. `side` says which edge the hinge is on. */}
       {doors.map((door) => (
         <group key={door.id} position={[door.u, 0, 0]}>
-          {plan && grip('doors', door)}
+          {!inside && grip('doors', door)}
           {/* Sunlight must not come in through a doorway (a hall is behind it, not the
               sky), so an unseen sheet in the doorway still casts a shadow. */}
           <mesh userData={{ helper: true }} position={[0, door.top / 2, -WALL]} castShadow>
@@ -560,7 +583,7 @@ function Wall({ name, room, mode, inside, plan, daylight, wall, wallPhoto, onGra
 }
 
 // `inside` is true for the inside view: all four walls stand at full height and the room has a ceiling.
-function RoomShell({ room, tallSide, daylight, surfaces, inside, plan, onGrab }) {
+function RoomShell({ room, lowWalls, daylight, surfaces, inside, plan, onGrab, onEdit }) {
   const { width, length, height } = room;
   const floor = useFloorTextures(room, surfaces.floor);
   const wall = surfaces.wall;
@@ -579,14 +602,15 @@ function RoomShell({ room, tallSide, daylight, surfaces, inside, plan, onGrab })
         />
       </mesh>
 
-      {/* The four walls. Inside the room all are real. From outside, the back wall and
-          the side wall away from the camera are real, and the other two are low rims. */}
+      {/* The four walls. Inside the room all are real. From outside, the walls on the
+          camera's side are low rims (lowWalls names them), so you can see in whichever
+          way the room is turned. */}
       {['back', 'left', 'right', 'front'].map((name) => (
         <Wall
           key={name}
           name={name}
           room={room}
-          mode={inside || name === 'back' || name === tallSide ? 'real' : 'low'}
+          mode={inside || !lowWalls.includes(name) ? 'real' : 'low'}
           inside={inside}
           plan={plan}
           daylight={daylight}
@@ -595,6 +619,7 @@ function RoomShell({ room, tallSide, daylight, surfaces, inside, plan, onGrab })
           // the other walls are painted in the wall colour. Without it, every wall has it.
           wallPhoto={!wall.onlyOn || wall.onlyOn === name ? wallPhoto : null}
           onGrab={onGrab}
+          onEdit={onEdit}
         />
       ))}
 
@@ -686,6 +711,7 @@ const PREFERS_LESS_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)'
 // In 3D and inside the room it keeps its real colours.
 function Piece({ piece, fit, isSelected, plan, onPointerDown }) {
   const item = getItem(piece.type);
+  const size = sizeOf(piece); // its own size if it was changed, or the catalog's
   const footprint = getFootprint({ ...piece, rotation: 0 });
   const group = useRef(null);
   const age = useRef(0); // seconds since this piece appeared
@@ -716,7 +742,7 @@ function Piece({ piece, fit, isSelected, plan, onPointerDown }) {
         </mesh>
       )}
       {/* the dark patch on the floor under the piece; a rug lies flat and needs none */}
-      {item.size.h > 0.1 && (
+      {size.h > 0.1 && (
         <mesh userData={{ helper: true }} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0.012, 0]} renderOrder={1}>
           <planeGeometry args={[footprint.w * 1.5, footprint.d * 1.5]} />
           <meshBasicMaterial
@@ -731,13 +757,82 @@ function Piece({ piece, fit, isSelected, plan, onPointerDown }) {
       )}
       <FurnitureModel
         type={item.baseType || piece.type}
-        size={item.size}
+        size={size}
         color={CATEGORY_COLORS[item.category]}
         muted={piece.existing && plan}
         model={item.model}
+        tint={piece.tint}
+        finish={piece.finish}
       />
     </group>
   );
+}
+
+// Keeps the Rotate and Remove buttons floating over the selected piece. The buttons
+// are ordinary HTML (drawn by PreviewPanel, on top of the canvas); `target` is a ref
+// to the element that holds them. Every frame this works out where on screen the
+// piece is and moves that element there.
+function ActionsAnchor({ piece, plan, target }) {
+  const spot = useMemo(() => new THREE.Vector3(), []);
+  useFrame((state) => {
+    const element = target.current;
+    if (!element) return;
+    const size = sizeOf(piece);
+    // In 3D and inside the room the buttons sit just above the top of the piece. In
+    // the plan, seen from straight above, that would be on the piece, so there they
+    // sit behind its back edge.
+    if (plan) spot.set(piece.x, 0, piece.z - getFootprint(piece).d / 2 - 0.12);
+    else spot.set(piece.x, size.h + 0.2, piece.z);
+    // project() turns a place in the room into a place on screen, from -1 to 1 each way
+    spot.project(state.camera);
+    const left = (spot.x * 0.5 + 0.5) * state.size.width;
+    const top = Math.max((-spot.y * 0.5 + 0.5) * state.size.height, 64); // never off the top of the stage
+    element.style.transform = `translate(${left}px, ${top}px) translate(-50%, -100%)`;
+    // z above 1 means the place is behind the camera (it can be, inside the room)
+    element.style.visibility = spot.z < 1 ? 'visible' : 'hidden';
+  });
+  return null;
+}
+
+// The four round handles outside the walls on the plan. Dragging one makes the room
+// wider or longer. Each is a dark disc with two white arrowheads, one pointing in
+// and one pointing out.
+const HANDLE_GAP = 0.55; // metres from the wall to the handle
+function SizeHandles({ room, onStart }) {
+  // where each handle is, and a quarter turn for the two that slide up and down the plan
+  const handles = [
+    // the right and front ones sit a quarter of the way along their wall, clear of the
+    // room's width and length, which are written at the middle of those two walls
+    { side: 'right', position: [room.width / 2 + HANDLE_GAP, 0.03, -room.length / 4], turn: 0 },
+    { side: 'left', position: [-room.width / 2 - HANDLE_GAP, 0.03, 0], turn: 0 },
+    { side: 'front', position: [-room.width / 4, 0.03, room.length / 2 + HANDLE_GAP], turn: Math.PI / 2 },
+    { side: 'back', position: [0, 0.03, -room.length / 2 - HANDLE_GAP], turn: Math.PI / 2 },
+  ];
+  return handles.map((handle) => (
+    <group key={handle.side} position={handle.position} rotation={[-Math.PI / 2, 0, handle.turn]}>
+      <mesh
+        userData={{ helper: true }}
+        onPointerDown={(event) => {
+          event.stopPropagation();
+          onStart(handle.side, event);
+        }}
+        onPointerOver={() => (document.body.style.cursor = handle.turn ? 'ns-resize' : 'ew-resize')}
+        onPointerOut={() => (document.body.style.cursor = '')}
+      >
+        <circleGeometry args={[0.17, 32]} />
+        <meshBasicMaterial color="#0F0F0E" toneMapped={false} />
+      </mesh>
+      {/* a circle with 3 sides is a triangle: two of them make the double arrow */}
+      <mesh userData={{ helper: true }} position={[0.07, 0, 0.001]}>
+        <circleGeometry args={[0.055, 3]} />
+        <meshBasicMaterial color="#FFFFFF" toneMapped={false} />
+      </mesh>
+      <mesh userData={{ helper: true }} position={[-0.07, 0, 0.001]} rotation={[0, 0, Math.PI]}>
+        <circleGeometry args={[0.055, 3]} />
+        <meshBasicMaterial color="#FFFFFF" toneMapped={false} />
+      </mesh>
+    </group>
+  ));
 }
 
 // Everything inside the canvas. Kept separate from Room3D so it can use
@@ -748,7 +843,7 @@ const FIRST_LOOK = { yaw: -38, pitch: -6 };
 
 // `roomId` says which room this is, and `startView` is that room's own first inside
 // view ({ stand: { x, z }, look: { yaw, pitch } }), if it has one (the example room does).
-function Scene({ room, roomId, startView, pieces, selectedId, view, showGrid, zoom, lighting, surfaces, realistic, brightness, onPasses, onRoomChange, onSelect, onMove, onDragStart }) {
+function Scene({ room, roomId, startView, pieces, selectedId, view, showGrid, zoom, lighting, surfaces, realistic, brightness, onPasses, onRoomChange, onSelect, onMove, onDragStart, units, actionsRef, onEdit }) {
   // While a piece is being dragged we remember which one, and where on the
   // piece the pointer grabbed it, so it does not jump to the pointer.
   const [drag, setDrag] = useState(null);
@@ -769,6 +864,16 @@ function Scene({ room, roomId, startView, pieces, selectedId, view, showGrid, zo
   }, [roomId]);
   // Where an orbit or look drag began: { x, y, and the angles then }, or null when not dragging the view.
   const orbitStart = useRef(null);
+  // A drag on one of the room's size handles: which side, where it began, the room's
+  // size then, and how many metres one pixel was worth. null when not resizing.
+  const resizeStart = useRef(null);
+  // While a size handle is dragged, the camera keeps framing the room as it was when
+  // the drag began. Otherwise the picture would rescale under the pointer.
+  const [heldRoom, setHeldRoom] = useState(null);
+  // The handlers below are set up once, so they read the newest room and callbacks from here.
+  const latest = useRef({});
+  latest.current = { room, onRoomChange, onSelect };
+  const three = useThree(); // the camera and the canvas size, for turning pixels into metres
 
   useEffect(() => {
     // Letting go anywhere, even outside the canvas, ends a drag or an orbit.
@@ -787,11 +892,29 @@ function Scene({ room, roomId, startView, pieces, selectedId, view, showGrid, zo
           setLook({ yaw: start.look.yaw + turn, pitch: start.look.pitch });
         }
       }
+      // A press on a piece that was not selected, and never turned into a drag, selects it.
+      if (start && start.pick && !start.moved) latest.current.onSelect(start.pick);
       setDrag(null);
       setGrab(null);
       orbitStart.current = null;
+      resizeStart.current = null;
+      setHeldRoom(null);
     }
     function handleMove(event) {
+      // Dragging a size handle: the wall follows the pointer. The room stays centred,
+      // so the wall across from it moves the same distance the other way, and the
+      // size changes by twice the distance dragged. Sizes snap to 5 cm, from 1.5 to 12 m.
+      const sizing = resizeStart.current;
+      if (sizing) {
+        const pixels = sizing.side === 'left' || sizing.side === 'right' ? event.clientX - sizing.x : event.clientY - sizing.y;
+        const outward = sizing.side === 'right' || sizing.side === 'front' ? pixels : -pixels;
+        const part = sizing.side === 'left' || sizing.side === 'right' ? 'width' : 'length';
+        const longer = sizing[part] + 2 * outward * sizing.metresPerPixel;
+        const snapped = Math.min(Math.max(Math.round(longer / 0.05) * 0.05, 1.5), 12);
+        const next = Number(snapped.toFixed(2));
+        if (next !== latest.current.room[part]) latest.current.onRoomChange({ ...latest.current.room, [part]: next });
+        return;
+      }
       const start = orbitStart.current;
       if (!start) return;
       // moving more than a few pixels makes it a drag, not a click
@@ -804,12 +927,12 @@ function Scene({ room, roomId, startView, pieces, selectedId, view, showGrid, zo
         });
         return;
       }
+      if (start.turn === undefined) return; // a press on the plan: nothing to turn
+      // The room turns all the way round, as far as you drag. The tilt stops short
+      // of straight down and of level with the floor.
       const turn = start.turn - (event.clientX - start.x) * 0.3;
       const tilt = start.tilt - (event.clientY - start.y) * 0.2;
-      setOrbit({
-        turn: Math.min(Math.max(turn, -70), 70),
-        tilt: Math.min(Math.max(tilt, 25), 72),
-      });
+      setOrbit({ turn, tilt: Math.min(Math.max(tilt, 25), 72) });
     }
     window.addEventListener('pointerup', handleUp);
     window.addEventListener('pointermove', handleMove);
@@ -822,6 +945,14 @@ function Scene({ room, roomId, startView, pieces, selectedId, view, showGrid, zo
   // Pressing empty floor clears the selection. In 3D it also starts an orbit.
   function handleFloorDown(event) {
     onSelect(null);
+    startViewDrag(event, null);
+  }
+
+  // A press that may turn the view: in 3D it turns the room, inside it looks around.
+  // `pick` is the id of a piece the press landed on, or null. If the press ends
+  // without moving, that piece is selected (see handleUp above).
+  function startViewDrag(event, pick) {
+    orbitStart.current = { x: event.nativeEvent.clientX, y: event.nativeEvent.clientY, pick };
     // Inside the room, the same press starts looking around.
     if (view === 'inside') {
       // Remember where on the floor the press landed, if it is inside the room: a
@@ -833,23 +964,33 @@ function Scene({ room, roomId, startView, pieces, selectedId, view, showGrid, zo
       orbitStart.current = {
         x: event.nativeEvent.clientX,
         y: event.nativeEvent.clientY,
+        pick,
         look,
-        floor: isOnFloor ? { x: keepIn(point.x, room.width / 2), z: keepIn(point.z, room.length / 2) } : null,
+        // a press on a piece is not a wish to go and stand there
+        floor: isOnFloor && !pick ? { x: keepIn(point.x, room.width / 2), z: keepIn(point.z, room.length / 2) } : null,
       };
     }
     if (view === '3d') {
       orbitStart.current = {
         x: event.nativeEvent.clientX,
         y: event.nativeEvent.clientY,
+        pick,
         turn: orbit.turn,
         tilt: orbit.tilt,
       };
     }
   }
 
+  // A piece has to be selected before it can be dragged. That way, turning the room
+  // or looking around with a drag that happens to start on a piece never moves it.
+  // The first press on a piece selects it (if the press does not turn into a drag);
+  // a press on the selected piece starts dragging it.
   function handlePieceDown(event, piece) {
     event.stopPropagation();
-    onSelect(piece.id);
+    if (piece.id !== selectedId) {
+      startViewDrag(event, piece.id);
+      return;
+    }
     const point = getFloorPoint(event);
     if (point) {
       onDragStart(); // one history entry for the whole drag
@@ -901,12 +1042,24 @@ function Scene({ room, roomId, startView, pieces, selectedId, view, showGrid, zo
       const point = getFloorPoint(event);
       if (!point) return;
       const held = room[grab.list].find((entry) => entry.id === grab.id);
-      const acrossRoom = held.wall === 'back' || held.wall === 'front';
+      // The window or door goes to whichever wall the pointer is nearest, so dragging
+      // it round a corner moves it onto the next wall.
+      const toWalls = {
+        back: Math.abs(point.z + room.length / 2),
+        front: Math.abs(room.length / 2 - point.z),
+        left: Math.abs(point.x + room.width / 2),
+        right: Math.abs(room.width / 2 - point.x),
+      };
+      const nearest = Object.keys(toWalls).reduce((best, name) => (toWalls[name] < toWalls[best] ? name : best));
+      // It only changes wall once the pointer is clearly nearer the other one (by 15 cm),
+      // so it does not flip back and forth in a corner.
+      const wallName = toWalls[nearest] + 0.15 < toWalls[held.wall] ? nearest : held.wall;
+      const acrossRoom = wallName === 'back' || wallName === 'front';
       const along = acrossRoom ? point.x / room.width + 0.5 : point.z / room.length + 0.5;
       const kept = Math.min(Math.max(along, 0.02), 0.98);
       // It may not overlap another window or door on the wall: it stops beside it,
       // and jumps to the far side once the pointer is nearer to that side.
-      const moved = keepClear({ ...held, along: kept }, grab.list, room);
+      const moved = keepClear({ ...held, wall: wallName, along: kept }, grab.list, room);
       if (moved) onRoomChange({ ...room, [grab.list]: room[grab.list].map((entry) => (entry.id === grab.id ? moved : entry)) });
       return;
     }
@@ -917,9 +1070,44 @@ function Scene({ room, roomId, startView, pieces, selectedId, view, showGrid, zo
     }
   }
 
+  // Which walls are drawn low in 3D: the ones on the camera's side of the room.
+  // The camera stands in the direction (sin, cos) of its turn, seen from above. A
+  // wall is on the camera's side when the camera's direction points out through it.
+  const turnInRadians = THREE.MathUtils.degToRad(orbit.turn);
+  const towardX = Math.sin(turnInRadians); // above 0: the camera is on the right
+  const towardZ = Math.cos(turnInRadians); // above 0: the camera is at the front
+  const lowWalls = [];
+  if (view === '3d') {
+    if (towardZ > 0.15) lowWalls.push('front');
+    if (towardZ < -0.15) lowWalls.push('back');
+    if (towardX > 0.15) lowWalls.push('right');
+    if (towardX < -0.15) lowWalls.push('left');
+  }
+  if (view === '2d') lowWalls.push('front', 'right'); // the plan is seen from above, and these two are simply drawn as rims
+
+  // A size handle was pressed. Work out what one pixel is worth in metres, from where
+  // the right wall is on screen: project() gives -1 to 1 across the canvas.
+  function handleSizeStart(side, event) {
+    const edge = new THREE.Vector3(room.width / 2, 0, 0).project(three.camera);
+    const pixelsToEdge = edge.x * (three.size.width / 2);
+    resizeStart.current = {
+      side,
+      x: event.nativeEvent.clientX,
+      y: event.nativeEvent.clientY,
+      width: room.width,
+      length: room.length,
+      metresPerPixel: room.width / 2 / pixelsToEdge,
+    };
+    setHeldRoom(room);
+  }
+
+  const selectedPiece = pieces.find((piece) => piece.id === selectedId);
+
   return (
     <>
-      <CameraRig view={view} room={room} zoom={zoom} orbit={orbit} look={look} stand={stand} />
+      <CameraRig view={view} room={heldRoom || room} zoom={zoom} orbit={orbit} look={look} stand={stand} />
+      {selectedPiece && actionsRef && <ActionsAnchor piece={selectedPiece} plan={view === '2d'} target={actionsRef} />}
+      {view === '2d' && <SizeHandles room={room} onStart={handleSizeStart} />}
       {/* The realistic picture takes over the drawing while it is on (inside view only).
           It is there the whole time you are inside, so it can get ready before you switch it on. */}
       {view === 'inside' && PathTraced && (
@@ -979,8 +1167,8 @@ function Scene({ room, roomId, startView, pieces, selectedId, view, showGrid, zo
         .map(({ piece, bulb }) => (
           <pointLight
             key={piece.id}
-            userData={{ lampHeight: getItem(piece.type).size.h }}
-            position={[piece.x, getItem(piece.type).size.h * 0.85, piece.z]}
+            userData={{ lampHeight: sizeOf(piece).h }}
+            position={[piece.x, sizeOf(piece).h * 0.85, piece.z]}
             color={kelvinToColor(bulb.kelvin)}
             intensity={bulbIntensity(lightOutput(bulb))}
           />
@@ -1002,8 +1190,17 @@ function Scene({ room, roomId, startView, pieces, selectedId, view, showGrid, zo
         shadow-camera-top={7}
         shadow-camera-bottom={-7}
       />
-      <RoomShell room={room} tallSide={view === '3d' && orbit.turn < 0 ? 'right' : 'left'} daylight={sun.up} surfaces={surfaces} inside={view === 'inside'} plan={view === '2d'} onGrab={(list, id) => setGrab({ list, id })} />
-      {showGrid && view !== 'inside' && <MeasureGrid room={room} />}
+      <RoomShell
+        room={room}
+        lowWalls={lowWalls}
+        daylight={sun.up}
+        surfaces={surfaces}
+        inside={view === 'inside'}
+        plan={view === '2d'}
+        onGrab={(list, id) => setGrab({ list, id })}
+        onEdit={onEdit}
+      />
+      {showGrid && view !== 'inside' && <MeasureGrid room={room} units={units} />}
 
       {/* Inside the room, a big unseen ball around everything hears a press on a wall
           or the ceiling, so you can drag anywhere to look around. */}
@@ -1022,6 +1219,11 @@ function Scene({ room, roomId, startView, pieces, selectedId, view, showGrid, zo
         position={[0, 0.002, 0]}
         onPointerMove={handleFloorMove}
         onPointerDown={handleFloorDown}
+        // a double click on the room's floor opens the floor and walls panel
+        onDoubleClick={(event) => {
+          const point = getFloorPoint(event);
+          if (point && Math.abs(point.x) < room.width / 2 && Math.abs(point.z) < room.length / 2) onEdit('floor');
+        }}
       >
         <planeGeometry args={[40, 40]} />
         <meshBasicMaterial transparent opacity={0} depthWrite={false} />
@@ -1047,7 +1249,7 @@ function Scene({ room, roomId, startView, pieces, selectedId, view, showGrid, zo
   );
 }
 
-function Room3D({ room, roomId, startView, pieces, selectedId, view, showGrid, zoom, lighting, surfaces, realistic, brightness, onPasses, onRoomChange, onSelect, onMove, onDragStart, onZoom, onCanvasReady }) {
+function Room3D({ room, roomId, startView, pieces, selectedId, view, showGrid, zoom, lighting, surfaces, realistic, brightness, onPasses, onRoomChange, onSelect, onMove, onDragStart, units, actionsRef, onEdit, onZoom, onCanvasReady }) {
   return (
     <Canvas
       shadows="soft"
@@ -1077,6 +1279,9 @@ function Room3D({ room, roomId, startView, pieces, selectedId, view, showGrid, z
         onSelect={onSelect}
         onMove={onMove}
         onDragStart={onDragStart}
+        units={units}
+        actionsRef={actionsRef}
+        onEdit={onEdit}
       />
     </Canvas>
   );

@@ -1,16 +1,20 @@
 import { useState } from 'react';
 import Icon from './Icon.jsx';
-import { formatRoom } from '../lib/room.js';
 import { kindOf } from '../lib/rooms.js';
+import { useSlidingThumb } from '../lib/useSlidingThumb.js';
 
-// The row under the top bar: the home's name, one tab per room, and a + to add a room.
+// In the top bar, after the logo: the home's name, then one tab per room and a + to
+// add a room. Both are glass pills, as drawn in Figma (frame 216:4506).
 // Each tab has the icon of its kind of room. Pressing the open room's tab opens the
 // room dialog (name, kind, size). Pressing the home's name lets you retype it.
-// At the far end, "Start over" clears the saved home after asking once.
-function RoomTabs({ homeName, rooms, activeRoomId, onRenameHome, onPick, onEdit, onAdd, onStartOver }) {
+// The white pill behind the open room is one element (the "thumb") that flows from
+// tab to tab. lib/useSlidingThumb.js finds where it belongs.
+function RoomTabs({ homeName, rooms, activeRoomId, onRenameHome, onPick, onEdit, onAdd }) {
   const [isNaming, setIsNaming] = useState(false);
-  const [isAsking, setIsAsking] = useState(false); // is "Start over" waiting for a yes or no?
   const [draft, setDraft] = useState(homeName);
+  // the room names, joined: when one changes, its tab changes width and the thumb is measured again
+  const names = rooms.map((entry) => entry.name).join('|');
+  const { thumb, thumbRef, remember } = useSlidingThumb(activeRoomId, names);
 
   function finishNaming() {
     onRenameHome(draft.trim() || homeName);
@@ -27,7 +31,7 @@ function RoomTabs({ homeName, rooms, activeRoomId, onRenameHome, onPick, onEdit,
             finishNaming();
           }}
         >
-          <Icon name="home" size={16} />
+          <Icon name="door" size={16} />
           <input
             aria-label="Name of your home"
             value={draft}
@@ -47,7 +51,7 @@ function RoomTabs({ homeName, rooms, activeRoomId, onRenameHome, onPick, onEdit,
             setIsNaming(true);
           }}
         >
-          <Icon name="home" size={16} />
+          <Icon name="door" size={16} />
           {homeName}
         </button>
       )}
@@ -56,12 +60,16 @@ function RoomTabs({ homeName, rooms, activeRoomId, onRenameHome, onPick, onEdit,
           tab list, because a tab list may hold nothing but tabs. */}
       <div className="room-tabs">
         <div className="room-tabs__list" role="tablist" aria-label="Rooms in this home">
+          {thumb && (
+            <span ref={thumbRef} className="room-tabs__thumb" style={{ left: thumb.left, width: thumb.width }} aria-hidden="true" />
+          )}
           {rooms.map((entry) => {
             const isOpen = entry.id === activeRoomId;
             return (
               <button
                 type="button"
                 key={entry.id}
+                ref={remember(entry.id)}
                 role="tab"
                 aria-selected={isOpen}
                 className={isOpen ? 'room-tab is-current' : 'room-tab'}
@@ -70,8 +78,6 @@ function RoomTabs({ homeName, rooms, activeRoomId, onRenameHome, onPick, onEdit,
               >
                 <Icon name={kindOf(entry.kind).icon} size={16} />
                 {entry.name}
-                {/* the open room also shows its size */}
-                {isOpen && <span className="room-tab__size">{formatRoom(entry.size)}</span>}
               </button>
             );
           })}
@@ -80,29 +86,6 @@ function RoomTabs({ homeName, rooms, activeRoomId, onRenameHome, onPick, onEdit,
           <Icon name="plus" size={16} />
         </button>
       </div>
-
-      {isAsking ? (
-        <span className="room-bar__ask">
-          Clear every room?
-          <button
-            type="button"
-            className="room-bar__link room-bar__link--danger"
-            onClick={() => {
-              onStartOver();
-              setIsAsking(false);
-            }}
-          >
-            Yes, clear
-          </button>
-          <button type="button" className="room-bar__link" onClick={() => setIsAsking(false)}>
-            Keep
-          </button>
-        </span>
-      ) : (
-        <button type="button" className="room-bar__link room-bar__end" onClick={() => setIsAsking(true)}>
-          Start over
-        </button>
-      )}
     </nav>
   );
 }

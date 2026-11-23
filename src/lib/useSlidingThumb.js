@@ -10,13 +10,16 @@ import { useLayoutEffect, useRef, useState } from 'react';
 // changes, so it seems to flow from the old option to the new one.
 //
 // Give it the id of the chosen option. It gives back three things:
-//   thumb      where the thumb belongs, as { left, width } in pixels (null until the first measure)
+//   thumb      where the thumb belongs, as { left, top, width, height } in pixels (null until the
+//              first measure). A row uses left and width. A column (the view switch) uses top and height.
 //   thumbRef   goes on the thumb element as its ref, so the hook can animate it
 //   remember   remember(id) goes on each option's button as its ref, so the hook can measure it
 //
 // The row itself must be `position: relative` in CSS, so that "left" is counted
 // from the row's own edge.
-export function useSlidingThumb(chosen) {
+// `watch` is optional: any value that changes when the options change size (for the room
+// tabs, the room names), so the thumb is measured again then.
+export function useSlidingThumb(chosen, watch) {
   const buttons = useRef({}); // the option buttons, by id
   const thumbRef = useRef(null);
   const [thumb, setThumb] = useState(null);
@@ -26,14 +29,16 @@ export function useSlidingThumb(chosen) {
   useLayoutEffect(() => {
     function measure() {
       const button = buttons.current[String(chosen)];
-      if (button) setThumb({ left: button.offsetLeft, width: button.offsetWidth });
+      if (button) {
+        setThumb({ left: button.offsetLeft, top: button.offsetTop, width: button.offsetWidth, height: button.offsetHeight });
+      }
     }
     measure();
     // the labels get wider when the web font arrives, so measure once more then
     document.fonts?.ready.then(measure);
     window.addEventListener('resize', measure);
     return () => window.removeEventListener('resize', measure);
-  }, [chosen]);
+  }, [chosen, watch]);
 
   // The stretch: wider and flatter a third of the way through, then back, like a
   // drop of liquid being pulled along. Skipped the first time (nothing has moved

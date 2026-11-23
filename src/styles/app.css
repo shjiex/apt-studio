@@ -2205,23 +2205,6 @@ a.btn {
     transform var(--quick) var(--ease-out);
 }
 
-.btn:active,
-.room-tab:active,
-.strip-group:active,
-.light__choice:active,
-.room-kind:active,
-.surface__paint:active {
-  transform: scale(0.96);
-}
-
-.tile:hover {
-  transform: translateY(-2px);
-}
-
-.tile:active {
-  transform: translateY(0) scale(0.97);
-}
-
 /* a panel that opens under a top-bar button grows out of that corner */
 @keyframes pop-in {
   from {
@@ -2332,12 +2315,19 @@ a.btn {
      text to pass AA even over black. saturate(1.8) gives back the colour that
      contrast takes out, so a room seen through the glass keeps its colours. */
   --glass-filter: blur(14px) contrast(0.45) brightness(1.05) saturate(1.8);
-  /* a bright rim, a highlight along the top edge and a soft shade along the bottom,
-     inside the glass, and a soft shadow under it, as in Figma but lighter (0.14 in
-     place of 0.2), since the shadow is meant to stay quiet. */
+  /* A bright rim and a highlight along the top edge, both inside the glass, and a
+     faint shadow that stays close under it (4 px at most). The shadow used to reach
+     24 px and showed on everything near a glass control, so it was cut right down. */
   --glass-edge:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.8), inset 0 2px 2px rgba(255, 255, 255, 0.95),
-    inset 0 -3px 6px rgba(15, 15, 13, 0.16), 0 8px 24px rgba(15, 15, 13, 0.14);
+    inset 0 0 0 1px rgba(255, 255, 255, 0.8), inset 0 1.5px 1px rgba(255, 255, 255, 0.9),
+    inset 0 -2px 4px rgba(15, 15, 13, 0.05), 0 1px 3px rgba(15, 15, 13, 0.06);
+  /* Glass that only ever sits on the light page (the top bar): the backdrop is
+     always near white, so it needs no squeeze towards grey to keep text readable. */
+  --glass-fill-page: rgba(255, 255, 255, 0.6);
+  --glass-filter-page: blur(14px) saturate(1.4);
+  /* the curve every flowing thumb and glass control moves with: it runs a little
+     past the end (the 1.3) and settles back, like liquid */
+  --flow: cubic-bezier(0.3, 1.3, 0.4, 1);
   --glass-hover: rgba(255, 255, 255, 0.45);
   --glass-chosen: rgba(15, 15, 14, 0.82);
 }
@@ -2436,46 +2426,6 @@ a.btn {
 
 .feng__inner {
   background: transparent;
-}
-
-/* ---------- pressed: a control sinks in while it is held down ----------
-   It moves down a pixel, shrinks a little, and gets a shadow on its inside top
-   edge, as if pushed below the surface. 90 ms down, a little slower back up. */
-.btn,
-.room-tab,
-.home-chip,
-.view-switch__option,
-.light__choice,
-.chip,
-.tile,
-.feng__circle {
-  transition:
-    transform 180ms var(--ease-out),
-    box-shadow 180ms var(--ease-out),
-    background-color var(--quick),
-    color var(--quick);
-}
-
-.btn:active:not(:disabled),
-.room-tab:active,
-.home-chip:active,
-.light__choice:active,
-.chip:active,
-.tile:active,
-.feng__circle:active {
-  transform: translateY(1px) scale(0.97);
-  box-shadow: inset 0 2px 5px rgba(15, 15, 14, 0.28);
-  transition-duration: 90ms;
-}
-
-/* on a dark button the inner shadow would not show, so it is stronger there */
-.btn--primary:active:not(:disabled),
-.home-chip:active {
-  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.6);
-}
-
-.view-switch__option:active {
-  transform: scale(0.96);
 }
 
 /* ---------- the view switch: a thumb that flows from one option to the next ---------- */
@@ -2811,4 +2761,801 @@ a.btn {
    longer than the screen. flex: none tells it to keep its own height. */
 .moodboard .strip-groups {
   flex: none;
+}
+
+/* ==========================================================================
+   23 Nov: the layout from the Figma frame "Desktop, Plan" (216:4506)
+   ==========================================================================
+   The top bar holds the logo, the home, the room tabs and three round glass
+   buttons. Under it are up to three sections side by side: the tools (when open),
+   the room with the furniture card under it, and the moodboard or shop list.
+   Each section is a card with rounded corners on the page, like a bento box. */
+
+.app {
+  gap: var(--space-4);
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  min-height: var(--control-md);
+  gap: var(--space-4);
+}
+
+.top-bar__left {
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.logo {
+  flex: none;
+  color: var(--ink);
+}
+
+/* a round glass button: the three in the top bar, and download, lighting and floor
+   and walls on the stage */
+.btn--glass {
+  background: var(--glass-fill);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  box-shadow: var(--glass-edge);
+  color: var(--ink);
+}
+
+.btn--glass:hover:not(:disabled) {
+  background: var(--glass-hover);
+}
+
+.btn--danger {
+  background: var(--danger);
+  color: var(--white);
+}
+
+/* In the top bar the glass always has the light page behind it, so it uses the
+   lighter page glass (see --glass-fill-page). */
+.top-bar .btn--glass,
+.home-chip,
+.room-tabs {
+  background: var(--glass-fill-page);
+  -webkit-backdrop-filter: var(--glass-filter-page);
+  backdrop-filter: var(--glass-filter-page);
+  box-shadow: var(--glass-edge);
+  color: var(--ink);
+}
+
+.home-chip {
+  padding: 0 var(--space-4) 0 14px;
+  gap: 6px;
+}
+
+/* the room tabs: a white pill (the thumb) flows behind the open room */
+.room-tabs__list {
+  position: relative;
+}
+
+.room-tabs__thumb {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  border-radius: var(--radius-pill);
+  background: var(--white);
+  box-shadow: 0 1px 2px rgba(15, 15, 13, 0.08);
+  transition:
+    left 420ms var(--flow),
+    width 420ms var(--flow);
+  pointer-events: none;
+}
+
+.room-tab {
+  position: relative; /* above the thumb */
+  z-index: 1;
+  height: 32px;
+  padding: 0 14px;
+  gap: 6px;
+  color: var(--ink-muted);
+}
+
+.room-tab.is-current {
+  background: transparent; /* the thumb is the background now */
+  color: var(--ink);
+}
+
+.room-tab--add {
+  width: 32px;
+  padding: 0;
+  color: var(--ink);
+}
+
+/* ---------- the three sections ---------- */
+.workspace {
+  display: flex;
+  gap: 0;
+}
+
+.preview {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.tools {
+  flex: none;
+  width: 320px;
+  margin-right: var(--space-4);
+  overflow-y: auto;
+  max-height: calc(100vh - 104px);
+  animation: slide-in var(--calm) var(--ease-out);
+}
+
+.divider {
+  flex: none;
+  width: 12px;
+}
+
+.side,
+.piece-panel {
+  flex: none;
+  width: var(--moodboard-width, 560px);
+}
+
+.side {
+  padding: var(--space-5);
+  overflow-y: auto;
+  max-height: calc(100vh - 104px);
+  animation: slide-in var(--calm) var(--ease-out);
+}
+
+.strip-card {
+  flex: none;
+}
+
+/* ---------- controls on the stage ---------- */
+.stage__corner {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-2);
+}
+
+/* the view switch is a column of three round icons now */
+.view-switch {
+  flex-direction: column;
+  padding: 6px;
+  border-radius: var(--radius-lg);
+}
+
+.view-switch__option {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  justify-content: center;
+}
+
+.view-switch__thumb {
+  left: 6px;
+  right: 6px;
+  top: auto;
+  bottom: auto;
+  transition:
+    top 420ms var(--flow),
+    height 420ms var(--flow);
+}
+
+.stage__tools {
+  position: absolute;
+  left: 50%;
+  bottom: var(--space-4);
+  transform: translateX(-50%);
+  z-index: 2;
+  display: flex;
+  gap: var(--space-2);
+}
+
+/* the words at the top left of the inside view stop short of the corner controls */
+.stage__real {
+  right: 80px;
+}
+
+/* the download card opens under its button, inside the stage */
+.stage__corner .feng__card {
+  z-index: 30;
+}
+
+/* ---------- glass that flows, and no pressed state ----------
+   Nothing sinks when pressed any more. A glass control grows a touch under the
+   pointer and settles back with the --flow curve, and every chosen-option pill is
+   one thumb that flows from the old option to the new one. */
+.btn--glass,
+.home-chip,
+.feng__circle {
+  transition:
+    transform 320ms var(--flow),
+    background-color var(--quick),
+    color var(--quick);
+}
+
+.btn--glass:hover:not(:disabled),
+.home-chip:hover,
+.feng__circle:hover {
+  transform: scale(1.05);
+}
+
+/* ---------- the furniture card ---------- */
+.strip-groups--glass {
+  position: relative;
+  flex: none;
+  max-width: 100%;
+  gap: 2px;
+  padding: var(--space-1);
+  border-radius: var(--radius-pill);
+  background: var(--grey);
+}
+
+.strip-groups__thumb {
+  position: absolute;
+  top: var(--space-1);
+  bottom: var(--space-1);
+  border-radius: var(--radius-pill);
+  background: var(--glass-chosen);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.22);
+  transition:
+    left 420ms var(--flow),
+    width 420ms var(--flow);
+  pointer-events: none;
+}
+
+.strip-groups--glass .strip-group {
+  position: relative; /* above the thumb */
+  z-index: 1;
+  background: transparent;
+}
+
+.strip-groups--glass .strip-group:hover:not(.is-current) {
+  background: rgba(15, 15, 14, 0.06);
+}
+
+.strip-groups--glass .strip-group.is-current {
+  background: transparent;
+  color: var(--white);
+}
+
+/* Under the room the furniture is one line and has no search field. In the tools
+   section at the side it is a grid with the search field above it. */
+.strip-area--row .strip-search {
+  display: none;
+}
+
+.strip-area--grid .strip-tools {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.strip-area--grid .strip-search {
+  width: auto;
+  height: var(--control-sm);
+}
+
+.strip-area--grid .strip {
+  flex-wrap: wrap;
+  overflow: visible;
+  gap: var(--space-1);
+}
+
+.strip-area--grid .tile {
+  width: calc(33.33% - 3px);
+}
+
+/* The picture fills the coloured square, so the shadow under the furniture runs
+   to the square's edges and is not cut off part way. */
+.tile__face {
+  overflow: hidden;
+}
+
+.tile__face img {
+  width: 100%;
+  height: 100%;
+  transition: transform 320ms var(--flow);
+}
+
+/* Under the pointer the furniture leans a few degrees. --tilt is set per tile in
+   ElementTile.jsx, so each one leans its own way. */
+.tile:hover .tile__face img {
+  transform: rotate(var(--tilt, 4deg)) scale(1.06);
+}
+
+.tile__label {
+  text-align: center;
+  line-height: 1.2;
+}
+
+/* ---------- the section on the right: Moodboard and Shop ---------- */
+.side__head,
+.tools__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.side__tabs {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.side__tab,
+.tools__title {
+  padding: 0;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  color: var(--ink-muted);
+  transition: color var(--quick);
+}
+
+.side__tab.is-current,
+.side__tab:hover,
+.tools__title {
+  color: var(--ink);
+}
+
+.side__close {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  transition: background-color var(--quick);
+}
+
+.side__close:hover {
+  background: var(--grey);
+}
+
+.moodboard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-height: none;
+  overflow: visible;
+}
+
+.board-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.board-row__connect {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink-muted);
+}
+
+.board-row__connect:hover {
+  color: var(--ink);
+}
+
+/* Two columns of pins. Each card is as tall as its picture. The button under a
+   picture only takes up room while the pointer is over the card (or the keyboard
+   is in it), so the columns have no empty gaps between pictures. */
+.pin-grid {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+}
+
+.pin-column {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.pin-card {
+  margin-bottom: 0;
+}
+
+/* The row is 0 high until the card is hovered, then grows to fit its button.
+   A grid row can be animated between 0fr and 1fr, which a plain height cannot. */
+.pin__more {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 260ms var(--ease-out);
+}
+
+.pin__more > div {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.pin-card:hover .pin__more,
+.pin-card:focus-within .pin__more {
+  grid-template-rows: 1fr;
+}
+
+@media (hover: none) {
+  .pin__more {
+    grid-template-rows: 1fr;
+  }
+}
+
+.pin__add {
+  justify-content: space-between;
+  width: calc(100% - 4px);
+  height: 34px;
+  margin: 6px 2px 3px;
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--grey);
+  box-shadow: var(--glass-edge);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.pin__add span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- the tools section, and the menus under the top bar buttons ---------- */
+.tool-body {
+  width: auto;
+  max-height: none;
+  overflow: visible;
+  font-size: 14px;
+}
+
+.tools__head .light__choices {
+  flex: 1;
+}
+
+.tools__head .light__choice {
+  flex: 1;
+  height: 32px;
+}
+
+.advanced {
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--grey-strong);
+}
+
+.advanced summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+
+.advanced summary::-webkit-details-marker {
+  display: none;
+}
+
+/* a small arrow that turns over when the fold is open */
+.advanced summary::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  margin-right: 4px;
+  border-right: 2px solid var(--ink);
+  border-bottom: 2px solid var(--ink);
+  transform: rotate(45deg);
+  transition: transform var(--quick);
+}
+
+.advanced[open] summary::after {
+  transform: rotate(225deg);
+}
+
+.advanced[open] {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.menu-card {
+  width: 300px;
+}
+
+.menu-card__ask {
+  display: flex;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.shop {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* ---------- the slider, in glass ----------
+   A soft track, filled in ink up to the value (--fill comes from Slider.jsx), and a
+   clear rounded thumb with the same rim and highlight as the other glass. */
+.slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 24px;
+  margin: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.slider::-webkit-slider-runnable-track {
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(to right, var(--ink) var(--fill, 0%), rgba(15, 15, 14, 0.12) var(--fill, 0%));
+}
+
+.slider::-moz-range-track {
+  height: 8px;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(to right, var(--ink) var(--fill, 0%), rgba(15, 15, 14, 0.12) var(--fill, 0%));
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 30px;
+  height: 20px;
+  margin-top: -6px; /* centres the 20 px thumb on the 8 px track */
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.9),
+    inset 0 -2px 3px rgba(15, 15, 13, 0.08),
+    0 0 0 1px rgba(15, 15, 13, 0.1),
+    0 1px 3px rgba(15, 15, 13, 0.18);
+  transition: transform 320ms var(--flow);
+}
+
+.slider::-moz-range-thumb {
+  width: 30px;
+  height: 20px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.9),
+    0 0 0 1px rgba(15, 15, 13, 0.1),
+    0 1px 3px rgba(15, 15, 13, 0.18);
+}
+
+/* while it is held the thumb stretches sideways, like a drop being pulled */
+.slider:active::-webkit-slider-thumb {
+  transform: scale(1.2, 0.9);
+}
+
+.slider:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 4px;
+  border-radius: var(--radius-pill);
+}
+
+.stage__bright .slider {
+  width: 110px;
+}
+
+/* ---------- a phone ---------- */
+@media (max-width: 900px) {
+  .workspace {
+    flex-direction: column;
+    gap: var(--space-3);
+  }
+
+  .tools,
+  .side,
+  .piece-panel {
+    width: auto;
+    margin-right: 0;
+    max-height: none;
+  }
+
+  /* the tab bar picks which of the two shows; the cross is not needed there */
+  .app--preview .side,
+  .app--moodboard .preview,
+  .app--moodboard .tools {
+    display: none;
+  }
+
+  .side__close {
+    display: none;
+  }
+
+  .top-bar {
+    flex-wrap: wrap;
+  }
+
+  .top-bar__left {
+    flex-wrap: wrap;
+    row-gap: var(--space-2);
+  }
+
+  /* room for the three buttons in the middle of the stage's bottom edge */
+  .stage__area {
+    display: none;
+  }
+}
+
+/* ---------- Rotate and Remove, floating over the selected piece ----------
+   Room3D.jsx moves this row every frame (its transform), so it starts at the
+   stage's top left corner and has no place of its own here. */
+.stage__actions {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 4;
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  border-radius: var(--radius-pill);
+  background: var(--glass-fill);
+  -webkit-backdrop-filter: var(--glass-filter);
+  backdrop-filter: var(--glass-filter);
+  box-shadow: var(--glass-edge);
+  will-change: transform;
+}
+
+.stage__action {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--white);
+  color: var(--ink);
+  transition:
+    transform 320ms var(--flow),
+    background-color var(--quick);
+}
+
+.stage__action:hover {
+  transform: scale(1.08);
+}
+
+/* Remove is red, so it is the easy one to find and the hard one to press by mistake. */
+.stage__action--remove,
+.btn--remove {
+  background: var(--danger);
+  color: var(--white);
+}
+
+.btn--remove {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* ---------- the piece panel: fields you can type in ---------- */
+.piece-panel__actions {
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.piece-panel__own {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.piece-panel__own input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--ink);
+}
+
+.piece-panel__group h3 {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.measures {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.measure {
+  display: grid;
+  gap: 4px;
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--grey);
+}
+
+.measure:focus-within {
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
+
+.measure__label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+.measure__well {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.measure__well input {
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+  background: none;
+  outline: none;
+  font: inherit;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+
+.measure__unit {
+  flex: none;
+  color: var(--ink-muted);
+  font-size: 13px;
+}
+
+/* ---------- small fixes for the new layout ---------- */
+
+/* The cards under the top bar buttons sit over the light page and the white
+   sections, so they are light too: nearly solid white with a soft blur. */
+.top-bar .feng__card {
+  background: rgba(255, 255, 255, 0.88);
+  -webkit-backdrop-filter: var(--glass-filter-page);
+  backdrop-filter: var(--glass-filter-page);
+  box-shadow:
+    var(--glass-edge),
+    0 8px 24px rgba(15, 15, 13, 0.08);
+}
+
+/* With the tools open on the left, the right section gives some of its width back to the room. */
+.workspace.has-tools .side,
+.workspace.has-tools .piece-panel {
+  width: min(var(--moodboard-width, 560px), 400px);
+}
+
+.tools__head .light__choice {
+  padding: 0 var(--space-2);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* The stage measures itself (a container query), so its controls can make room on
+   a narrow stage whatever the size of the window. */
+.stage {
+  container-type: inline-size;
+}
+
+@container (max-width: 560px) {
+  .stage__area {
+    display: none;
+  }
 }
