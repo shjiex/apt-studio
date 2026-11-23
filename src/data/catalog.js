@@ -26,6 +26,12 @@ export const CATALOG = [
   { type: 'bookcase', name: 'Low bookcase', category: 'storage', size: { w: 1.0, d: 0.32, h: 0.9 }, image: '/furniture/bookcase.png', model: '/models/catalog/bookcase.glb' },
   { type: 'coffee_table', name: 'Coffee table', category: 'desks', size: { w: 1.0, d: 0.55, h: 0.4 }, image: '/furniture/coffee_table.png', model: '/models/catalog/coffee_table.glb' },
   { type: 'dining_table', name: 'Dining table', category: 'desks', size: { w: 1.4, d: 0.8, h: 0.75 }, image: '/furniture/dining_table.png', model: '/models/catalog/dining_table.glb' },
+  { type: 'dining_chair', name: 'Dining chair', category: 'seating', size: { w: 0.43, d: 0.47, h: 0.84 }, image: '/furniture/dining_chair.png', model: '/models/catalog/dining_chair.glb' },
+  { type: 'tv_stand', name: 'TV stand', category: 'storage', size: { w: 1.5, d: 0.42, h: 0.5 }, image: '/furniture/tv_stand.png', model: '/models/catalog/tv_stand.glb' },
+  { type: 'wardrobe', name: 'Wardrobe', category: 'storage', size: { w: 1.02, d: 0.6, h: 1.9 }, image: '/furniture/wardrobe.png', model: '/models/catalog/wardrobe.glb' },
+  { type: 'side_table', name: 'Side table', category: 'desks', size: { w: 0.45, d: 0.45, h: 0.5 }, image: '/furniture/side_table.png', model: '/models/catalog/side_table.glb' },
+  { type: 'floor_mirror', name: 'Floor mirror', category: 'decor', size: { w: 0.6, d: 0.39, h: 1.69 }, image: '/furniture/floor_mirror.png', model: '/models/catalog/floor_mirror.glb' },
+  { type: 'pouf', name: 'Pouf', category: 'seating', size: { w: 0.5, d: 0.5, h: 0.4 }, image: '/furniture/pouf.png', model: '/models/catalog/pouf.glb' },
 ];
 
 // Which tile colour each kind of furniture uses.
