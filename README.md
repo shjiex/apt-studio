@@ -528,6 +528,25 @@ project continues.
 - **Measured.** Over black, ink text on glass reads 4.86 to 1 at the lowest (AA needs 4.5). Over
   white it reads 12.94 to 1, and the glass there is grey 212, against 215 in the Figma render.
 
+### Checked on a real graphics card, and the files GitHub was missing (22 Nov, 10:30 pm)
+
+- **A real graphics card at last.** The hosted test build was opened on a MacBook with an Apple
+  M4. The plan, the 3D view, the inside view, the moodboard and the glass all draw as they should,
+  and the zoom control matches the Stage control in Figma (node 216:4668).
+- **The Realistic picture, timed there.** After you step inside, the program is ready in about
+  0.8 s. Reading the room takes about 0.1 s. The first traced picture is on screen in the first
+  frame after you switch Realistic on, and the picture gains about 12 passes a second. At 130
+  passes it looked clean. On software graphics the same start took 4.3 s.
+- **One thing to know when testing.** A browser tab that is hidden stops drawing frames, so the
+  picture seems stuck at "Starting". That is the browser saving power. Bring the tab to the front
+  and it continues.
+- **Files the GitHub copy lacked.** `public/models/pins/manifest.json` with the furniture choices
+  (`elements`), `pipeline/pin2object.py`, `bake_catalog.py` and `furniture_lib.py` from the 4 pm
+  round, `public/example/colour-block-wall.jpg` (without it the example room's wall is black)
+  and the twenty files of `tests/headless/`.
+- **The hosted demo.** `src/demoFiles.json` now lists the model files of the new hosted build,
+  because the first one can no longer be republished.
+
 ## Components
 
 | Component | What it does |

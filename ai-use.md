@@ -305,6 +305,13 @@ My direction: "Keep working on it nonstop autonomously". Running axe, and which 
 
 My direction: "it doesn't look like the liquid glass loads right, it should look like" the Stage control in Figma (node 216:4668). The filter values were the assistant's, picked by matching the Figma render's grey and measuring AA over black and white.
 
+### Checked on a real graphics card, and the files GitHub was missing (22 Nov, 10:30 pm), AI-generated
+
+- `src/demoFiles.json`: the model addresses of the new hosted build.
+- `README.md`: the timings from the MacBook.
+
+My direction: "complete what was left off". The assistant opened the hosted build on my MacBook, timed the Realistic picture there, and copied over the files my GitHub upload had missed. No app code changed in this round.
+
 ## Chat transcript
 
 TODO: paste the share link or exported transcript of the Claude conversation here.
