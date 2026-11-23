@@ -3707,3 +3707,24 @@ a.btn {
 .feng__first .feng__from {
   display: block;
 }
+
+/* ---------- a fold inside a window or door card ---------- */
+/* No line above it, because the card already frames it, and more air between the
+   rows than the rest of the panel so the sliders do not feel packed. */
+.advanced--inner {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.advanced--inner summary {
+  font-weight: 500;
+  font-size: 13px;
+}
+
+.advanced--inner[open] {
+  gap: var(--space-4);
+}
+
+.advanced--inner[open] summary {
+  margin-bottom: calc(var(--space-1) * -1);
+}

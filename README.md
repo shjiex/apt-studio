@@ -617,6 +617,9 @@ project continues.
   tell how long to wait.
 - **Lighting panel.** Daylight, time, month and lamp bulbs stay in view. Everything else is
   folded under Advanced.
+- **Floor and walls panel.** Each window and door card shows its wall. The sliders for its
+  place and size are folded under Size and position, because most people drag the window on
+  the plan (`SurfacesPanel.jsx`).
 - **Checks.** `tests/headless/shoot7.py` (smoke) and `tests/headless/shoot43.py` (welcome,
   tips, wall decor, feet, contrast) were run in headless Chromium with software graphics.
   Icons on the stage glass read 4.86 to 1 over black and 12.94 to 1 over white. Words on the
@@ -626,7 +629,7 @@ project continues.
 
 - **Why.** The score had nine checks, almost all about the bed. I asked for it to be more
   comprehensive after research, so it now reads a living room and a desk as carefully as a
-  bedroom. A room is scored on up to 22 checks, and only the ones that apply to its furniture
+  bedroom. A room is scored on up to 21 checks, and only the ones that apply to its furniture
   are counted.
 - **What the research said.** The form school of feng shui is about where things stand, and
   its main idea is the commanding position: the bed, sofa and desk have a solid wall behind
@@ -650,7 +653,7 @@ project continues.
 - **The example room now scores 78.** Its sofa floats in the middle with its back to the
   door, as in the photo it copies, so two sofa checks fail. The score used to be 100 because
   nothing looked at the sofa.
-- **Checks.** `node tests/logic/check-logic.mjs` has 22 new lines for these and all pass. The
+- **Checks.** `node tests/logic/check-logic.mjs` has 21 new lines for these and all pass. The
   score takes about 1 ms for the example room and 9 ms for an 8 by 8 m room.
 - **Sources read.**
   [Homes & Gardens on furniture placement](https://www.homesandgardens.com/interior-design/feng-shui-furniture-placement),

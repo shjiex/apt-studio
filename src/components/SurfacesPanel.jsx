@@ -240,32 +240,36 @@ function SurfacesPanel({ surfaces, onChange, room, onRoomChange }) {
               optionClass="surface__choice"
             />
           </div>
-          <label className="light__row">
-            <span>Along the wall</span>
-            <Slider
-              aria-label="Along the wall"
-              min="0.05"
-              max="0.95"
-              step="0.01"
-              value={win.along}
-              onChange={(event) => changeWindow({ ...win, along: Number(event.target.value) })}
+          {/* The exact place and size are folded away. Most people drag the window on the plan. */}
+          <details className="advanced advanced--inner">
+            <summary>Size and position</summary>
+            <label className="light__row">
+              <span>Along the wall</span>
+              <Slider
+                aria-label="Along the wall"
+                min="0.05"
+                max="0.95"
+                step="0.01"
+                value={win.along}
+                onChange={(event) => changeWindow({ ...win, along: Number(event.target.value) })}
+              />
+            </label>
+            <WindowSlider label="Width" value={win.width} min={0.4} max={3} onChange={(width) => changeWindow({ ...win, width })} />
+            <WindowSlider
+              label="Bottom edge"
+              value={win.bottom}
+              min={0}
+              max={1.5}
+              onChange={(bottom) => changeWindow({ ...win, bottom, top: Math.max(win.top, bottom + 0.3) })}
             />
-          </label>
-          <WindowSlider label="Width" value={win.width} min={0.4} max={3} onChange={(width) => changeWindow({ ...win, width })} />
-          <WindowSlider
-            label="Bottom edge"
-            value={win.bottom}
-            min={0}
-            max={1.5}
-            onChange={(bottom) => changeWindow({ ...win, bottom, top: Math.max(win.top, bottom + 0.3) })}
-          />
-          <WindowSlider
-            label="Top edge"
-            value={win.top}
-            min={1}
-            max={room.height - 0.1}
-            onChange={(top) => changeWindow({ ...win, top, bottom: Math.min(win.bottom, top - 0.3) })}
-          />
+            <WindowSlider
+              label="Top edge"
+              value={win.top}
+              min={1}
+              max={room.height - 0.1}
+              onChange={(top) => changeWindow({ ...win, top, bottom: Math.min(win.bottom, top - 0.3) })}
+            />
+          </details>
         </div>
       ))}
       {/* Doors: one card each. A door keeps the floor in front of it clear: furniture there shows as Blocked. */}
@@ -287,32 +291,35 @@ function SurfacesPanel({ surfaces, onChange, room, onRoomChange }) {
               optionClass="surface__choice"
             />
           </div>
-          <label className="light__row">
-            <span>Along the wall</span>
-            <Slider
-              aria-label="Along the wall"
-              min="0.02"
-              max="0.98"
-              step="0.01"
-              value={door.along}
-              onChange={(event) => changeDoor({ ...door, along: Number(event.target.value) })}
-            />
-          </label>
-          <WindowSlider label="Width" value={door.width} min={0.6} max={1.6} onChange={(width) => changeDoor({ ...door, width })} />
-          {/* which edge the hinge is on, as you face the door from inside the room */}
-          <div className="light__row">
-            <span>Hinge</span>
-            <Segmented
-              label="Hinge"
-              options={[
-                ['left', 'Left'],
-                ['right', 'Right'],
-              ]}
-              value={door.hinge || 'left'}
-              onChange={(hinge) => changeDoor({ ...door, hinge })}
-              optionClass="surface__choice"
-            />
-          </div>
+          <details className="advanced advanced--inner">
+            <summary>Size, position and hinge</summary>
+            <label className="light__row">
+              <span>Along the wall</span>
+              <Slider
+                aria-label="Along the wall"
+                min="0.02"
+                max="0.98"
+                step="0.01"
+                value={door.along}
+                onChange={(event) => changeDoor({ ...door, along: Number(event.target.value) })}
+              />
+            </label>
+            <WindowSlider label="Width" value={door.width} min={0.6} max={1.6} onChange={(width) => changeDoor({ ...door, width })} />
+            {/* which edge the hinge is on, as you face the door from inside the room */}
+            <div className="light__row">
+              <span>Hinge</span>
+              <Segmented
+                label="Hinge"
+                options={[
+                  ['left', 'Left'],
+                  ['right', 'Right'],
+                ]}
+                value={door.hinge || 'left'}
+                onChange={(hinge) => changeDoor({ ...door, hinge })}
+                optionClass="surface__choice"
+              />
+            </div>
+          </details>
           <div className="light__row">
             <span>Door</span>
             <Segmented
