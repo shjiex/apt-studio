@@ -32,6 +32,7 @@ await pg.add_init_script("localStorage.setItem('apt-studio-welcomed','yes'); loc
 
 | Script | Covers |
 |---|---|
+| `shoot-account.py` | Accounts against the Firebase Auth emulator (the steps to start it are at the top of the script): sign up, the plain mistakes caught on the card, the eye that shows the password, the account menu saying the account could not be reached, log out, a wrong password, the reset link, log in, staying signed in after a reload, an email that is taken |
 | `shoot7.py` | Smoke test: the app loads, tiles are there, a piece is added, the login page opens, no console errors |
 | `shoot16.py` | The panel for the selected piece (size, link, actions) |
 | `shoot22.py` | Rooms of a home (add, rename, remove, tabs) and furniture search |

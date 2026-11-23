@@ -42,6 +42,12 @@ function App() {
   const [accountHomeOf, setAccountHomeOf] = useState(null);
   // Each room exactly as it was last written to the account, by id, to tell which rooms changed.
   const roomsInAccount = useRef({});
+  // How saving to the account is going, for the account menu:
+  // 'idle' (nobody signed in), 'loading', 'saving', 'saved' or 'failed'.
+  const [accountState, setAccountState] = useState('idle');
+  // Goes up by one when the person asks to try again after a failure, which runs
+  // the two effects below once more.
+  const [tries, setTries] = useState(0);
   // A board connected earlier in this browser comes back on a reload. The function
   // form of useState runs once, when the app starts.
   const [boardInBrowser] = useState(loadBoardFromBrowser);
@@ -91,7 +97,13 @@ function App() {
   // When someone signs in: show the home saved in their account, if there is one.
   // If there is none, the home on screen becomes theirs (the effect below saves it).
   useEffect(() => {
-    if (!user) return;
+    if (!user) {
+      setAccountState('idle');
+      return;
+    }
+    // Already read for this person (a second try after a failed save): nothing to load.
+    if (accountHomeOf === user.uid) return;
+    setAccountState('loading');
     loadHome(user.uid)
       .then((saved) => {
         if (saved) {
@@ -99,9 +111,13 @@ function App() {
           roomsInAccount.current = Object.fromEntries(saved.rooms.map((room) => [room.id, room]));
         }
         setAccountHomeOf(user.uid);
+        setAccountState('saved');
       })
-      .catch((error) => console.error('Could not load the home: ', error));
-  }, [user]);
+      .catch((error) => {
+        console.error('Could not load the home: ', error);
+        setAccountState('failed');
+      });
+  }, [user, tries]);
 
   // Save the home a moment after it stops changing: always in this browser, and in
   // the account when signed in. Waiting 0.8 s means dragging a piece saves once, not
@@ -114,14 +130,19 @@ function App() {
       // An unchanged room is still the very same object, so !== finds the changed ones.
       const changed = rooms.filter((room) => roomsInAccount.current[room.id] !== room);
       const removed = Object.keys(roomsInAccount.current).filter((id) => !rooms.some((room) => room.id === id));
+      setAccountState('saving');
       saveHome(user.uid, home, changed, removed)
         .then(() => {
           roomsInAccount.current = Object.fromEntries(rooms.map((room) => [room.id, room]));
+          setAccountState('saved');
         })
-        .catch((error) => console.error('Could not save the home: ', error));
+        .catch((error) => {
+          console.error('Could not save the home: ', error);
+          setAccountState('failed');
+        });
     }, 800);
     return () => clearTimeout(timer);
-  }, [homeName, rooms, activeRoomId, user, accountHomeOf]);
+  }, [homeName, rooms, activeRoomId, user, accountHomeOf, tries]);
 
   // Save to the account, but only a connected board and only when signed in.
   async function saveIfSignedIn(board, picks) {
@@ -267,11 +288,13 @@ function App() {
               onUseSamples={handleUseSamples}
               onTogglePick={handleTogglePick}
               onLogOut={handleLogOut}
+              accountState={accountState}
+              onTryAgain={() => setTries(tries + 1)}
             />
           }
         />
-        <Route path="/login" element={<AuthPage key="login" mode="login" />} />
-        <Route path="/signup" element={<AuthPage key="signup" mode="signup" />} />
+        <Route path="/login" element={<AuthPage key="login" mode="login" user={user} />} />
+        <Route path="/signup" element={<AuthPage key="signup" mode="signup" user={user} />} />
       </Routes>
     </Router>
   );

@@ -4098,3 +4098,77 @@ a.btn {
     left: var(--space-4);
   }
 }
+
+/* ---------- the account menu: how saving is going, and a way to try again ---------- */
+.account__menu {
+  gap: var(--space-3);
+  padding: var(--space-4);
+  width: 280px;
+  border-radius: var(--radius-md);
+  z-index: 40;
+}
+
+.account__email {
+  color: var(--ink);
+  font-weight: 500;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.account__note {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  color: var(--ink-muted);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.account__note svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+.account__note.is-problem {
+  color: var(--blocked-ink);
+}
+
+.account__actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.account .btn {
+  position: relative;
+}
+
+/* the red mark on the account button */
+.account__mark {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--danger);
+  box-shadow: 0 0 0 2px var(--white);
+}
+
+/* ---------- the login card: the eye that shows the password ---------- */
+.auth__card .field__well {
+  align-items: center;
+}
+
+.auth__card .field__well .icon-action {
+  flex: none;
+  margin-right: calc(var(--space-2) * -1);
+}
+
+.auth__card .icon-action[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--white);
+}
+
+.auth__card h1 {
+  margin-bottom: calc(var(--space-2) * -1);
+}

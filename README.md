@@ -735,7 +735,7 @@ project continues.
 - **Checked in headless Chromium only.** The specks and the door flicker need a look on a
   real graphics card.
 
-### Realistic without specks, a doorway that is not a black hole, more room for the room (23 Nov, 4:00 am)
+### Realistic without specks, a doorway that is not a black hole, more room for the room (23 Nov, 3:45 am)
 
 - **Specks in Realistic.** The white spots were still there on my Mac after the 3 am round, even
   when the picture said Sharp. Two changes in `PathTraced.jsx` removed them. First, no traced
@@ -756,7 +756,7 @@ project continues.
   specks, the doorway is grey with the door in it, and the plus button is visible at 1024 px.
   `tests/headless/shoot7.py`, `shoot43.py` and `tests/logic/check-logic.mjs` pass.
 
-### A Pinterest importer checked against the real feed (23 Nov, 4:30 am)
+### A Pinterest importer checked against the real feed (23 Nov, 3:50 am)
 
 - **Checked against Pinterest itself.** From an ordinary page in my browser the feed answered
   with 49 pins for a public board, and the app's own importer code read them. The shared test
@@ -776,6 +776,31 @@ project continues.
 - **Honest labels.** The count reads "49 of 312 Pins" when Pinterest shares only part of a
   board. The furniture made from pictures comes from the sample photos, so with a Pinterest
   board connected its group is called From the sample photos.
+
+### Logging in, tried end to end on a stand-in Firebase (23 Nov, 4:00 am)
+
+- **Tried, not only written.** The whole account flow ran against the Firebase Auth emulator,
+  a stand-in for Firebase that runs on the test machine, so nothing touched my real project
+  and no account was made there. `tests/headless/shoot-account.py` signs up, logs out, logs in
+  with a wrong password, asks for a reset link, logs in, reloads and tries an email that is
+  taken. All seventeen checks pass.
+- **Saving, checked without a browser.** `tests/logic/check-account.mjs` runs the app's own
+  `lib/storage.js` against a stand-in Firestore kept in memory that refuses what the real one
+  refuses (a value that is `undefined`, a list inside a list, a document over 1 MiB). A home
+  with two rooms saves and loads back whole, a removed room is deleted, the moodboard sits next
+  to the home, and a room with two 300 kB photos fits. The real Firestore has still not been
+  run by me, because that needs an account in my project.
+- **The login card.** Empty fields and a short password are caught on the card. The button says
+  One moment while Firebase answers. An eye shows the password. After a wrong password the card
+  offers Email me a reset link. Someone already signed in who opens the login page goes back to
+  their room. More of Firebase's error codes have their own sentence.
+- **The account menu.** It says how saving is going: Getting your saved home, Saving your home,
+  Your home is saved to this account, or that the account could not be reached and the changes
+  are kept in this browser, with Try again. A red mark sits on the account button while saving
+  has failed. Before, a failed save only wrote to the console. The menu closes on Escape and on
+  a click elsewhere.
+- **A switch for testing.** A build made with `VITE_EMULATOR=1` talks to the emulator in place
+  of the real Firebase (`firebase.js`).
 
 ## Components
 

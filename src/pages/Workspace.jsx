@@ -50,6 +50,8 @@ function Workspace({
   onUseSamples,
   onTogglePick,
   onLogOut,
+  accountState,
+  onTryAgain,
   onFirstRoom,
   onStartWithExample,
 }) {
@@ -584,7 +586,7 @@ function Workspace({
             layout={layout}
             onLayout={handleLayout}
           />
-          <AccountButton user={user} onLogOut={onLogOut} />
+          <AccountButton user={user} onLogOut={onLogOut} state={accountState} onTryAgain={onTryAgain} />
         </div>
       </header>
 
