@@ -145,7 +145,7 @@ function PreviewPanel({
             {/* While the realistic picture is on: make it lighter or darker, and save it as it is now. */}
             {realistic && (
               <label className="stage__bright">
-                Brightness
+                <span className="stage__bright-word">Brightness</span>
                 <Slider
                   aria-label="Brightness of the realistic picture"
                   min="0.4"
@@ -156,10 +156,14 @@ function PreviewPanel({
                 />
               </label>
             )}
+            {/* On a narrow stage this one is left out (app.css): the download button in the
+                corner saves the picture too. */}
             {realistic && (
-              <Button variant="white" size="sm" icon="download" onClick={onSavePicture}>
-                Save picture
-              </Button>
+              <span className="stage__save">
+                <Button variant="white" size="sm" icon="download" onClick={onSavePicture}>
+                  Save picture
+                </Button>
+              </span>
             )}
           </div>
         )}

@@ -793,7 +793,8 @@ project continues.
 - **The login card.** Empty fields and a short password are caught on the card. The button says
   One moment while Firebase answers. An eye shows the password. After a wrong password the card
   offers Email me a reset link. Someone already signed in who opens the login page goes back to
-  their room. More of Firebase's error codes have their own sentence.
+  their room. More of Firebase's error codes have their own sentence. Pressing Enter on the
+  card while accounts are off does nothing, where it used to show an error.
 - **The account menu.** It says how saving is going: Getting your saved home, Saving your home,
   Your home is saved to this account, or that the account could not be reached and the changes
   are kept in this browser, with Try again. A red mark sits on the account button while saving
@@ -813,7 +814,9 @@ project continues.
   of Floor and walls. The section is 368 px wide, and on a small window the cross has a row of
   its own. The furniture tiles there touched each other and now have 8 px between them.
 - **Narrow stage, narrow side section.** On a stage under 460 px wide the three middle buttons
-  move up one row so they no longer sit on undo and redo. The line above the moodboard pictures
+  move up one row so they no longer sit on undo and redo, and the row over the realistic
+  picture drops the word Brightness and the Save picture button (the download button in the
+  corner saves the picture too). The line above the moodboard pictures
   stays on one line.
 - **Seen on my Mac in the test link.** At 1440 by 900 the plan, the turn in 3D and dragging a
   tile onto the floor all work, and undo took the piece away again.

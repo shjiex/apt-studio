@@ -55,6 +55,7 @@ function AuthPage({ mode, user }) {
 
   async function handleSubmit(event) {
     event.preventDefault(); // stop the browser from reloading the page
+    if (!isFirebaseReady) return; // Enter in a field also lands here; without Firebase there is nothing to ask
     setError('');
     setNote('');
     setCanReset(false);

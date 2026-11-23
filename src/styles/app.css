@@ -4241,3 +4241,23 @@ a.btn {
   flex: none;
   white-space: nowrap;
 }
+
+/* The save button of the realistic picture sits in the row like its neighbours. */
+.stage__save {
+  display: inline-flex;
+}
+
+/* On a narrow stage (a panel open at the side on a small window) the row over the
+   realistic picture is cut down to what it needs: the switch, how sharp it is and the
+   slider. The word Brightness goes, and so does Save picture, because the download
+   button in the corner saves the picture too. */
+@container (max-width: 460px) {
+  .stage__save,
+  .stage__bright-word {
+    display: none;
+  }
+
+  .stage__real {
+    right: 72px;
+  }
+}
