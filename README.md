@@ -555,6 +555,8 @@ project continues.
 - **Furniture choice card on a phone.** The card stopped 12 px above the bottom of the window,
   which on a phone is under the tab bar. It now stops 8 px above the tab bar when the tab bar is
   shown (`MoodboardPanel.jsx`).
+- **Looked at on the MacBook.** The example room opens with its wall picture on the back wall
+  only, and dragging the bed on the plan showed steady outlines.
 - **Measured.** Ink text on the card reads 4.86 to 1 over black and 12.94 to 1 over white. Text
   inside a choice row reads 11.11 to 1 over black. AA needs 4.5.
 
