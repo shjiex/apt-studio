@@ -464,6 +464,21 @@ project continues.
   now over black and white backdrops: ink on the track 16.53 to 1 on both, white on the chosen
   thumb 11.92 to 1.
 
+### Checks for the fit tags and the room score (22 Nov, 9:00 pm)
+
+- **`tests/logic/check-logic.mjs`.** 31 small checks of `getFit` (`src/lib/room.js`) and
+  `getFengShui` (`src/lib/fengshui.js`): overlaps, the 15 cm tight gap, a rug under furniture,
+  the door swing, turned pieces, a bed under a window or in line with the door, a desk with the
+  door behind you, open floor, and every piece of the example room fitting with a score of 100.
+  Run it from the project folder with `node tests/logic/check-logic.mjs`. It loads the app's
+  files through Vite, so nothing new is installed.
+- **What they found.** No bugs. Two of the desk checks were first written the wrong way round: a
+  desk turned 0 degrees against the back wall has you facing that wall, so a door in the front
+  wall is behind you, which the app gets right.
+- **The room score has eleven checks,** not nine as the handoff said: four for a bed, one for a
+  desk, and six for every room (the rug one only when there is a rug). Each applies only when its
+  pieces are in the room.
+
 ## Components
 
 | Component | What it does |

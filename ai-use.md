@@ -275,6 +275,12 @@ My direction: "this should be an example room available for users to use" and "K
 
 My direction: "Keep working on it nonstop autonomously". The assistant found the off-screen panels while checking the phone layout, and ran the pointer and contrast checks the handoff listed as not done.
 
+### Checks for the fit tags and the room score (22 Nov, 9:00 pm), AI-generated
+
+- `tests/logic/check-logic.mjs` (new).
+
+My direction: "Keep working on it nonstop autonomously". The handoff noted there were no unit tests. Which cases to check was the assistant's choice.
+
 ## Chat transcript
 
 TODO: paste the share link or exported transcript of the Claude conversation here.
