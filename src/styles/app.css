@@ -4298,3 +4298,10 @@ a.btn {
 .dialog > .btn--fill {
   flex: none;
 }
+
+/* ---------- the lighting panel in cards, like the floor and walls panel ---------- */
+/* The sunrise, sunset and sun height boxes now sit inside the daylight card, which
+   is the same grey as they were, so they turn white to stay visible there. */
+.light__fixed .light__facts div {
+  background: var(--white);
+}

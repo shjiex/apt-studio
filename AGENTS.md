@@ -76,7 +76,7 @@ Without `src/firebaseConfig.js` the app runs in visitor mode: everything works, 
 | `components/PiecePanel.jsx` | Fields for the selected piece: typed size and position, colour and finish, Own, bulb, shop link and price |
 | `components/FitTag.jsx` | The Fits, Tight, Blocked tag |
 | `components/FengShuiCard.jsx` | The room score button (number only, 48 by 48) and its card: one thing to do first, then two folds |
-| `components/LightingPanel.jsx` | Lighting panel body: daylight, time, month and lamp bulbs in view; place, facing, fixed lights and dimmers under Advanced |
+| `components/LightingPanel.jsx` | Lighting panel body, built like `SurfacesPanel` since 23 Nov, 4:42 pm: a card each for Daylight (time and month sliders, "Place and sun" fold), Lamp bulbs and every fixed light, each with an On and Off `Segmented` row and a "Colour and brightness" fold. Exports `BulbSliders`, which `PiecePanel` uses |
 | `components/SurfacesPanel.jsx` | Floor and walls panel body: oak or your photo, paint or your photo, windows, doors (wall, size, hinge, open or shut) |
 | `components/PhotoStraighten.jsx` | Four-corner straightening of an angled floor or wall photo |
 | `components/Segmented.jsx` | A row of choices on one track with a dark thumb that slides between them |

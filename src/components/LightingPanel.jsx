@@ -2,6 +2,7 @@ import Segmented from './Segmented.jsx';
 import { MONTH_NAMES, PLACES, formatHour, getSun, kelvinToColor, nameOfKelvin, newFixedLight, sunOnWindows } from '../lib/light.js';
 import Slider from './Slider.jsx';
 import Icon from './Icon.jsx';
+import { WALL_NAMES } from '../lib/room.js';
 
 const KIND_NAMES = { ceiling: 'Ceiling light', wall: 'Wall light', strip: 'LED strip' };
 
@@ -56,11 +57,17 @@ export function BulbSliders({ bulb, onChange }) {
   );
 }
 
+// The two choices every on and off row in this panel uses, as [id, words] for Segmented.
+const ON_OFF = [
+  [true, 'On'],
+  [false, 'Off'],
+];
+
 // The lighting panel. It opens in the tools section to the left of the room.
-// At the top are the two things most people change: the time of day and whether
-// the lamps are on. Everything else (which way the room faces, where the home is,
-// lights fixed to the room, the bulbs) sits under Advanced, so a beginner is not
-// met with a wall of sliders.
+// It is built the same way as the floor and walls panel: one card for each part
+// (daylight, the lamp bulbs, and each light fixed to the room), a bold name and an
+// On or Off choice at the top of each card, and the finer settings folded away
+// inside the card, so the panel stays short until you ask for the detail.
 // The room changes as you move the controls.
 function LightingPanel({ lighting, onChange, windows }) {
   const sun = getSun(lighting);
@@ -70,213 +77,232 @@ function LightingPanel({ lighting, onChange, windows }) {
     onChange({ ...lighting, fixed: lighting.fixed.map((light) => (light.id === changed.id ? changed : light)) });
   }
 
+  // Take one fixed light out of the room.
+  function removeLight(id) {
+    onChange({ ...lighting, fixed: lighting.fixed.filter((other) => other.id !== id) });
+  }
+
   return (
     <div className="tool-body light">
-      <label className="light__head">
-        <strong>Daylight</strong>
-        <input
-          type="checkbox"
-          checked={lighting.daylight}
-          onChange={(event) => onChange({ ...lighting, daylight: event.target.checked })}
-        />
-      </label>
-      {lighting.daylight && (
-        <>
-          <label className="light__row">
-            <span>
-              Time <strong>{formatHour(lighting.hour)}</strong>
-            </span>
-            <span className="tag tag--grey">
-              {!sun.up ? 'Sun is down' : sunOnWindows(sun, windows) ? 'Sun on a window' : 'No direct sun'}
-            </span>
-            <Slider
-              aria-label="Time of day"
-              min="4"
-              max="22"
-              step="0.5"
-              value={lighting.hour}
-              onChange={(event) => onChange({ ...lighting, hour: Number(event.target.value) })}
-            />
-          </label>
-          <div className="light__row">
-            <span>
-              Month <strong>{MONTH_NAMES[lighting.month - 1]}</strong>
-            </span>
-            <div className="light__months">
-              {MONTH_NAMES.map((name, index) => (
-                <button
-                  key={name}
-                  type="button"
-                  className={index + 1 === lighting.month ? 'light__choice is-current' : 'light__choice'}
-                  aria-label={name}
-                  aria-pressed={index + 1 === lighting.month}
-                  onClick={() => onChange({ ...lighting, month: index + 1 })}
-                >
-                  {name[0]}
-                </button>
-              ))}
-            </div>
-          </div>
-        </>
-      )}
-
-      <label className="light__head">
-        <strong>Lamp bulbs</strong>
-        <input
-          type="checkbox"
-          checked={lighting.lamps.on}
-          onChange={(event) => onChange({ ...lighting, lamps: { ...lighting.lamps, on: event.target.checked } })}
-        />
-      </label>
-
-      {/* <details> is the browser's own fold: pressing the summary line opens and closes it. */}
-      <details className="advanced">
-        <summary>Advanced</summary>
+      {/* Daylight: the time and the month are in view, where the home is sits in a fold. */}
+      <div className="light__fixed">
+        <div className="light__row">
+          <strong>Daylight</strong>
+          <Segmented
+            label="Daylight"
+            options={ON_OFF}
+            value={lighting.daylight}
+            onChange={(daylight) => onChange({ ...lighting, daylight })}
+            optionClass="surface__choice"
+          />
+        </div>
         {lighting.daylight && (
           <>
-            <div className="light__row">
-              <span title="The back wall is the one at the top of the plan">Back wall faces</span>
-              <Segmented
-                label="Back wall faces"
-                // the row shows one letter for each side: N, E, S, W
-                options={['north', 'east', 'south', 'west'].map((side) => [side, side[0].toUpperCase()])}
-                value={lighting.windowFaces}
-                onChange={(side) => onChange({ ...lighting, windowFaces: side })}
-              />
-            </div>
-            {/* Where the home is: pick a city, or set the latitude yourself with the slider. */}
-            <div className="light__row">
+            <label className="light__row">
               <span>
-                Where{' '}
-                <strong>
-                  {Math.abs(Math.round(lighting.latitude))}° {lighting.latitude >= 0 ? 'N' : 'S'}
-                </strong>
+                Time <strong>{formatHour(lighting.hour)}</strong>
               </span>
-              <select
-                className="light__select"
-                aria-label="City"
-                value={PLACES.some((place) => place.latitude === lighting.latitude) ? lighting.latitude : ''}
-                onChange={(event) => onChange({ ...lighting, latitude: Number(event.target.value) })}
-              >
-                <option value="" disabled>
-                  Other
-                </option>
-                {PLACES.map((place) => (
-                  <option key={place.name} value={place.latitude}>
-                    {place.name}
-                  </option>
-                ))}
-              </select>
+              <span className="tag tag--grey">
+                {!sun.up ? 'Sun is down' : sunOnWindows(sun, windows) ? 'Sun on a window' : 'No direct sun'}
+              </span>
               <Slider
-                aria-label="Latitude"
-                min="-60"
-                max="65"
-                step="1"
-                value={lighting.latitude}
-                onChange={(event) => onChange({ ...lighting, latitude: Number(event.target.value) })}
+                aria-label="Time of day"
+                min="4"
+                max="22"
+                step="0.5"
+                value={lighting.hour}
+                onChange={(event) => onChange({ ...lighting, hour: Number(event.target.value) })}
               />
-            </div>
-            {/* three facts side by side: when the sun rises, when it sets, how high it is now */}
-            <dl className="light__facts">
-              <div>
-                <dt>Sunrise</dt>
-                <dd>{formatHour(sun.rise)}</dd>
+            </label>
+            {/* the month as a slider from January (1) to December (12), like the time above it */}
+            <label className="light__row">
+              <span>
+                Month <strong>{MONTH_NAMES[lighting.month - 1]}</strong>
+              </span>
+              <Slider
+                aria-label="Month"
+                min="1"
+                max="12"
+                step="1"
+                value={lighting.month}
+                onChange={(event) => onChange({ ...lighting, month: Number(event.target.value) })}
+              />
+            </label>
+
+            {/* <details> is the browser's own fold: pressing the summary line opens and closes it. */}
+            <details className="advanced advanced--inner">
+              <summary>Place and sun</summary>
+              <div className="light__row">
+                <span title="The back wall is the one at the top of the plan">Back wall faces</span>
+                <Segmented
+                  label="Back wall faces"
+                  // the row shows one letter for each side: N, E, S, W
+                  options={['north', 'east', 'south', 'west'].map((side) => [side, side[0].toUpperCase()])}
+                  value={lighting.windowFaces}
+                  onChange={(side) => onChange({ ...lighting, windowFaces: side })}
+                />
               </div>
-              <div>
-                <dt>Sunset</dt>
-                <dd>{formatHour(sun.set)}</dd>
+              {/* Where the home is: pick a city, or set the latitude yourself with the slider. */}
+              <div className="light__row">
+                <span>
+                  Where{' '}
+                  <strong>
+                    {Math.abs(Math.round(lighting.latitude))}° {lighting.latitude >= 0 ? 'N' : 'S'}
+                  </strong>
+                </span>
+                <select
+                  className="light__select"
+                  aria-label="City"
+                  value={PLACES.some((place) => place.latitude === lighting.latitude) ? lighting.latitude : ''}
+                  onChange={(event) => onChange({ ...lighting, latitude: Number(event.target.value) })}
+                >
+                  <option value="" disabled>
+                    Other
+                  </option>
+                  {PLACES.map((place) => (
+                    <option key={place.name} value={place.latitude}>
+                      {place.name}
+                    </option>
+                  ))}
+                </select>
+                <Slider
+                  aria-label="Latitude"
+                  min="-60"
+                  max="65"
+                  step="1"
+                  value={lighting.latitude}
+                  onChange={(event) => onChange({ ...lighting, latitude: Number(event.target.value) })}
+                />
               </div>
-              <div>
-                <dt>Sun height</dt>
-                <dd>{sun.up ? `${Math.round(sun.elevation)}°` : 'Down'}</dd>
-              </div>
-            </dl>
+              {/* three facts side by side: when the sun rises, when it sets, how high it is now */}
+              <dl className="light__facts">
+                <div>
+                  <dt>Sunrise</dt>
+                  <dd>{formatHour(sun.rise)}</dd>
+                </div>
+                <div>
+                  <dt>Sunset</dt>
+                  <dd>{formatHour(sun.set)}</dd>
+                </div>
+                <div>
+                  <dt>Sun height</dt>
+                  <dd>{sun.up ? `${Math.round(sun.elevation)}°` : 'Down'}</dd>
+                </div>
+              </dl>
+            </details>
           </>
         )}
-        {lighting.fixed.map((light) => (
-          <div className="light__fixed" key={light.id}>
-            <label className="light__head">
-              <strong>{KIND_NAMES[light.kind]}</strong>
-              <span className="light__tools">
-                <button
-                  type="button"
-                  className="icon-action icon-action--danger"
-                  aria-label={`Remove ${KIND_NAMES[light.kind]}`}
-                  title="Remove"
-                  onClick={() => onChange({ ...lighting, fixed: lighting.fixed.filter((other) => other.id !== light.id) })}
-                >
-                  <Icon name="trash" size={16} />
-                </button>
-                <input
-                  type="checkbox"
-                  aria-label={`${KIND_NAMES[light.kind]} on`}
-                  checked={light.on}
-                  onChange={(event) => changeLight({ ...light, on: event.target.checked })}
-                />
-              </span>
-            </label>
-            {light.kind === 'ceiling' ? (
-              <div className="light__row">
-                <span>Where it hangs</span>
-                {/* nine spots over the room: the top row is the window wall */}
-                <div className="light__spots">
-                  {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((spot) => (
-                    <button
-                      key={spot}
-                      type="button"
-                      className={spot === light.spot ? 'light__spot is-current' : 'light__spot'}
-                      aria-label={`Spot ${spot + 1} of 9`}
-                      aria-pressed={spot === light.spot}
-                      onClick={() => changeLight({ ...light, spot })}
-                    />
-                  ))}
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="light__row">
-                  <span>On which wall</span>
-                  <Segmented
-                    label="On which wall"
-                    options={['back', 'left', 'right', 'front'].map((wall) => [wall, wall])}
-                    value={light.wall}
-                    onChange={(wall) => changeLight({ ...light, wall })}
-                    optionClass="light__choice--word"
+      </div>
+
+      {/* Lamp bulbs: the bulb shared by every lamp in the room. Its sliders sit in a fold. */}
+      <div className="light__fixed">
+        <div className="light__row">
+          <strong>Lamp bulbs</strong>
+          <Segmented
+            label="Lamp bulbs"
+            options={ON_OFF}
+            value={lighting.lamps.on}
+            onChange={(on) => onChange({ ...lighting, lamps: { ...lighting.lamps, on } })}
+            optionClass="surface__choice"
+          />
+        </div>
+        {lighting.lamps.on && (
+          <details className="advanced advanced--inner">
+            <summary>Colour and brightness</summary>
+            <BulbSliders bulb={lighting.lamps} onChange={(lamps) => onChange({ ...lighting, lamps })} />
+          </details>
+        )}
+      </div>
+
+      {/* Lights fixed to the room: one card each, like a window or a door. */}
+      {lighting.fixed.map((light) => (
+        <div className="light__fixed" key={light.id}>
+          <div className="light__row">
+            <strong>{KIND_NAMES[light.kind]}</strong>
+            <button
+              type="button"
+              className="icon-action icon-action--danger"
+              aria-label={`Remove ${KIND_NAMES[light.kind]}`}
+              title="Remove"
+              onClick={() => removeLight(light.id)}
+            >
+              <Icon name="trash" size={16} />
+            </button>
+          </div>
+          {light.kind === 'ceiling' ? (
+            <div className="light__row">
+              <span>Where it hangs</span>
+              {/* nine spots over the room: the top row is the window wall */}
+              <div className="light__spots">
+                {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((spot) => (
+                  <button
+                    key={spot}
+                    type="button"
+                    className={spot === light.spot ? 'light__spot is-current' : 'light__spot'}
+                    aria-label={`Spot ${spot + 1} of 9`}
+                    aria-pressed={spot === light.spot}
+                    onClick={() => changeLight({ ...light, spot })}
                   />
-                </div>
-                {light.kind === 'wall' && (
-                  <label className="light__row">
-                    <span>Along the wall</span>
-                    <Slider
-                      min="0.1"
-                      max="0.9"
-                      step="0.05"
-                      value={light.along}
-                      onChange={(event) => changeLight({ ...light, along: Number(event.target.value) })}
-                    />
-                  </label>
-                )}
-              </>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="light__row">
+              <span>Wall</span>
+              <Segmented
+                label="Wall"
+                options={Object.entries(WALL_NAMES)}
+                value={light.wall}
+                onChange={(wall) => changeLight({ ...light, wall })}
+                optionClass="surface__choice"
+              />
+            </div>
+          )}
+          {/* The bulb, and for a wall light its place along the wall, are folded away. */}
+          <details className="advanced advanced--inner">
+            <summary>{light.kind === 'wall' ? 'Position, colour and brightness' : 'Colour and brightness'}</summary>
+            {light.kind === 'wall' && (
+              <label className="light__row">
+                <span>Along the wall</span>
+                <Slider
+                  aria-label="Along the wall"
+                  min="0.1"
+                  max="0.9"
+                  step="0.05"
+                  value={light.along}
+                  onChange={(event) => changeLight({ ...light, along: Number(event.target.value) })}
+                />
+              </label>
             )}
             <BulbSliders bulb={light} onChange={changeLight} />
+          </details>
+          <div className="light__row">
+            <span>Light</span>
+            <Segmented
+              label={`${KIND_NAMES[light.kind]} on or off`}
+              options={ON_OFF}
+              value={light.on}
+              onChange={(on) => changeLight({ ...light, on })}
+              optionClass="surface__choice"
+            />
           </div>
-        ))}
-
-        <div className="light__add">
-          {Object.keys(KIND_NAMES).map((kind) => (
-            <button
-              key={kind}
-              type="button"
-              className="btn btn--secondary btn--sm"
-              onClick={() => onChange({ ...lighting, fixed: [...lighting.fixed, newFixedLight(kind)] })}
-            >
-              + {KIND_NAMES[kind]}
-            </button>
-          ))}
         </div>
+      ))}
 
-        {lighting.lamps.on && <BulbSliders bulb={lighting.lamps} onChange={(lamps) => onChange({ ...lighting, lamps })} />}
-      </details>
+      {/* one button for each kind of light you can fix to the room */}
+      <div className="light__add">
+        {Object.keys(KIND_NAMES).map((kind) => (
+          <button
+            key={kind}
+            type="button"
+            className="btn btn--secondary btn--sm"
+            onClick={() => onChange({ ...lighting, fixed: [...lighting.fixed, newFixedLight(kind)] })}
+          >
+            <Icon name="plus" size={16} />
+            {KIND_NAMES[kind]}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

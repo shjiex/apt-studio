@@ -445,6 +445,18 @@ My direction: "Keep working on it until 7:50 am". The assistant found this while
 
 My direction: "yes to Pages". The assistant added the workflow it had prepared earlier.
 
+### Clean commit history (23 Nov, 12:33 pm), AI-generated
+
+- Changed: the messages of 16 commits on `main` and `round-glass-panels`. No files.
+
+My direction: "clean up the commits, not sure why there are 10k" and then "remove coauthor lines". The assistant found that my home folder was a git repository, renamed its `.git` folder, made the project folder a clone of GitHub, took the co-author and session lines out of every commit message and force pushed after saving a backup bundle.
+
+### The lighting panel is built like the floor and walls panel (23 Nov, 4:42 pm), AI-generated
+
+- Changed: `components/LightingPanel.jsx`, `styles/app.css`.
+
+My direction: "the lighting panel is extremely tight; it should adhere to the same design system that designed the floor and walls panel". The assistant compared screenshots of the two panels, rebuilt the lighting panel from the same cards, folds and choice rows, and checked each control in a headless browser.
+
 ## Chat transcript
 
 TODO: paste the share link or exported transcript of the Claude conversation here.

@@ -924,6 +924,36 @@ project continues.
   Accounts are off, because `src/firebaseConfig.js` stays out of the repository, so the site
   runs in visitor mode and keeps the home in the browser.
 
+### Clean commit history (23 Nov, 12:33 pm)
+
+- **Why.** VS Code showed more than 10,000 changes. My home folder had been a git repository
+  since an October class exercise, so every file on my Mac counted. Its `.git` folder is now
+  `~/.git-old-css-button-exercise`, and `~/Downloads/apt-studio-app` is a clone of this
+  repository.
+- **No AI co-author lines.** 16 commits ended with a "Co-Authored-By" line and a session link.
+  Both lines were taken out of every commit message and `main` was pushed again. The files
+  did not change. Every commit got a new ID, so older IDs in these notes (such as `156342a`)
+  no longer exist on GitHub.
+
+### The lighting panel is built like the floor and walls panel (23 Nov, 4:42 pm)
+
+- **What I asked.** The lighting panel felt very tight. It should follow the same design
+  system as the floor and walls panel.
+- **Cards.** Daylight, Lamp bulbs and each fixed light are now cards, like Floor, Walls,
+  each window and each door. Each card has its name in bold and an On and Off choice on the
+  same sliding track as a door's Open and Shut. The checkboxes are gone.
+- **Folds inside the cards.** "Place and sun" (which way the back wall faces, the city, the
+  sunrise and sunset) sits in the daylight card. "Colour and brightness" sits in the lamp
+  card and in each fixed light. The Advanced fold at the bottom is gone.
+- **Month.** A slider from January to December takes the place of the twelve one-letter
+  buttons, so it reads like the time slider above it.
+- **Add buttons.** Ceiling light, Wall light and LED strip have a plus icon, like the Window
+  and Door buttons.
+- **Checked.** Month, Daylight, Lamp bulbs, a wall light's wall, its On and Off choice and
+  Remove were each changed in a headless browser and saved to the room, with no errors.
+  `npm run build` passes. The glass contrast was not measured again, because the panel uses
+  only parts that were already on glass.
+
 ## Components
 
 | Component | What it does |
